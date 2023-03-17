@@ -1,0 +1,22 @@
+# VS Code
+.vscode/
+
+# Misc
+.DS_Store
+
+# Build
+dist/
+build/
+
+# Python
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.coverage
+
+# Node.js
+node_modules/
+
+# Data files
+*.db
+*.db-journal
