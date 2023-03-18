@@ -12,10 +12,10 @@ build/
 __pycache__/
 .pytest_cache/
 .mypy_cache/
-.coverage
 
-# Node.js
-node_modules/
+# Yarn
+.yarn/
+.pnp.*
 
 # Data files
 *.db

@@ -1,0 +1,8 @@
+{
+  "name": "paramview-frontend",
+  "private": true,
+  "dependencies": {
+    "react": "^18.2.0"
+  },
+  "packageManager": "yarn@3.5.0"
+}
