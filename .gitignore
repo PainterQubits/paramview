@@ -14,6 +14,7 @@ __pycache__/
 .mypy_cache/
 
 # Yarn
+node_modules/
 .yarn/
 .pnp.*
 
