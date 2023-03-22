@@ -18,9 +18,10 @@
   },
   "settings": {
     "import/resolver": {
-      "typescript": {
-        "project": "frontend/tsconfig.json"
-      }
+      "typescript": { "project": "frontend/tsconfig.json" }
+    },
+    "react": {
+      "version": "detect"
     }
   }
 }
