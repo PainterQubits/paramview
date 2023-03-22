@@ -3,13 +3,11 @@ import { appTitle } from "@/constants";
 
 const toolbarSx = {
   display: "flex",
-  justifyContent: "space-between",
-  alignItems: "center",
-  columnGap: 4,
   px: 2,
   py: 1.5,
 };
 
+/** Header containing the app title. */
 export default function Header() {
   return (
     <AppBar position="static" elevation={0}>

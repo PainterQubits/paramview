@@ -7,7 +7,8 @@ const appSx = {
   height: "100vh",
 };
 
-export default function Test() {
+/** The entire application. */
+export default function App() {
   return (
     <Box sx={appSx}>
       <Header />
