@@ -1,5 +1,6 @@
-import { Box, Typography, AppBar } from "@mui/material";
+import { ThemeProvider, Box, Typography, AppBar } from "@mui/material";
 import { appTitle } from "@/constants";
+import theme from "@/theme";
 
 const toolbarSx = {
   display: "flex",
@@ -11,11 +12,13 @@ const toolbarSx = {
 export default function Header() {
   return (
     <AppBar position="static" elevation={0}>
-      <Box sx={toolbarSx}>
-        <Typography variant="h1" align="center">
-          {appTitle}
-        </Typography>
-      </Box>
+      <ThemeProvider theme={theme("dark")}>
+        <Box sx={toolbarSx}>
+          <Typography variant="h1" align="center">
+            {appTitle}
+          </Typography>
+        </Box>
+      </ThemeProvider>
     </AppBar>
   );
 }

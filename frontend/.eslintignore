@@ -1,6 +1,1 @@
-# Yarn
-.yarn/
-.pnp.*
-
-# Build
-dist/
+../.gitignore
