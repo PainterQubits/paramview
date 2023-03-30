@@ -15,151 +15,159 @@ import {
   Checkbox,
   Skeleton,
 } from "@mui/material";
+import theme from "@/theme";
+import { timestampToString } from "@/utils/timestamp";
+import { commitHistoryAtom } from "@/atoms/api";
+import { syncLatestAtom, selectedCommitAtom } from "@/atoms/commitSelect";
 import CommitSelectList, { CommitSelectListContext } from "./CommitSelectList";
 
-// const commitSelectSx = {
-//   display: "flex",
-//   alignItems: "center",
-// };
+const commitSelectSx = {
+  display: "flex",
+  alignItems: "center",
+};
 
-// const autocompleteSx = {
-//   [`& .${outlinedInputClasses.root} .${autocompleteClasses.input}`]: {
-//     pt: 0.25,
-//     pb: 0,
-//     pl: 0.5,
-//   },
-// };
+const autocompleteSx = {
+  [`& .${outlinedInputClasses.root} .${autocompleteClasses.input}`]: {
+    pt: 0.25,
+    pb: 0,
+    pl: 0.5,
+  },
+};
 
-// const inputSx = {
-//   backgroundColor: "rgba(255, 255, 255, 0.1)",
-// };
+const inputSx = {
+  backgroundColor: "rgba(255, 255, 255, 0.1)",
+};
 
-// const timestampSx = {
-//   pl: 0.5,
-//   pb: 0.125,
-//   whiteSpace: "nowrap",
-//   textOverflow: "ellipsis",
-//   overflow: "hidden",
-//   flexBasis: "100%",
-// };
+const timestampSx = {
+  pl: 0.5,
+  pb: 0.125,
+  whiteSpace: "nowrap",
+  textOverflow: "ellipsis",
+  overflow: "hidden",
+  flexBasis: "100%",
+};
 
-// /**
-//  * Material UI Paper component in light mode. This is necessary since the rest of the
-//  * header is in dark mode.
-//  */
-// function LightModePaper(props: PaperProps) {
-//   return (
-//     <ThemeProvider theme={theme("light")}>
-//       <Paper {...props} />
-//     </ThemeProvider>
-//   );
-// }
+/**
+ * Material UI Paper component in light mode. This is necessary since the rest of the
+ * header is in dark mode.
+ */
+function LightModePaper(props: PaperProps) {
+  return (
+    <ThemeProvider theme={theme("light")}>
+      <Paper {...props} />
+    </ThemeProvider>
+  );
+}
 
-// /** Component to display when CommitSelect is done loading. */
-// function CommitSelectContents() {
-//   const [selectedCommit, setSelectedCommit] = useAtom(selectedCommitAtom);
-//   const [syncLatest, setSyncLatest] = useAtom(syncLatestAtom);
+/** Component to display when CommitSelect is done loading. */
+function CommitSelectContents() {
+  const [selectedCommit, setSelectedCommit] = useAtom(selectedCommitAtom);
+  const [syncLatest, setSyncLatest] = useAtom(syncLatestAtom);
 
-//   /** Commit history entries retrieved from the server. */
-//   const [history] = useAtom(historyAtom);
+  /** Commit history entries retrieved from the server. */
+  const [commitHistory] = useAtom(commitHistoryAtom);
 
-//   /** Index of the currently highlighted item in the commit list dropdown. */
-//   const [highlightedIndex, setHighlightedIndex] = useState<number | null>(null);
+  /** Index of the currently highlighted item in the commit list dropdown. */
+  const [highlightedIndex, setHighlightedIndex] = useState<number | null>(null);
 
-//   /** History indices in reverse. (Used as options for the autocomplete component.) */
-//   const historyIndices = useMemo(() => [...history.keys()].reverse(), [history]);
+  /** History indices in reverse. (Used as options for the autocomplete component.) */
+  const historyIndices = useMemo(
+    () => [...commitHistory.keys()].reverse(),
+    [commitHistory],
+  );
 
-//   /** Get the commit message for the given history index. */
-//   const getMessage = useCallback(
-//     (index: number) => `${index}: ${history[index]?.message ?? "no message"}`,
-//     [history],
-//   );
+  /** Get the commit message for the given history index. */
+  const getMessage = useCallback(
+    (index: number) => `${commitHistory[index].id}: ${commitHistory[index].message}`,
+    [commitHistory],
+  );
 
-//   /** Index of the history entry to display the timestamp for. */
-//   const displayIndex = highlightedIndex === null ? selectedCommit : highlightedIndex;
+  /** Index of the history entry to display the timestamp for. */
+  const displayIndex = highlightedIndex === null ? selectedCommit : highlightedIndex;
 
-//   /** Functions to pass to the CommitSelectList component via a context. */
-//   const commitSelectListContextValue = useMemo(
-//     () => ({
-//       scrollToIndex: selectedCommit === null ? null : history.length - 1 - selectedCommit,
-//       getPrimary: getMessage,
-//       getSecondary: (option: number) =>
-//         timestampToString(history[option]?.timestamp ?? 0),
-//     }),
-//     [getMessage, history, selectedCommit],
-//   );
+  /** Functions to pass to the CommitSelectList component via a context. */
+  const commitSelectListContextValue = useMemo(
+    () => ({
+      scrollToIndex:
+        selectedCommit === null ? null : commitHistory.length - 1 - selectedCommit,
+      getPrimary: getMessage,
+      getSecondary: (option: number) =>
+        timestampToString(commitHistory[option].timestamp),
+    }),
+    [getMessage, commitHistory, selectedCommit],
+  );
 
-//   return (
-//     <Box sx={commitSelectSx}>
-//       <CommitSelectListContext.Provider value={commitSelectListContextValue}>
-//         <Autocomplete
-//           sx={autocompleteSx}
-//           fullWidth
-//           disablePortal
-//           disableListWrap
-//           autoHighlight
-//           value={selectedCommit}
-//           onChange={(_, index) => {
-//             if (index !== null) {
-//               setSyncLatest(false);
-//               setSelectedCommit(index);
-//             }
-//           }}
-//           onHighlightChange={(_, index) => {
-//             if (index !== null) {
-//               setHighlightedIndex(index);
-//             }
-//           }}
-//           onClose={() => setHighlightedIndex(null)}
-//           options={historyIndices}
-//           getOptionLabel={getMessage}
-//           PaperComponent={LightModePaper}
-//           ListboxComponent={CommitSelectList}
-//           renderOption={(props, option) => [props, option] as React.ReactNode}
-//           renderInput={(params) => (
-//             <TextField
-//               {...params}
-//               label="Commit"
-//               color="secondary"
-//               InputProps={{
-//                 ...params.InputProps,
-//                 sx: inputSx,
-//                 endAdornment: (
-//                   <>
-//                     {params.InputProps.endAdornment}
-//                     <Typography variant="body2" color="text.secondary" sx={timestampSx}>
-//                       {timestampToString(history[displayIndex]?.timestamp ?? 0)}
-//                     </Typography>
-//                   </>
-//                 ),
-//               }}
-//             />
-//           )}
-//         />
-//       </CommitSelectListContext.Provider>
-//       <Box>
-//         <FormGroup>
-//           <FormControlLabel
-//             control={<Checkbox color="secondary" />}
-//             label="Latest"
-//             labelPlacement="start"
-//             checked={syncLatest}
-//             onChange={() => {
-//               setSyncLatest(!syncLatest);
-//               setSelectedCommit(history.length - 1);
-//             }}
-//           />
-//         </FormGroup>
-//       </Box>
-//     </Box>
-//   );
-// }
+  return (
+    <Box sx={commitSelectSx}>
+      <CommitSelectListContext.Provider value={commitSelectListContextValue}>
+        <Autocomplete
+          sx={autocompleteSx}
+          fullWidth
+          disablePortal
+          disableListWrap
+          autoHighlight
+          value={selectedCommit}
+          onChange={(_, index) => {
+            if (index !== null) {
+              setSyncLatest(false);
+              setSelectedCommit(index);
+            }
+          }}
+          onHighlightChange={(_, index) => {
+            if (index !== null) {
+              setHighlightedIndex(index);
+            }
+          }}
+          onClose={() => setHighlightedIndex(null)}
+          options={historyIndices}
+          getOptionLabel={getMessage}
+          PaperComponent={LightModePaper}
+          ListboxComponent={CommitSelectList}
+          renderOption={(props, option) => [props, option] as React.ReactNode}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label="Commit"
+              color="secondary"
+              InputProps={{
+                ...params.InputProps,
+                sx: inputSx,
+                endAdornment: (
+                  <>
+                    {params.InputProps.endAdornment}
+                    <Typography variant="body2" color="text.secondary" sx={timestampSx}>
+                      {timestampToString(commitHistory[displayIndex].timestamp)}
+                    </Typography>
+                  </>
+                ),
+              }}
+            />
+          )}
+        />
+      </CommitSelectListContext.Provider>
+      <Box>
+        <FormGroup>
+          <FormControlLabel
+            control={<Checkbox color="secondary" />}
+            label="Latest"
+            labelPlacement="start"
+            checked={syncLatest}
+            onChange={() => {
+              setSyncLatest(!syncLatest);
+              setSelectedCommit(commitHistory.length - 1);
+            }}
+          />
+        </FormGroup>
+      </Box>
+    </Box>
+  );
+}
 
-// /** Controls that affect the entire dashboard. */
-// export default function CommitSelect() {
-//   return (
-//     <Suspense fallback={<Skeleton variant="rounded" height="4rem" />}>
-//       <CommitSelectContents />
-//     </Suspense>
-//   );
-// }
+/** Controls that affect the entire dashboard. */
+export default function CommitSelect() {
+  return (
+    <Suspense fallback={<Skeleton variant="rounded" height="4rem" />}>
+      <CommitSelectContents />
+    </Suspense>
+  );
+}
