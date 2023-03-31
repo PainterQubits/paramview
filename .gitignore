@@ -6,7 +6,7 @@
 
 # Build
 dist/
-build/
+paramview/static/
 
 # Python
 __pycache__/
