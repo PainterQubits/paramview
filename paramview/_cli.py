@@ -1,5 +1,6 @@
 """Command-line interface to start ParamView."""
 
+from pathlib import Path
 from argparse import Namespace, ArgumentParser
 from importlib.metadata import distribution
 from paramview._server import start_server
@@ -19,8 +20,8 @@ def parse_args() -> Namespace:
     )
     parser.add_argument(
         "db_path",
-        metavar="<ParamDB path>",
-        type=str,
+        metavar="<database path>",
+        type=Path,
         help="path to the ParamDB database file",
     )
     return parser.parse_args()
@@ -28,5 +29,5 @@ def parse_args() -> Namespace:
 
 def main() -> None:
     """Parse command line arguments and start the server."""
-    parse_args()
-    start_server()
+    args = parse_args()
+    start_server(args.db_path)
