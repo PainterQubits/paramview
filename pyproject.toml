@@ -28,6 +28,10 @@ black = "^23.3.0"
 [tool.poetry.scripts]
 paramview = "paramview._cli:main"
 
+[tool.pylint.basic]
+# Allow one and two character variable names (e.g. "id" or "p1").
+good-names-rgxs = ["^[a-z][a-z0-9]?$"]
+
 [[tool.poetry.source]]
 name = "paramdb"
 url = "https://painterqubits.github.io/paramdb/releases"

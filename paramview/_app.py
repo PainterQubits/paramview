@@ -1,14 +1,14 @@
 """WSGI app."""
 
-from pathlib import Path
 from flask import Flask, send_from_directory
+from paramview._db import DB
 from paramview._api import api
 
 
-def create_app(db_path: Path):
+def create_app(db: DB):
     """Return the WSGI app for ParamView with the given database path."""
     app = Flask(__name__, static_url_path="/")
-    app.config["db_path"] = db_path
+    app.config["db"] = db
     app.register_blueprint(api)
 
     @app.route("/")

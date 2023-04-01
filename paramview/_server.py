@@ -2,11 +2,11 @@
 
 import os
 import sys
-from pathlib import Path
 import socket
 import mimetypes
 import webbrowser
 import waitress
+from paramview._db import DB
 from paramview._app import create_app
 
 # Fix JavaScript MIME type for Windows
@@ -14,13 +14,14 @@ mimetypes.add_type("text/javascript", ".js")
 
 
 def start_server(
-    db_path: Path, host: str = "127.0.0.1", default_port: int = 5050
+    db_path: str, host: str = "127.0.0.1", default_port: int = 5050
 ) -> None:
     """
     Start the server locally on the given port using Waitress, and open in a new
     browser window. If the given port is in use, find another available port.
     """
-    app = create_app(db_path)
+    db = DB(db_path)
+    app = create_app(db)
     port = default_port
     sock = socket.socket()
     if os.name == "posix":
