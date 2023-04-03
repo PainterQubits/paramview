@@ -9,6 +9,7 @@ const commitAtom = atom(0);
 
 /** Currently selected index in the commit history. */
 export const selectedCommitAtom = atom(
-  (get) => (get(syncLatestAtom) ? get(commitHistoryAtom).length - 1 : get(commitAtom)),
+  async (get) =>
+    get(syncLatestAtom) ? (await get(commitHistoryAtom)).length - 1 : get(commitAtom),
   (_, set, newCommit: number) => set(commitAtom, newCommit),
 );

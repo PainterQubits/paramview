@@ -78,7 +78,12 @@ function CommitSelectContents() {
 
   /** Get the commit message for the given history index. */
   const getMessage = useCallback(
-    (index: number) => `${commitHistory[index].id}: ${commitHistory[index].message}`,
+    (index: number) => {
+      if (commitHistory.length === 0) return "";
+      return Number.isNaN(index)
+        ? ""
+        : `${commitHistory[index].id}: ${commitHistory[index].message}`;
+    },
     [commitHistory],
   );
 
@@ -136,7 +141,11 @@ function CommitSelectContents() {
                   <>
                     {params.InputProps.endAdornment}
                     <Typography variant="body2" color="text.secondary" sx={timestampSx}>
-                      {timestampToString(commitHistory[displayIndex].timestamp)}
+                      {timestampToString(
+                        Number.isNaN(displayIndex)
+                          ? 0
+                          : commitHistory[displayIndex].timestamp,
+                      )}
                     </Typography>
                   </>
                 ),
