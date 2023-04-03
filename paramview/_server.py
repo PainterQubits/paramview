@@ -6,7 +6,6 @@ import socket
 import mimetypes
 import webbrowser
 import waitress
-from paramview._db import DB
 from paramview._app import create_app
 
 # Fix JavaScript MIME type for Windows
@@ -20,8 +19,7 @@ def start_server(
     Start the server locally on the given port using Waitress, and open in a new
     browser window. If the given port is in use, find another available port.
     """
-    db = DB(db_path)
-    app = create_app(db)
+    app = create_app(db_path)
     port = default_port
     sock = socket.socket()
     if os.name == "posix":
