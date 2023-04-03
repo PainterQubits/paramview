@@ -25,7 +25,6 @@ black = "^23.3.0"
 paramview = "paramview._cli:main"
 
 [tool.pylint.basic]
-# Allow one and two character variable names (e.g. "id" or "p1").
 good-names-rgxs = ["^[a-z][a-z0-9]?$"]
 
 [tool.pylint.messages_control]
