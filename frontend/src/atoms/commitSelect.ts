@@ -5,11 +5,13 @@ import { commitHistoryAtom } from "@/atoms/api";
 export const syncLatestAtom = atom(true);
 
 /** Keeps track of the selected commit to use when sync latest is false. */
-const commitAtom = atom(0);
+const commitIndexAtom = atom(0);
 
 /** Currently selected index in the commit history. */
-export const selectedCommitAtom = atom(
+export const selectedCommitIndexAtom = atom(
   async (get) =>
-    get(syncLatestAtom) ? (await get(commitHistoryAtom)).length - 1 : get(commitAtom),
-  (_, set, newCommit: number) => set(commitAtom, newCommit),
+    get(syncLatestAtom)
+      ? (await get(commitHistoryAtom)).length - 1
+      : get(commitIndexAtom),
+  (_, set, newCommit: number) => set(commitIndexAtom, newCommit),
 );

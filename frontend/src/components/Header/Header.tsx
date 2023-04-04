@@ -28,6 +28,7 @@ const commitSelectContainerSx = {
 
 function DatabaseName() {
   const [databaseName] = useAtom(databaseNameAtom);
+
   return (
     <Typography variant="h1" sx={databaseNameSx}>
       {databaseName}

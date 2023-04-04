@@ -18,7 +18,7 @@ import {
 import theme from "@/theme";
 import { formatDatetimeString } from "@/utils/timestamp";
 import { commitHistoryAtom } from "@/atoms/api";
-import { syncLatestAtom, selectedCommitAtom } from "@/atoms/commitSelect";
+import { syncLatestAtom, selectedCommitIndexAtom } from "@/atoms/commitSelect";
 import CommitSelectList, { CommitSelectListContext } from "./CommitSelectList";
 
 const commitSelectSx = {
@@ -61,7 +61,7 @@ function LightModePaper(props: PaperProps) {
 
 /** Component to display when CommitSelect is done loading. */
 function CommitSelectContents() {
-  const [selectedCommit, setSelectedCommit] = useAtom(selectedCommitAtom);
+  const [selectedCommitIndex, setSelectedCommitIndex] = useAtom(selectedCommitIndexAtom);
   const [syncLatest, setSyncLatest] = useAtom(syncLatestAtom);
 
   /** Commit history entries retrieved from the server. */
@@ -83,18 +83,17 @@ function CommitSelectContents() {
   );
 
   /** Index of the history entry to display the timestamp for. */
-  const displayIndex = highlightedIndex === null ? selectedCommit : highlightedIndex;
+  const displayIndex = highlightedIndex === null ? selectedCommitIndex : highlightedIndex;
 
   /** Functions to pass to the CommitSelectList component via a context. */
   const commitSelectListContextValue = useMemo(
     () => ({
-      scrollToIndex:
-        selectedCommit === null ? null : commitHistory.length - 1 - selectedCommit,
+      scrollToIndex: selectedCommitIndex,
       getPrimary: getMessage,
       getSecondary: (option: number) =>
         formatDatetimeString(commitHistory[option].timestamp),
     }),
-    [getMessage, commitHistory, selectedCommit],
+    [getMessage, commitHistory, selectedCommitIndex],
   );
 
   return (
@@ -106,19 +105,21 @@ function CommitSelectContents() {
           disablePortal
           disableListWrap
           autoHighlight
-          value={selectedCommit}
+          value={selectedCommitIndex}
           onChange={(_, index) => {
             if (index !== null) {
-              setSyncLatest(false);
-              setSelectedCommit(index);
+              startTransition(() => {
+                setSyncLatest(false);
+                setSelectedCommitIndex(index);
+              });
             }
           }}
           onHighlightChange={(_, index) => {
             if (index !== null) {
-              setHighlightedIndex(index);
+              startTransition(() => setHighlightedIndex(index));
             }
           }}
-          onClose={() => setHighlightedIndex(null)}
+          onClose={() => startTransition(() => setHighlightedIndex(null))}
           options={historyIndices}
           getOptionLabel={getMessage}
           PaperComponent={LightModePaper}
@@ -153,11 +154,9 @@ function CommitSelectContents() {
             labelPlacement="start"
             checked={syncLatest}
             onChange={() =>
-              // Use startTransition so that asynchronous selectedCommitAtom does not
-              // flash loading state.
               startTransition(() => {
                 setSyncLatest(!syncLatest);
-                setSelectedCommit(commitHistory.length - 1);
+                setSelectedCommitIndex(commitHistory.length - 1);
               })
             }
           />
