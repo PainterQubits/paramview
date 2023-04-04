@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, Suspense } from "react";
+import { startTransition, useState, useMemo, useCallback, Suspense } from "react";
 import { useAtom } from "jotai";
 import {
   PaperProps,
@@ -16,7 +16,7 @@ import {
   Skeleton,
 } from "@mui/material";
 import theme from "@/theme";
-import { timestampToString } from "@/utils/timestamp";
+import { formatDatetimeString } from "@/utils/timestamp";
 import { commitHistoryAtom } from "@/atoms/api";
 import { syncLatestAtom, selectedCommitAtom } from "@/atoms/commitSelect";
 import CommitSelectList, { CommitSelectListContext } from "./CommitSelectList";
@@ -78,12 +78,7 @@ function CommitSelectContents() {
 
   /** Get the commit message for the given history index. */
   const getMessage = useCallback(
-    (index: number) => {
-      if (commitHistory.length === 0) return "";
-      return Number.isNaN(index)
-        ? ""
-        : `${commitHistory[index].id}: ${commitHistory[index].message}`;
-    },
+    (index: number) => `${commitHistory[index].id}: ${commitHistory[index].message}`,
     [commitHistory],
   );
 
@@ -97,7 +92,7 @@ function CommitSelectContents() {
         selectedCommit === null ? null : commitHistory.length - 1 - selectedCommit,
       getPrimary: getMessage,
       getSecondary: (option: number) =>
-        timestampToString(commitHistory[option].timestamp),
+        formatDatetimeString(commitHistory[option].timestamp),
     }),
     [getMessage, commitHistory, selectedCommit],
   );
@@ -141,11 +136,7 @@ function CommitSelectContents() {
                   <>
                     {params.InputProps.endAdornment}
                     <Typography variant="body2" color="text.secondary" sx={timestampSx}>
-                      {timestampToString(
-                        Number.isNaN(displayIndex)
-                          ? 0
-                          : commitHistory[displayIndex].timestamp,
-                      )}
+                      {formatDatetimeString(commitHistory[displayIndex].timestamp)}
                     </Typography>
                   </>
                 ),
@@ -161,10 +152,14 @@ function CommitSelectContents() {
             label="Latest"
             labelPlacement="start"
             checked={syncLatest}
-            onChange={() => {
-              setSyncLatest(!syncLatest);
-              setSelectedCommit(commitHistory.length - 1);
-            }}
+            onChange={() =>
+              // Use startTransition so that asynchronous selectedCommitAtom does not
+              // flash loading state.
+              startTransition(() => {
+                setSyncLatest(!syncLatest);
+                setSelectedCommit(commitHistory.length - 1);
+              })
+            }
           />
         </FormGroup>
       </Box>

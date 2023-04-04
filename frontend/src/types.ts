@@ -2,5 +2,5 @@
 export type CommitEntry = {
   id: number;
   message: string;
-  timestamp: number;
+  timestamp: string;
 };

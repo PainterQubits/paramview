@@ -24,9 +24,12 @@ export async function requestData<T>(url: string, requestInit?: RequestInit) {
       message = responseText;
     }
 
-    throw new Error(`\
-Data request responded with error code ${status} (${statusText}):
-${message}${status === 504 ? notRunningMessage : ""}`);
+    throw new Error(
+      `Data request responded with error code ${status} (${statusText})` +
+        (message.length > 0 ? ":\n" : "") +
+        message +
+        (message.length === 0 ? notRunningMessage : ""),
+    );
   }
 
   return JSON.parse(responseText) as T;
