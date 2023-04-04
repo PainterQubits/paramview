@@ -26,7 +26,7 @@ export async function requestData<T>(url: string, requestInit?: RequestInit) {
 
     throw new Error(
       `Data request responded with error code ${status} (${statusText})` +
-        (message.length > 0 ? ":\n" : "") +
+        (message.length > 0 ? ":\n\n" : "") +
         message +
         (message.length === 0 ? notRunningMessage : ""),
     );
