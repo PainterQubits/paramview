@@ -1,5 +1,5 @@
 import { atom } from "jotai";
-import { commitHistoryAtom } from "@/atoms/api";
+import { databaseNameAtom, commitHistoryAtom } from "@/atoms/api";
 
 /** Whether to sync the current commit index with the latest commit. */
 export const syncLatestAtom = atom(true);
@@ -9,9 +9,12 @@ const commitIndexAtom = atom(0);
 
 /** Currently selected index in the commit history. */
 export const selectedCommitIndexAtom = atom(
-  async (get) =>
-    get(syncLatestAtom)
-      ? (await get(commitHistoryAtom)).length - 1
-      : get(commitIndexAtom),
+  async (get) => {
+    const commitHistoryLength = (await get(commitHistoryAtom)).length;
+    if (commitHistoryLength === 0) {
+      throw Error(`Database ${await get(databaseNameAtom)} has no commits.`);
+    }
+    return get(syncLatestAtom) ? commitHistoryLength - 1 : get(commitIndexAtom);
+  },
   (_, set, newCommit: number) => set(commitIndexAtom, newCommit),
 );
