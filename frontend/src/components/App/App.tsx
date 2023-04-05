@@ -1,6 +1,6 @@
 import { ErrorBoundary } from "react-error-boundary";
 import { Box } from "@mui/material";
-import { Header, Params } from "@/components";
+import { Header, ParamList } from "@/components";
 import Error from "./Error";
 
 const appSx = {
@@ -15,7 +15,7 @@ export default function App() {
     <ErrorBoundary FallbackComponent={Error}>
       <Box sx={appSx}>
         <Header />
-        <Params />
+        <ParamList />
       </Box>
     </ErrorBoundary>
   );

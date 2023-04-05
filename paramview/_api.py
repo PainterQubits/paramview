@@ -43,7 +43,7 @@ def _commit_history() -> list[CommitEntry]:
     return _current_db.commit_history()
 
 
-@api.route("/params/<int:commit_id>")
+@api.route("/data/<int:commit_id>")
 def _params(commit_id: int) -> dict[str, Any]:
-    """Return parameter data from the commit with the given ID."""
+    """Return data from the commit with the given ID."""
     return _current_db.load(commit_id, load_classes=False)
