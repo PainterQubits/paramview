@@ -1,44 +1,33 @@
 import { Suspense } from "react";
 import { useAtom } from "jotai";
-import { Box, List, ListItem } from "@mui/material";
+import { List, ListItem } from "@mui/material";
 import { Data } from "@/types";
 import { isLeaf } from "@/utils/type";
-import { leafToString, getType, getTimestamp, getChildren } from "@/utils/data";
+import { getType, getTimestamp, getChildren } from "@/utils/data";
 import { dataAtom } from "@/atoms/api";
+import { roundAtom } from "@/atoms/paramList";
 import LeafItemContent from "./LeafItemContent";
 import GroupItemContent from "./GroupItemContent";
 import ParamCollapse from "./CollapseButton";
 
-const paramListSx = {
-  display: "flex",
-  flex: 1,
-  overflow: "hidden",
-};
-
-const paramListContentsSx = {
-  flexBasis: "42rem",
-  overflowY: "auto",
-  borderRight: 1,
-  borderColor: "divider",
-  background: "#F4F4F4",
-};
-
 const rootListSx = {
   borderBottom: 1,
   borderColor: "divider",
+  backgroundColor: "grey.100",
+  overflowY: "auto",
 };
 
 const sublistSx = {
-  ml: 2,
+  ml: 1.5,
+  borderLeft: 1,
+  borderColor: "divider",
 };
 
 const listItemSx = {
   display: "block",
   borderBottom: 1,
   borderColor: "divider",
-  "&:last-child": {
-    borderBottom: "none",
-  },
+  "&:last-child": { borderBottom: "none" },
 };
 
 type ParamSublistProps = {
@@ -52,7 +41,7 @@ function ParamSublist({ items, root = false }: ParamSublistProps) {
       {items.map(([name, data]) => (
         <ListItem key={name} sx={listItemSx} disableGutters disablePadding>
           {isLeaf(data) ? (
-            <LeafItemContent name={name} value={leafToString(data)} />
+            <LeafItemContent name={name} value={data} />
           ) : (
             <ParamCollapse
               defaultOpen={root}
@@ -76,19 +65,13 @@ function ParamSublist({ items, root = false }: ParamSublistProps) {
 function ParamListContents() {
   const [data] = useAtom(dataAtom);
 
-  return (
-    <Box sx={paramListContentsSx}>
-      <ParamSublist items={[["root", data]]} root />
-    </Box>
-  );
+  return <ParamSublist items={[["root", data]]} root />;
 }
 
 export default function ParamList() {
   return (
-    <Box sx={paramListSx}>
-      <Suspense>
-        <ParamListContents />
-      </Suspense>
-    </Box>
+    <Suspense>
+      <ParamListContents />
+    </Suspense>
   );
 }

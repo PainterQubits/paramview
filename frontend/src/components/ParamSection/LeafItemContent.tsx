@@ -1,4 +1,8 @@
+import { useAtom } from "jotai";
 import { Box, Typography } from "@mui/material";
+import { Leaf } from "@/types";
+import { leafToString } from "@/utils/data";
+import { roundAtom } from "@/atoms/paramList";
 
 const leafItemContentSx = {
   display: "flex",
@@ -8,21 +12,21 @@ const leafItemContentSx = {
   pl: "24px",
   pr: 2,
   py: 0.25,
-  borderLeft: 1,
-  borderColor: "divider",
   background: "white",
 };
 
 type LeafItemContentProps = {
   name: string;
-  value: string;
+  value: Leaf;
 };
 
 export default function LeafItemContent({ name, value }: LeafItemContentProps) {
+  const [round] = useAtom(roundAtom);
+
   return (
     <Box sx={leafItemContentSx}>
       <Typography>{name}</Typography>
-      <Typography align="right">{value}</Typography>
+      <Typography align="right">{leafToString(value, round)}</Typography>
     </Box>
   );
 }
