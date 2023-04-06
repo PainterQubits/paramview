@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useAtom } from "jotai";
 import { Collapse, ListItemButton, ListItemIcon } from "@mui/material";
 import { ChevronRight, ExpandMore } from "@mui/icons-material";
+import { collapseAtom } from "@/atoms/paramList";
 
 const listItemButtonSx = {
   py: 0,
-  borderLeft: 1,
-  borderColor: "divider",
   background: "white",
 };
 
@@ -29,7 +29,11 @@ export default function ParamCollapseItem({
   itemContent,
   children,
 }: ParamCollapseProps) {
+  const [collapse] = useAtom(collapseAtom);
+
   const [open, setOpen] = useState(defaultOpen);
+
+  useEffect(() => setOpen(defaultOpen), [collapse, defaultOpen]);
 
   return (
     <>

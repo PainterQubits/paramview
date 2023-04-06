@@ -11,18 +11,33 @@ import {
 } from "@/utils/type";
 import { formatDate } from "@/utils/timestamp";
 
-export function leafToString(value: Leaf) {
+const precision = 4;
+
+function numberToString(num: number, round: boolean) {
+  if (round) {
+    const exponent = Number(num.toExponential().split("e")[1]);
+    num = Number(num.toPrecision(precision));
+
+    if (Math.abs(exponent) >= precision) {
+      return num.toExponential(precision - 1);
+    }
+  }
+
+  return String(num);
+}
+
+export function leafToString(value: Leaf, round: boolean) {
   if (isDatetime(value)) return formatDate(value.isoformat);
 
-  if (isQuantity(value)) return `${value.value} ${value.unit}`;
+  if (isQuantity(value)) return `${numberToString(value.value, round)} ${value.unit}`;
 
   if (typeof value === "boolean") return value ? "True" : "False";
 
-  if (typeof value === "string") return `"${value}"`;
-
   if (value === null) return "None";
 
-  return `${value}`;
+  if (typeof value === "number") return numberToString(value, round);
+
+  return value;
 }
 
 export function getType(group: Group) {

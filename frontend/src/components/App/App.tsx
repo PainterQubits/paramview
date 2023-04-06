@@ -1,6 +1,6 @@
 import { ErrorBoundary } from "react-error-boundary";
 import { Box } from "@mui/material";
-import { Header, ParamList } from "@/components";
+import { Header, ParamSection } from "@/components";
 import Error from "./Error";
 
 const appSx = {
@@ -9,13 +9,21 @@ const appSx = {
   height: "100vh",
 };
 
+const contentSx = {
+  display: "flex",
+  flex: 1,
+  overflow: "hidden",
+};
+
 /** The entire application. */
 export default function App() {
   return (
     <ErrorBoundary FallbackComponent={Error}>
       <Box sx={appSx}>
         <Header />
-        <ParamList />
+        <Box sx={contentSx}>
+          <ParamSection />
+        </Box>
       </Box>
     </ErrorBoundary>
   );
