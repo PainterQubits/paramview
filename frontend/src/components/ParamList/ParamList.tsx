@@ -48,16 +48,10 @@ function ParamSublist({ items, root = false }: ParamSublistProps) {
       {items.map(([name, data]) => (
         <ListItem key={name} sx={listItemSx} disableGutters disablePadding>
           {isLeaf(data) ? (
-            <ParamItemContent
-              leftPadding
-              leftBorder={!root}
-              name={name}
-              value={leafToString(data)}
-            />
+            <ParamItemContent leftPadding name={name} value={leafToString(data)} />
           ) : (
             <ParamCollapse
               defaultOpen={root}
-              leftBorder={!root}
               itemContent={<ParamItemContent name={name} value={getType(data)} />}
             >
               {<ParamSublist items={getChildren(data)} />}

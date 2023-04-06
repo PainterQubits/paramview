@@ -6,11 +6,6 @@ const listItemButtonSx = {
   py: 0,
 };
 
-const leftBorderSx = {
-  borderLeft: 1,
-  borderColor: "divider",
-};
-
 const iconSx = {
   minWidth: 24,
 };
@@ -22,14 +17,12 @@ const collapseSx = {
 
 type ParamCollapseProps = {
   defaultOpen: boolean;
-  leftBorder?: boolean;
   itemContent: JSX.Element;
   children: React.ReactNode;
 };
 
 export default function ParamCollapseItem({
   defaultOpen,
-  leftBorder = false,
   itemContent,
   children,
 }: ParamCollapseProps) {
@@ -39,7 +32,7 @@ export default function ParamCollapseItem({
     <>
       <ListItemButton
         disableGutters
-        sx={[listItemButtonSx, leftBorder ? leftBorderSx : {}]}
+        sx={[listItemButtonSx]}
         onClick={() => setOpen(!open)}
       >
         <ListItemIcon sx={iconSx}>
