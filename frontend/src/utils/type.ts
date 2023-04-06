@@ -42,8 +42,11 @@ export function isParam(data: Data): data is Param {
 export function isStruct(data: Data): data is Struct {
   return (
     data instanceof Object &&
-    "type" in data &&
+    "__type" in data &&
     !("__last_updated" in data) &&
+    data.__type !== "datetime.datetime" &&
+    data.__type !== "astropy.units.quantity.Quantity" &&
+    data.__type !== "ParamList" &&
     data.__type !== "ParamDict"
   );
 }

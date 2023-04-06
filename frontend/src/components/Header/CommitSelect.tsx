@@ -16,7 +16,7 @@ import {
   Skeleton,
 } from "@mui/material";
 import theme from "@/theme";
-import { formatDatetimeString } from "@/utils/timestamp";
+import { formatDate } from "@/utils/timestamp";
 import { commitHistoryAtom } from "@/atoms/api";
 import { syncLatestAtom, selectedCommitIndexAtom } from "@/atoms/commitSelect";
 import CommitSelectList, { CommitSelectListContext } from "./CommitSelectList";
@@ -90,8 +90,7 @@ function CommitSelectContents() {
     () => ({
       scrollToIndex: selectedCommitIndex,
       getPrimary: getMessage,
-      getSecondary: (option: number) =>
-        formatDatetimeString(commitHistory[option].timestamp),
+      getSecondary: (option: number) => formatDate(commitHistory[option].timestamp),
     }),
     [getMessage, commitHistory, selectedCommitIndex],
   );
@@ -137,7 +136,7 @@ function CommitSelectContents() {
                   <>
                     {params.InputProps.endAdornment}
                     <Typography variant="body2" color="text.secondary" sx={timestampSx}>
-                      {formatDatetimeString(commitHistory[displayIndex].timestamp)}
+                      {formatDate(commitHistory[displayIndex].timestamp)}
                     </Typography>
                   </>
                 ),

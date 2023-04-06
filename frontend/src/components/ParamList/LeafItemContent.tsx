@@ -1,31 +1,26 @@
 import { Box, Typography } from "@mui/material";
 
-const itemContentSx = {
+const leafItemContentSx = {
   display: "flex",
   alignItems: "center",
   justifyContent: "space-between",
   flex: 1,
-  pr: 2,
-  py: 0.2,
-};
-
-const leftPaddingSx = {
   pl: "24px",
+  pr: 2,
+  py: 0.25,
+  borderLeft: 1,
+  borderColor: "divider",
+  background: "white",
 };
 
-type ParamItemContentProps = {
+type LeafItemContentProps = {
   name: string;
   value: string;
-  leftPadding?: boolean;
 };
 
-export default function ParamItemContent({
-  name,
-  value,
-  leftPadding = false,
-}: ParamItemContentProps) {
+export default function LeafItemContent({ name, value }: LeafItemContentProps) {
   return (
-    <Box sx={[itemContentSx, leftPadding ? leftPaddingSx : {}]}>
+    <Box sx={leafItemContentSx}>
       <Typography>{name}</Typography>
       <Typography align="right">{value}</Typography>
     </Box>
