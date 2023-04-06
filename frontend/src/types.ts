@@ -5,23 +5,12 @@ export type CommitEntry = {
   timestamp: string;
 };
 
-export type Data =
-  | number
-  | boolean
-  | string
-  | null
-  | List
-  | Dict
-  | Datetime
-  | Quantity
-  | Struct
-  | Param
-  | ParamList
-  | ParamDict;
-
 export type List = Data[];
 
-export type Dict = { [key: string]: Data };
+export type Dict = {
+  __dict: never; // Fake key so TypeScript can distinguish
+  [key: string]: Data;
+};
 
 export type Datetime = {
   __type: "datetime.datetime";
@@ -35,6 +24,7 @@ export type Quantity = {
 };
 
 export type Struct = {
+  __struct: never; // Fake key so TypeScript can distinguish from similar types
   __type: string;
   [key: string]: Data;
 };
@@ -54,3 +44,9 @@ export type ParamDict = {
   __type: "ParamDict";
   [key: string]: Data;
 };
+
+export type Leaf = number | boolean | string | null | Datetime | Quantity;
+
+export type Group = List | Dict | Struct | Param | ParamList | ParamDict;
+
+export type Data = Leaf | Group;
