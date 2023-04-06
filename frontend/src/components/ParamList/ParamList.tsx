@@ -8,8 +8,20 @@ import { dataAtom } from "@/atoms/api";
 import ParamItemContent from "./ParamItemContent";
 import ParamCollapse from "./ParamCollapse";
 
+const paramListSx = {
+  display: "flex",
+  justifyContent: "flex-end",
+  height: "100%",
+};
+
 const paramListContentsSx = {
+  flexBasis: "30rem",
   overflowY: "auto",
+  borderLeft: 1,
+  borderColor: "divider",
+};
+
+const rootListSx = {
   borderBottom: 1,
   borderColor: "divider",
 };
@@ -32,14 +44,20 @@ type ParamSublistProps = {
 
 function ParamSublist({ items, root = false }: ParamSublistProps) {
   return (
-    <List disablePadding sx={!root ? sublistSx : {}}>
+    <List disablePadding sx={root ? rootListSx : sublistSx}>
       {items.map(([name, data]) => (
         <ListItem key={name} sx={listItemSx} disableGutters disablePadding>
           {isLeaf(data) ? (
-            <ParamItemContent leftPadding name={name} value={leafToString(data)} />
+            <ParamItemContent
+              leftPadding
+              leftBorder={!root}
+              name={name}
+              value={leafToString(data)}
+            />
           ) : (
             <ParamCollapse
               defaultOpen={root}
+              leftBorder={!root}
               itemContent={<ParamItemContent name={name} value={getType(data)} />}
             >
               {<ParamSublist items={getChildren(data)} />}
@@ -63,8 +81,10 @@ function ParamListContents() {
 
 export default function ParamList() {
   return (
-    <Suspense>
-      <ParamListContents />
-    </Suspense>
+    <Box sx={paramListSx}>
+      <Suspense>
+        <ParamListContents />
+      </Suspense>
+    </Box>
   );
 }
