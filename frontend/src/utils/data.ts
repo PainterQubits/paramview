@@ -1,7 +1,19 @@
 import { Leaf, Group, Data } from "@/types";
-import { isQuantity, isList, isDict, isStruct, isParam, isParamList } from "@/utils/type";
+import {
+  isLeaf,
+  isDatetime,
+  isQuantity,
+  isList,
+  isDict,
+  isStruct,
+  isParam,
+  isParamList,
+} from "@/utils/type";
+import { formatDate } from "@/utils/timestamp";
 
 export function leafToString(value: Leaf) {
+  if (isDatetime(value)) return formatDate(value.isoformat);
+
   if (isQuantity(value)) return `${value.value} ${value.unit}`;
 
   if (typeof value === "boolean") return value ? "True" : "False";
@@ -15,18 +27,29 @@ export function leafToString(value: Leaf) {
 
 export function getType(group: Group) {
   if (isList(group)) return "list";
+
   if (isDict(group)) return "dict";
+
+  if (isParam(group)) return `${group.__type} (Param)`;
+
+  if (isStruct(group)) return `${group.__type} (Struct)`;
+
   return group.__type;
+}
+
+export function getTimestamp(group: Group): number {
+  if (isParam(group)) return new Date(group.__last_updated.isoformat).getTime();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const timestamps = getChildren(group).map(([_, data]) =>
+    isLeaf(data) ? -Infinity : getTimestamp(data),
+  );
+  return Math.max(...timestamps);
 }
 
 export function getChildren(group: Group): [string, Data][] {
   let children: Data[] | { [key: string]: Data };
   if (isList(group) || isDict(group)) {
     children = group;
-  } else if (isStruct(group)) {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { __type, __struct, ...rest } = group;
-    children = rest;
   } else if (isParam(group)) {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { __type, __last_updated, ...rest } = group;
@@ -34,7 +57,7 @@ export function getChildren(group: Group): [string, Data][] {
   } else if (isParamList(group)) {
     children = group.__items;
   } else {
-    // ParamDict
+    // Struct, ParamDict, or unknown type
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { __type, ...rest } = group;
     children = rest;

@@ -1,5 +1,5 @@
-/** Convert the given Unix timestamp (in seconds) to a readable date string. */
-export function formatDatetimeString(timestamp: string) {
+/** Convert the datetime string or Unix timestamp to a readable date string. */
+export function formatDate(timestamp: string | number) {
   return new Date(timestamp).toLocaleString(undefined, {
     year: "2-digit",
     month: "2-digit",

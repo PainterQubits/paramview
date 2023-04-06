@@ -4,6 +4,9 @@ import { ChevronRight, ExpandMore } from "@mui/icons-material";
 
 const listItemButtonSx = {
   py: 0,
+  borderLeft: 1,
+  borderColor: "divider",
+  background: "white",
 };
 
 const iconSx = {
@@ -30,11 +33,7 @@ export default function ParamCollapseItem({
 
   return (
     <>
-      <ListItemButton
-        disableGutters
-        sx={[listItemButtonSx]}
-        onClick={() => setOpen(!open)}
-      >
+      <ListItemButton disableGutters sx={listItemButtonSx} onClick={() => setOpen(!open)}>
         <ListItemIcon sx={iconSx}>
           {open ? <ExpandMore /> : <ChevronRight />}
         </ListItemIcon>

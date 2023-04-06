@@ -3,22 +3,24 @@ import { useAtom } from "jotai";
 import { Box, List, ListItem } from "@mui/material";
 import { Data } from "@/types";
 import { isLeaf } from "@/utils/type";
-import { leafToString, getType, getChildren } from "@/utils/data";
+import { leafToString, getType, getTimestamp, getChildren } from "@/utils/data";
 import { dataAtom } from "@/atoms/api";
-import ParamItemContent from "./ParamItemContent";
-import ParamCollapse from "./ParamCollapse";
+import LeafItemContent from "./LeafItemContent";
+import GroupItemContent from "./GroupItemContent";
+import ParamCollapse from "./CollapseButton";
 
 const paramListSx = {
   display: "flex",
-  justifyContent: "flex-end",
-  height: "100%",
+  flex: 1,
+  overflow: "hidden",
 };
 
 const paramListContentsSx = {
-  flexBasis: "30rem",
+  flexBasis: "42rem",
   overflowY: "auto",
-  borderLeft: 1,
+  borderRight: 1,
   borderColor: "divider",
+  background: "#F4F4F4",
 };
 
 const rootListSx = {
@@ -34,7 +36,9 @@ const listItemSx = {
   display: "block",
   borderBottom: 1,
   borderColor: "divider",
-  "&:last-child": { borderBottom: "none" },
+  "&:last-child": {
+    borderBottom: "none",
+  },
 };
 
 type ParamSublistProps = {
@@ -48,11 +52,17 @@ function ParamSublist({ items, root = false }: ParamSublistProps) {
       {items.map(([name, data]) => (
         <ListItem key={name} sx={listItemSx} disableGutters disablePadding>
           {isLeaf(data) ? (
-            <ParamItemContent leftPadding name={name} value={leafToString(data)} />
+            <LeafItemContent name={name} value={leafToString(data)} />
           ) : (
             <ParamCollapse
               defaultOpen={root}
-              itemContent={<ParamItemContent name={name} value={getType(data)} />}
+              itemContent={
+                <GroupItemContent
+                  name={name}
+                  type={getType(data)}
+                  timestamp={getTimestamp(data)}
+                />
+              }
             >
               {<ParamSublist items={getChildren(data)} />}
             </ParamCollapse>

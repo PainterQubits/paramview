@@ -12,7 +12,8 @@ include = ["paramview/static/**/*"]
 python = "^3.10"
 flask = "^2.2.3"
 waitress = "^2.1.2"
-paramdb = "^0.4.0"
+# paramdb = "^0.4.0"
+paramdb = {git = "https://github.com/PainterQubits/paramdb.git"}
 
 [tool.poetry.group.dev.dependencies]
 types-waitress = "^2.1.4.7"
@@ -33,11 +34,11 @@ disable = ["too-few-public-methods"]
 [tool.mypy]
 strict = true
 
-[[tool.poetry.source]]
-name = "paramdb"
-url = "https://painterqubits.github.io/paramdb/releases"
-default = false
-secondary = true
+# [[tool.poetry.source]]
+# name = "paramdb"
+# url = "https://painterqubits.github.io/paramdb/releases"
+# default = false
+# secondary = true
 
 [build-system]
 requires = ["poetry-core"]
