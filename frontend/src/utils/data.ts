@@ -14,16 +14,24 @@ import { formatDate } from "@/utils/timestamp";
 const precision = 4;
 
 function numberToString(num: number, round: boolean) {
+  const numString = String(num);
+
   if (round) {
-    const exponent = Number(num.toExponential().split("e")[1]);
-    num = Number(num.toPrecision(precision));
+    const exponential = num.toExponential();
+    const exponent = Number(exponential.split("e")[1]);
 
     if (Math.abs(exponent) >= precision) {
-      return num.toExponential(precision - 1);
+      const exponentialToPrecision = num.toExponential(precision - 1);
+      return exponentialToPrecision.length < exponential.length
+        ? exponentialToPrecision
+        : exponential;
     }
+
+    const numToPrecision = num.toPrecision(precision);
+    return numToPrecision.length < numString.length ? numToPrecision : numString;
   }
 
-  return String(num);
+  return numString;
 }
 
 export function leafToString(value: Leaf, round: boolean) {
