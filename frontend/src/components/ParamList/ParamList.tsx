@@ -1,31 +1,70 @@
 import { Suspense } from "react";
 import { useAtom } from "jotai";
-import { Box, Typography } from "@mui/material";
+import { Box, List, ListItem } from "@mui/material";
+import { Data } from "@/types";
+import { isLeaf } from "@/utils/type";
+import { leafToString, getType, getChildren } from "@/utils/data";
 import { dataAtom } from "@/atoms/api";
-import { isParamDict } from "@/utils/type";
+import ParamItemContent from "./ParamItemContent";
+import ParamCollapse from "./ParamCollapse";
 
-function ParamText() {
-  const [data] = useAtom(dataAtom);
+const paramListContentsSx = {
+  overflowY: "auto",
+  borderBottom: 1,
+  borderColor: "divider",
+};
 
-  if (isParamDict(data)) {
-    return (
-      <Box>
-        {Object.entries(data).map(([name, value]) => (
-          <Typography key={name}>
-            {name}: {JSON.stringify(value)}
-          </Typography>
-        ))}
-      </Box>
-    );
-  }
+const sublistSx = {
+  ml: 2,
+};
 
-  return <Typography>{JSON.stringify(data)}</Typography>;
+const listItemSx = {
+  display: "block",
+  borderBottom: 1,
+  borderColor: "divider",
+  "&:last-child": { borderBottom: "none" },
+};
+
+type ParamSublistProps = {
+  items: [string, Data][];
+  root?: boolean;
+};
+
+function ParamSublist({ items, root = false }: ParamSublistProps) {
+  return (
+    <List disablePadding sx={!root ? sublistSx : {}}>
+      {items.map(([name, data]) => (
+        <ListItem key={name} sx={listItemSx} disableGutters disablePadding>
+          {isLeaf(data) ? (
+            <ParamItemContent leftPadding name={name} value={leafToString(data)} />
+          ) : (
+            <ParamCollapse
+              defaultOpen={root}
+              itemContent={<ParamItemContent name={name} value={getType(data)} />}
+            >
+              {<ParamSublist items={getChildren(data)} />}
+            </ParamCollapse>
+          )}
+        </ListItem>
+      ))}
+    </List>
+  );
 }
 
-export default function Params() {
+function ParamListContents() {
+  const [data] = useAtom(dataAtom);
+
+  return (
+    <Box sx={paramListContentsSx}>
+      <ParamSublist items={[["root", data]]} root />
+    </Box>
+  );
+}
+
+export default function ParamList() {
   return (
     <Suspense>
-      <ParamText />
+      <ParamListContents />
     </Suspense>
   );
 }
