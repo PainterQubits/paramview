@@ -5,7 +5,6 @@ import { Data } from "@/types";
 import { isLeaf } from "@/utils/type";
 import { getType, getTimestamp, getChildren } from "@/utils/data";
 import { dataAtom } from "@/atoms/api";
-import { roundAtom } from "@/atoms/paramList";
 import LeafItemContent from "./LeafItemContent";
 import GroupItemContent from "./GroupItemContent";
 import ParamCollapse from "./CollapseButton";

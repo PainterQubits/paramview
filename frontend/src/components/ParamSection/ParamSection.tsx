@@ -7,6 +7,7 @@ const paramSectionSx = {
   flexDirection: "column",
   flexBasis: "40rem",
   overflow: "hidden",
+  borderLeft: 1,
   borderRight: 1,
   borderColor: "divider",
 };
