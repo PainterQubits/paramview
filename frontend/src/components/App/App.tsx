@@ -11,6 +11,7 @@ const appSx = {
 
 const contentSx = {
   display: "flex",
+  justifyContent: "center",
   flex: 1,
   overflow: "hidden",
 };

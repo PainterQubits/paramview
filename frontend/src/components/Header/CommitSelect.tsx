@@ -88,7 +88,7 @@ function CommitSelectContents() {
   /** Functions to pass to the CommitSelectList component via a context. */
   const commitSelectListContextValue = useMemo(
     () => ({
-      scrollToIndex: selectedCommitIndex,
+      scrollToIndex: commitHistory.length - 1 - selectedCommitIndex,
       getPrimary: getMessage,
       getSecondary: (option: number) => formatDate(commitHistory[option].timestamp),
     }),
