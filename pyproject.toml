@@ -11,9 +11,10 @@ include = ["paramview/static/**/*"]
 [tool.poetry.dependencies]
 python = "^3.10"
 flask = "^2.2.3"
-waitress = "^2.1.2"
 # paramdb = "^0.4.0"
 paramdb = {git = "https://github.com/PainterQubits/paramdb.git"}
+flask-socketio = "^5.3.3"
+eventlet = "^0.33.3"
 
 [tool.poetry.group.dev.dependencies]
 types-waitress = "^2.1.4.7"

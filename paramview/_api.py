@@ -40,6 +40,7 @@ def _database_name() -> Response:
 @api.route("/commit-history")
 def _commit_history() -> list[CommitEntry]:
     """Return the commit history."""
+    current_app.config["socketio"].emit("commit history", "this is a test")
     return _current_db.commit_history()
 
 

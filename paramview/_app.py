@@ -3,6 +3,7 @@
 from typing import Any
 import os
 from flask import Flask, Response, send_from_directory
+from flask_socketio import SocketIO  # type: ignore
 from paramdb import ParamDB
 from paramview._api import api
 
@@ -13,6 +14,7 @@ def create_app(db_path: str) -> Flask:
         raise FileNotFoundError(f"database file '{db_path}' does not exist")
     db = ParamDB[Any](db_path)
     app = Flask(__name__, static_url_path="/")
+    app.config["socketio"] = SocketIO(app)
     app.config["db"] = db
     app.config["db_path"] = db_path
     app.register_blueprint(api)

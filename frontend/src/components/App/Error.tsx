@@ -16,6 +16,8 @@ const errorMesssageSx = {
 
 /** Displayed in case of any uncaught error within the app. */
 export default function Error({ error }: FallbackProps) {
+  document.title = "Error";
+
   return (
     <Alert severity="error" sx={errorAlertSx}>
       <AlertTitle>Error</AlertTitle>

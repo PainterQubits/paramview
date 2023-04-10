@@ -13,6 +13,10 @@ export default defineConfig({
       "/api": {
         target: "http://127.0.0.1:5050",
       },
+      "/socket.io": {
+        target: "ws://127.0.0.1:5050",
+        ws: true,
+      },
     },
   },
   plugins: [react()],
