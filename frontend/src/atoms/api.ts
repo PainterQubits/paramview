@@ -3,17 +3,16 @@ import { CommitEntry, Data } from "@/types";
 import { requestData } from "@/utils/api";
 import { selectedCommitIndexAtom } from "@/atoms/commitSelect";
 
-/** Database name retrieved from the server. */
-export const databaseNameAtom = atom(async () => {
-  const databaseName = await requestData<string>("api/database-name");
-  document.title = databaseName;
-  return databaseName;
+const databaseName = requestData<string>("api/database-name").then((name) => {
+  document.title = name;
+  return name;
 });
 
+/** Database name retrieved from the server. */
+export const databaseNameAtom = atom(async () => databaseName);
+
 /** Commit history retrieved from the server. */
-export const commitHistoryAtom = atom(() =>
-  requestData<CommitEntry[]>("api/commit-history"),
-);
+export const commitHistoryAtom = atom(requestData<CommitEntry[]>("api/commit-history"));
 
 /** Data for the currently selected commit. */
 export const dataAtom = atom(async (get) => {
