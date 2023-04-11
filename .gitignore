@@ -17,6 +17,7 @@ __pycache__/
 node_modules/
 .yarn/
 .pnp.*
+.yarnrc.yml
 
 # Data files
 *.db
