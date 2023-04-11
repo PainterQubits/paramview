@@ -31,6 +31,7 @@ jobs:
 
       - name: Create _site/releases/index.html
         run: |
+          mkdir _site
           mkdir _site/releases
           echo '<!DOCTYPE html>
           <html>
