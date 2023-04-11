@@ -64,8 +64,6 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version-file: frontend/.nvmrc
-          cache: yarn
-          cache-dependency-path: frontend/yarn.lock
 
       - name: Install dependencies
         run: corepack enable && yarn
