@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "paramview"
-version = "0.1.0"
+version = "0.1.1"
 description = "GUI for viewing the contents of a ParamDB database."
 authors = ["Alex Hadley <alexhad6@gmail.com>"]
 license = "BSD-3-Clause"
