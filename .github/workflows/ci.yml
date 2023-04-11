@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+env:
+  PYTHON_VERSION: "3.10"
+  POETRY_VERSION: "1.4.2"
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install Poetry
+        run: pipx install poetry==$POETRY_VERSION
+
+      - name: Set up Python with Poetry cache
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: poetry
+
+      - name: Install dependencies
+        run: poetry install --all-extras
+
+      - name: Check Formatting (Black)
+        run: poetry run black paramview --check
+
+      - name: Lint (Flake8)
+        run: poetry run flake8 paramview
+
+      - name: Lint (Pylint)
+        run: poetry run pylint paramdb tests
+
+      - name: Mypy cache
+        uses: actions/cache@v3
+        with:
+          path: .mypy_cache
+          key: mypy-${{ runner.os }}-python-${{ env.PYTHON_VERSION }}-${{ github.sha }}
+          restore-keys: |
+            mypy-${{ runner.os }}-python-${{ env.PYTHON_VERSION }}-
+
+      - name: Type Check (Mypy)
+        run: poetry run mypy paramview
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Node with Yarn cache
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: .nvmrc
+          cache: yarn
+
+      - name: Install dependencies
+        run: yarn
+
+      - name: Lint
+        run: yarn lint
