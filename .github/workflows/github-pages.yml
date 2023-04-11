@@ -5,7 +5,7 @@ on: workflow_dispatch
 env:
   PYTHON_VERSION: "3.10"
   POETRY_VERSION: "1.4.2"
-  PARAMVIEW_VERSION: "0.5.0"
+  PARAMVIEW_VERSION: "0.1.0"
 
 jobs:
   build:
