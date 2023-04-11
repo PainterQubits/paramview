@@ -11,8 +11,14 @@ const databaseName = requestData<string>("api/database-name").then((name) => {
 /** Database name retrieved from the server. */
 export const databaseNameAtom = atom(async () => databaseName);
 
+const commitHistoryStateAtom = atom(requestData<CommitEntry[]>("api/commit-history"));
+
 /** Commit history retrieved from the server. */
-export const commitHistoryAtom = atom(requestData<CommitEntry[]>("api/commit-history"));
+export const commitHistoryAtom = atom(
+  (get) => get(commitHistoryStateAtom),
+  (_, set) =>
+    set(commitHistoryStateAtom, requestData<CommitEntry[]>("api/commit-history")),
+);
 
 /** Data for the currently selected commit. */
 export const dataAtom = atom(async (get) => {
