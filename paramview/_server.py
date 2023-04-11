@@ -41,7 +41,7 @@ def start_server(
     """
     port = _available_port(host, default_port)
     app, socketio = create_app(db_path)
-    stop_watch_db = watch_db(db_path)
+    stop_watch_db = watch_db(db_path, socketio)
     try:
         print(f"Serving on http://{host}:{port}", file=sys.stderr)
         webbrowser.open(f"http://{host}:{port}", new=2)
