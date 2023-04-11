@@ -23,11 +23,25 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: poetry
 
-      - name: Install dependencies
+      - name: Install backend dependencies
         run: poetry install
 
+      - name: Set up Node
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: frontend/.nvmrc
+
+      - name: Yarn cache
+        uses: actions/cache@v3
+        with:
+          path: frontend/.yarn/cache
+          key: yarn-${{ runner.os }}-${{ hashFiles('frontend/yarn.lock') }}
+
+      - name: Install frontend dependencies
+        run: corepack enable && yarn
+
       - name: Build package
-        run: poetry build
+        run: make
 
       - name: Create _site/releases/index.html
         run: |
