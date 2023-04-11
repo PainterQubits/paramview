@@ -60,10 +60,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Set up Node with Yarn cache
+      - name: Set up Node
         uses: actions/setup-node@v3
         with:
           node-version-file: frontend/.nvmrc
+
+      - name: Yarn cache
+        uses: actions/cache@v3
+        with:
+          path: frontend/.yarn/cache
+          key: yarn-${{ runner.os }}-${{ hashFiles('frontend/yarn.lock') }}
 
       - name: Install dependencies
         run: corepack enable && yarn
