@@ -1,16 +1,17 @@
 """WSGI server."""
 
-from typing import cast
 import os
 import sys
 import socket
 import mimetypes
 import webbrowser
-from flask_socketio import SocketIO  # type: ignore
 from paramview._app import create_app
+from paramview._watch_db import watch_db
 
 # Fix JavaScript MIME type for Windows
 mimetypes.add_type("text/javascript", ".js")
+
+# eventlet.monkey_patch()
 
 
 def _available_port(host: str, default_port: int) -> int:
@@ -38,9 +39,12 @@ def start_server(
     Start the server locally on the given port using SocketIO, and open in a new browser
     window. If the given port is in use, find another available port.
     """
-    app = create_app(db_path)
-    socketio = cast(SocketIO, app.config["socketio"])
     port = _available_port(host, default_port)
-    webbrowser.open(f"http://{host}:{port}", new=2)
-    print(f"Serving on http://{host}:{port}", file=sys.stderr)
-    socketio.run(app, host, port)
+    app, socketio = create_app(db_path)
+    stop_watch_db = watch_db(db_path)
+    try:
+        print(f"Serving on http://{host}:{port}", file=sys.stderr)
+        webbrowser.open(f"http://{host}:{port}", new=2)
+        socketio.run(app, host, port)
+    finally:
+        stop_watch_db()

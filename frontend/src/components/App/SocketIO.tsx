@@ -1,32 +1,26 @@
 import { io } from "socket.io-client";
-import { useState, useEffect } from "react";
+import { startTransition, useEffect } from "react";
 import { useSetAtom } from "jotai";
 import { commitHistoryAtom } from "@/atoms/api";
-
-const notRunningMessage = "\n\nPlease check that paramview is running.";
 
 const socket = io();
 
 export default function SocketIO() {
-  const setCommitHistory = useSetAtom(commitHistoryAtom);
-  const [error, setError] = useState<boolean>(false);
+  const updateCommitHistory = useSetAtom(commitHistoryAtom);
+
+  const update = () => {
+    console.log("Updated database");
+    startTransition(updateCommitHistory);
+  };
 
   useEffect(() => {
-    if (error) {
-      socket.disconnect(); // Stop trying to connect
-      throw Error("Could not connect to ParamView backend." + notRunningMessage);
-    }
-  }, [error]);
+    socket.on("connect", update);
 
-  useEffect(() => {
-    socket.on("connect_error", () => setError(true));
+    socket.on("connect_error", update);
 
-    socket.on("disconnect", () => setError(true));
+    socket.on("disconnect", update);
 
-    socket.on("commit history", () => {
-      // setCommitHistory();
-      console.log("Commit history received.");
-    });
+    socket.on("database_update", update);
 
     return () => {
       socket.removeAllListeners();
