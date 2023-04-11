@@ -7,6 +7,8 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0).
 
 ## [Unreleased]
 
+## [0.1.1] (Apr 11 2023)
+
 ### Fixed
 - Releases contain the frontend
 
@@ -18,5 +20,6 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0).
 - CLI command `paramview` for launching the GUI
 - `start_server` Python function to launch the GUI
 
-[unreleased]: https://github.com/PainterQubits/paramview/compare/v0.1.0...main
+[unreleased]: https://github.com/PainterQubits/paramview/compare/v0.1.1...main
+[0.1.1]: https://github.com/PainterQubits/paramview/releases/tag/v0.1.1
 [0.1.0]: https://github.com/PainterQubits/paramview/releases/tag/v0.1.0
