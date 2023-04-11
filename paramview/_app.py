@@ -20,7 +20,7 @@ def create_app(db_path: str) -> tuple[Flask, SocketIO]:
     app.config["db_path"] = db_path
     app.config["db"] = ParamDB[Any](db_path)
     app.register_blueprint(api)
-    socketio = SocketIO(app, message_queue="memory:///")
+    socketio = SocketIO(app)
 
     @app.route("/")
     def index() -> Response:
