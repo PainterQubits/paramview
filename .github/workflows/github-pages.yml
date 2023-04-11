@@ -1,0 +1,73 @@
+name: Deploy to GitHub Pages
+
+on: workflow_dispatch
+
+env:
+  PYTHON_VERSION: "3.10"
+  POETRY_VERSION: "1.4.2"
+  PARAMVIEW_VERSION: "0.5.0"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install Poetry
+        run: pipx install poetry==$POETRY_VERSION
+
+      - name: Set up Python with Poetry cache
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: poetry
+
+      - name: Install dependencies
+        run: poetry install
+
+      - name: Build package
+        run: poetry build
+
+      - name: Create _site/releases/index.html
+        run: |
+          mkdir _site/releases
+          echo '<!DOCTYPE html>
+          <html>
+            <body>
+              <a href="paramview/">paramview</a>
+            </body>
+          </html>' > _site/releases/index.html
+
+      - name: Create _site/releases/paramview/index.html
+        run: |
+          mkdir _site/releases/paramview
+          echo '<!DOCTYPE html>
+          <html>
+            <body>
+              <a href="paramview-${{ env.PARAMVIEW_VERSION }}-py3-none-any.whl">
+                paramview-${{ env.PARAMVIEW_VERSION }}-py3-none-any.whl
+              </a>
+              <a href="paramview-${{ env.PARAMVIEW_VERSION }}.tar.gz">paramview-${{ env.PARAMVIEW_VERSION }}.tar.gz</a>
+            </body>
+          </html>' > _site/releases/paramview/index.html
+
+      - name: Move package files into _site/releases/paramview
+        run: mv dist/* _site/releases/paramview
+
+      - name: Upload site artifact
+        uses: actions/upload-pages-artifact@v1
+
+  deploy:
+    needs: build
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v2
