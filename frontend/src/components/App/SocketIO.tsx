@@ -8,10 +8,7 @@ const socket = io();
 export default function SocketIO() {
   const updateCommitHistory = useSetAtom(commitHistoryAtom);
 
-  const update = () => {
-    console.log("Updated database");
-    startTransition(updateCommitHistory);
-  };
+  const update = () => startTransition(updateCommitHistory);
 
   useEffect(() => {
     socket.on("connect", update);
