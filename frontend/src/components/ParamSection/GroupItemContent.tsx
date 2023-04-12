@@ -21,12 +21,16 @@ const timestampSx = {
 };
 
 type ParamItemContentProps = {
+  /** Name to display. */
   name: string;
+  /** Type to display. */
   type: string;
+  /** Timestamp to display. */
   timestamp: number;
 };
 
-export default function ParamItemContent({
+/** Item content for a Group. */
+export default function GroupItemContent({
   name,
   type,
   timestamp,

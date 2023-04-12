@@ -30,10 +30,13 @@ const listItemSx = {
 };
 
 type ParamSublistProps = {
+  /** List of names and Data to display in this sublist. */
   items: [string, Data][];
+  /** Whether this is the root list. */
   root?: boolean;
 };
 
+/** Sublist in the parameter list. */
 function ParamSublist({ items, root = false }: ParamSublistProps) {
   return (
     <List disablePadding sx={root ? rootListSx : sublistSx}>
@@ -61,12 +64,17 @@ function ParamSublist({ items, root = false }: ParamSublistProps) {
   );
 }
 
+/**
+ * Contents of the parameter list, which must be wrapped by Suspense since it could be
+ * loading.
+ */
 function ParamListContents() {
   const [data] = useAtom(dataAtom);
 
   return <ParamSublist items={[["root", data]]} root />;
 }
 
+/** List of parameter data. */
 export default function ParamList() {
   return (
     <Suspense>

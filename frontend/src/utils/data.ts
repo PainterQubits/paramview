@@ -5,14 +5,15 @@ import {
   isQuantity,
   isList,
   isDict,
-  isStruct,
-  isParam,
   isParamList,
+  isParam,
+  isStruct,
 } from "@/utils/type";
 import { formatDate } from "@/utils/timestamp";
 
 const precision = 4;
 
+/** Convert the given number to a string, rounding it if round is true. */
 function numberToString(num: number, round: boolean) {
   const numString = String(num);
 
@@ -34,6 +35,9 @@ function numberToString(num: number, round: boolean) {
   return numString;
 }
 
+/**
+ * Convert the given Leaf to a string, rounding it if it is a number and round is true.
+ */
 export function leafToString(value: Leaf, round: boolean) {
   if (isDatetime(value)) return formatDate(value.isoformat);
 
@@ -48,6 +52,7 @@ export function leafToString(value: Leaf, round: boolean) {
   return value;
 }
 
+/** Return a string representing the type of the given Group. */
 export function getType(group: Group) {
   if (isList(group)) return "list";
 
@@ -60,6 +65,7 @@ export function getType(group: Group) {
   return group.__type;
 }
 
+/** Get the last updated timestamp from the given Group. */
 export function getTimestamp(group: Group): number {
   if (isParam(group)) return new Date(group.__last_updated.isoformat).getTime();
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -69,16 +75,17 @@ export function getTimestamp(group: Group): number {
   return Math.max(...timestamps);
 }
 
+/** Return the Data values contained with the given Group. */
 export function getChildren(group: Group): [string, Data][] {
   let children: Data[] | { [key: string]: Data };
   if (isList(group) || isDict(group)) {
     children = group;
+  } else if (isParamList(group)) {
+    children = group.__items;
   } else if (isParam(group)) {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { __type, __last_updated, ...rest } = group;
     children = rest;
-  } else if (isParamList(group)) {
-    children = group.__items;
   } else {
     // Struct, ParamDict, or unknown type
     // eslint-disable-next-line @typescript-eslint/no-unused-vars

@@ -26,6 +26,7 @@ const commitSelectContainerSx = {
   maxWidth: "50rem",
 };
 
+/** The database name. */
 function DatabaseName() {
   const [databaseName] = useAtom(databaseNameAtom);
 

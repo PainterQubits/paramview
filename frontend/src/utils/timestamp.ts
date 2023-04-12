@@ -1,4 +1,4 @@
-/** Convert the datetime string or Unix timestamp to a readable date string. */
+/** Convert the given datetime string or Unix timestamp to a readable date string. */
 export function formatDate(timestamp: string | number) {
   return new Date(timestamp).toLocaleString(undefined, {
     year: "2-digit",

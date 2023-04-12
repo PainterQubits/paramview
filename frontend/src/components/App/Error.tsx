@@ -14,7 +14,7 @@ const errorMesssageSx = {
   whiteSpace: "pre-wrap",
 };
 
-/** Displayed in case of any uncaught error within the app. */
+/** Displays the given error and a button to reload the page. */
 export default function Error({ error }: FallbackProps) {
   document.title = "Error";
 
