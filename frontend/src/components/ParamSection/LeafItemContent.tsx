@@ -16,10 +16,13 @@ const leafItemContentSx = {
 };
 
 type LeafItemContentProps = {
+  /** Name to display. */
   name: string;
+  /** Leaf value to display. */
   value: Leaf;
 };
 
+/** Item content for a Leaf. */
 export default function LeafItemContent({ name, value }: LeafItemContentProps) {
   const [round] = useAtom(roundAtom);
 

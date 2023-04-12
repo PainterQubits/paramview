@@ -7,11 +7,17 @@ export default function theme(mode: PaletteMode = "light") {
     palette: {
       mode,
       primary: indigo,
-      secondary: { main: "#fff" },
+      secondary: {
+        main: "#fff",
+      },
     },
     typography: {
-      h1: { fontSize: "2rem" },
-      h2: { fontSize: "1.625rem" },
+      h1: {
+        fontSize: "2rem",
+      },
+      h2: {
+        fontSize: "1.625rem",
+      },
     },
   });
 }

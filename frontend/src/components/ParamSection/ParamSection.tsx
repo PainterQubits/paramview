@@ -25,6 +25,7 @@ const paramHeaderSx = {
   zIndex: 1,
 };
 
+/** Parameter section of the app. */
 export default function ParamSection() {
   return (
     <Box sx={paramSectionSx}>

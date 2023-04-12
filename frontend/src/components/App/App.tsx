@@ -17,7 +17,7 @@ const contentSx = {
   overflow: "hidden",
 };
 
-/** The entire application. */
+/** Root component for the entire app. */
 export default function App() {
   return (
     <ErrorBoundary FallbackComponent={Error}>

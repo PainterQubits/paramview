@@ -1,10 +1,11 @@
 const notRunningMessage = "\n\nPlease check that paramview is running.";
 
-export async function requestData<T>(url: string, requestInit?: RequestInit) {
+/** Request data from the given URL and parse the response as JSON. */
+export async function requestData<T>(url: string) {
   let response: Response;
 
   try {
-    response = await fetch(url, requestInit);
+    response = await fetch(url);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     throw Error(`${message}${notRunningMessage}`);

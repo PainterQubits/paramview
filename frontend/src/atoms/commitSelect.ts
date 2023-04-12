@@ -7,7 +7,10 @@ export const syncLatestAtom = atom(true);
 /** Keeps track of the selected commit to use when sync latest is false. */
 const commitIndexAtom = atom(0);
 
-/** Currently selected index in the commit history. */
+/**
+ * Currently selected index in the commit history. This will be the latest commit if
+ * syncLatestAtom is true, or the selected commit otherwise.
+ */
 export const selectedCommitIndexAtom = atom(
   async (get) => {
     const commitHistoryLength = (await get(commitHistoryAtom)).length;

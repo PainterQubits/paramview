@@ -1,5 +1,6 @@
 import { atom } from "jotai";
 
+/** Primitive atom to store the current value of collapseAtom. */
 const collapseStateAtom = atom(Symbol());
 
 /**
@@ -11,6 +12,7 @@ export const collapseAtom = atom(
   (_, set) => set(collapseStateAtom, Symbol()),
 );
 
+/** Primitive atom to store the current value of roundStateAtom. */
 const roundStateAtom = atom(true);
 
 /** Whether to round parameters and a toggle function. */
