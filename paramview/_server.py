@@ -1,4 +1,4 @@
-"""WSGI server."""
+"""WSGI server for frontend and backend API."""
 
 import os
 import sys
@@ -10,8 +10,6 @@ from paramview._watch_db import watch_db
 
 # Fix JavaScript MIME type for Windows
 mimetypes.add_type("text/javascript", ".js")
-
-# eventlet.monkey_patch()
 
 
 def _available_port(host: str, default_port: int) -> int:

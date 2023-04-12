@@ -1,15 +1,11 @@
-"""WSGI app."""
+"""WSGI app to serve the frontend and the backend API."""
 
 from typing import Any
 import os
-import eventlet  # type: ignore
 from flask import Flask, Response, send_from_directory
 from flask_socketio import SocketIO  # type: ignore
 from paramdb import ParamDB
 from paramview._api import api
-
-# Monkey patch the socket library for Redis
-eventlet.monkey_patch(socket=True)
 
 
 def create_app(db_path: str) -> tuple[Flask, SocketIO]:

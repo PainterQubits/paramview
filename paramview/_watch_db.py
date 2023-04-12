@@ -10,6 +10,8 @@ from watchdog.events import FileSystemEvent, FileSystemEventHandler
 
 
 class _DBEventHandler(FileSystemEventHandler):
+    """Watchdog event handler for watching the ParamDB file."""
+
     # pylint: disable-next=too-many-arguments
     def __init__(
         self,
@@ -25,11 +27,18 @@ class _DBEventHandler(FileSystemEventHandler):
         self._socketio = socketio
 
     def _db_update(self) -> None:
+        """
+        Register that the database has been updated by seting the database update event
+        and notify threads waiting on the condition variable.
+        """
         with self._watch_db_condition:
             self._db_update_event.set()
             self._watch_db_condition.notify()
 
     def dispatch(self, event: FileSystemEvent) -> None:
+        # Only dispatch events that match the database path with or without the
+        # SQLite "-journal" suffix. On macOS, it appears that only the journal file
+        # triggers Watchdog on a database write.
         if event.src_path in (self._db_path, f"{self._db_path}-journal"):
             super().dispatch(event)  # type: ignore
 
