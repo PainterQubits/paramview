@@ -3,12 +3,11 @@
 from typing import Any
 import os
 from flask import Flask, Response, send_from_directory
-from flask_socketio import SocketIO  # type: ignore
 from paramdb import ParamDB
 from paramview._api import api
 
 
-def create_app(db_path: str) -> tuple[Flask, SocketIO]:
+def create_app(db_path: str) -> Flask:
     """Return the WSGI app for ParamView with the given database path."""
     if not os.path.exists(db_path):
         raise FileNotFoundError(f"database file '{db_path}' does not exist")
@@ -16,7 +15,6 @@ def create_app(db_path: str) -> tuple[Flask, SocketIO]:
     app.config["db_path"] = db_path
     app.config["db"] = ParamDB[Any](db_path)
     app.register_blueprint(api)
-    socketio = SocketIO(app)
 
     @app.route("/")
     def index() -> Response:
@@ -25,4 +23,4 @@ def create_app(db_path: str) -> tuple[Flask, SocketIO]:
         assert static_folder is not None, "no static folder set"
         return send_from_directory(static_folder, "index.html")
 
-    return app, socketio
+    return app

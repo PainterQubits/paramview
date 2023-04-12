@@ -5,6 +5,7 @@ import sys
 import socket
 import mimetypes
 import webbrowser
+from flask_socketio import SocketIO  # type: ignore
 from paramview._app import create_app
 from paramview._watch_db import watch_db
 
@@ -38,7 +39,8 @@ def start_server(
     window. If the given port is in use, find another available port.
     """
     port = _available_port(host, default_port)
-    app, socketio = create_app(db_path)
+    app = create_app(db_path)
+    socketio = SocketIO(app)
     stop_watch_db = watch_db(db_path, socketio)
     try:
         print(f"Serving on http://{host}:{port}", file=sys.stderr)
