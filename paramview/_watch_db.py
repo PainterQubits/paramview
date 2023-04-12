@@ -34,15 +34,12 @@ class _DBEventHandler(FileSystemEventHandler):
             super().dispatch(event)  # type: ignore
 
     def on_moved(self, event: FileSystemEvent) -> None:
-        self._db_update()
-
-    def on_created(self, event: FileSystemEvent) -> None:
+        # Triggers an update if the database file was moved.
         self._db_update()
 
     def on_deleted(self, event: FileSystemEvent) -> None:
-        self._db_update()
-
-    def on_modified(self, event: FileSystemEvent) -> None:
+        # Triggers an update if the database file was deleted, or if the database
+        # journal file was deleted, which indicates a commit may have occured.
         self._db_update()
 
 
