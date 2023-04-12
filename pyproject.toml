@@ -28,6 +28,7 @@ paramview = "paramview._cli:main"
 
 [tool.pytest.ini_options]
 addopts = ["--import-mode=importlib"]
+filterwarnings = ["ignore::DeprecationWarning:eventlet.support.greenlets"]
 
 [tool.pylint.basic]
 good-names-rgxs = ["^[a-z][a-z0-9]?$"]
