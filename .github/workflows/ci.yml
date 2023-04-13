@@ -29,7 +29,7 @@ jobs:
           cache: poetry
 
       - name: Install dependencies
-        run: poetry install --all-extras
+        run: poetry install
 
       - name: Check Formatting (Black)
         run: poetry run black paramview tests --check
@@ -50,6 +50,30 @@ jobs:
 
       - name: Type Check (Mypy)
         run: poetry run mypy paramview tests
+
+      - name: Test (Pytest)
+        run: poetry run pytest
+
+  backend-macos-windows:
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install Poetry
+        run: pipx install poetry==$POETRY_VERSION
+
+      - name: Set up Python with Poetry cache
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: poetry
+
+      - name: Install dependencies
+        run: poetry install
 
       - name: Test (Pytest)
         run: poetry run pytest
