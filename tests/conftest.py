@@ -35,6 +35,7 @@ def fixture_db_path(db_name: str, tmp_path: Path) -> str:
 
 @pytest.fixture(name="db")
 def fixture_db(db_path: str) -> ParamDB[Any]:
+    """ParamDB database."""
     return ParamDB[Any](db_path)
 
 
