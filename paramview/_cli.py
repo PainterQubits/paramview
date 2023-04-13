@@ -8,9 +8,12 @@ _PACKAGE_NAME = "paramview"
 _VERSION = distribution(_PACKAGE_NAME).version
 
 
-def _parse_args() -> Namespace:
-    """Parse command line arguments using argparse."""
-    parser = ArgumentParser()
+def _parse_args(*args: str) -> Namespace:
+    """
+    Parse command line arguments using argparse. If arguments are passed in, those are
+    parsed instead of command line arguments.
+    """
+    parser = ArgumentParser(prog=_PACKAGE_NAME)
     parser.add_argument(
         "-V",
         "--version",
@@ -29,7 +32,7 @@ def _parse_args() -> Namespace:
         type=int,
         help="port to use (default is 5050)",
     )
-    return parser.parse_args()
+    return parser.parse_args(args or None)
 
 
 def main() -> None:

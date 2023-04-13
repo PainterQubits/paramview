@@ -19,12 +19,10 @@ class _DBEventHandler(FileSystemEventHandler):
         db_name: str,
         watch_db_condition: Condition,
         db_update_event: Event,
-        socketio: SocketIO,
     ):
         self._db_path = os.path.join(db_dir, db_name)
         self._watch_db_condition = watch_db_condition
         self._db_update_event = db_update_event
-        self._socketio = socketio
 
     def _db_update(self) -> None:
         """
@@ -87,12 +85,12 @@ def watch_db(db_path: str, socketio: SocketIO) -> Callable[[], None]:
     db_update_event = Event()
     stop_watch_db_event = Event()
     event_handler = _DBEventHandler(
-        db_dir, db_name, watch_db_condition, db_update_event, socketio
+        db_dir, db_name, watch_db_condition, db_update_event
     )
     observer = Observer()
     observer.schedule(event_handler, db_dir)  # type: ignore
     observer.start()  # type: ignore
-    spawn(
+    watch_db_thread = spawn(
         _watch_db_helper,
         watch_db_condition,
         db_update_event,
@@ -102,9 +100,10 @@ def watch_db(db_path: str, socketio: SocketIO) -> Callable[[], None]:
 
     def stop_watch_db() -> None:
         observer.stop()  # type: ignore
-        stop_watch_db_event.set()
         with watch_db_condition:
+            stop_watch_db_event.set()
             watch_db_condition.notify()
+        watch_db_thread.wait()
         observer.join()
 
     return stop_watch_db
