@@ -14,14 +14,12 @@ def test_database_name(db_name: str, client: FlaskClient) -> None:
     assert response.json == db_name
 
 
-def test_commit_history(db_path: str, client: FlaskClient) -> None:
+def test_commit_history(db: ParamDB[Any], client: FlaskClient) -> None:
     """Gets the database name."""
     response = client.get("/api/commit-history")
     assert response.status_code == 200  # Success
     assert response.mimetype == "application/json"
-    assert response.json == json.loads(
-        json.dumps(ParamDB[Any](db_path).commit_history())
-    )
+    assert response.json == json.loads(json.dumps(db.commit_history()))
 
 
 def test_data_nonexistent_fails(client: FlaskClient) -> None:
@@ -36,9 +34,8 @@ def test_data_nonexistent_fails(client: FlaskClient) -> None:
     assert "IndexError" in error_json["description"]
 
 
-def test_data(db_path: str, client: FlaskClient) -> None:
+def test_data(db: ParamDB[Any], client: FlaskClient) -> None:
     """Gets data from particular commits."""
-    db = ParamDB[Any](db_path)
     for entry in db.commit_history():
         response = client.get(f"/api/data/{entry.id}")
         assert response.status_code == 200  # Success
