@@ -13,7 +13,7 @@ env:
   POETRY_VERSION: "1.4.2"
 
 jobs:
-  backend-lint:
+  backend (ubuntu):
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -51,10 +51,10 @@ jobs:
       - name: Type Check (Mypy)
         run: poetry run mypy paramview tests
 
-  backend-tests:
+  backend:
     strategy:
       matrix:
-        os: [ubuntu, macos, windows]
+        os: [macos, windows]
     runs-on: ${{ matrix.os }}-latest
     steps:
       - name: Checkout
