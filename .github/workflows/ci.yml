@@ -13,7 +13,7 @@ env:
   POETRY_VERSION: "1.4.2"
 
 jobs:
-  backend (ubuntu):
+  backend:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
