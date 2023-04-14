@@ -1,6 +1,6 @@
 """Tests for paramview._watch_db."""
 
-from typing import Any, Generator
+from typing import Any, Generator, cast
 import os
 import time
 from eventlet import sleep  # type: ignore
@@ -57,6 +57,11 @@ def test_emits_on_delete(
 ) -> None:
     """Emits a SocketIO event when the database is deleted."""
     assert len(socketio_client.get_received()) == 0
+
+    # Explicitly close DB to avoid Windows permission error
+    db = cast(ParamDB[Any], socketio_client.app.config["db"])
+    db._engine.dispose()  # pylint: disable=protected-access
+
     os.remove(db_path)
     received = wait_for_socketio_events(socketio_client)
     assert len(received) == 1
@@ -70,6 +75,11 @@ def test_emits_on_move(
 ) -> None:
     """Emits a SocketIO event when the database is moved/renamed."""
     assert len(socketio_client.get_received()) == 0
+
+    # Explicitly close DB to avoid Windows permission error
+    db = cast(ParamDB[Any], socketio_client.app.config["db"])
+    db._engine.dispose()  # pylint: disable=protected-access
+
     os.rename(db_path, f"{db_path}-moved")
     received = wait_for_socketio_events(socketio_client)
     assert len(received) == 1
