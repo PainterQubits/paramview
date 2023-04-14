@@ -29,6 +29,8 @@ def fixture_db_path(db_name: str, tmp_path: Path) -> str:
     db.commit("Initial commit", ParamDict(a=1, b=2, c=3))
     db.commit("Increment all by 3", ParamDict(a=4, b=5, c=6))
     db.commit("Convert to list", ParamList([4, 5, 6]))
+    # Explicitly close DB to avoid Windows permission error
+    db._engine.dispose()  # pylint: disable=protected-access
     os.rename(db_path_init, db_path)
     return db_path
 
