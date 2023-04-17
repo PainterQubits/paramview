@@ -1,4 +1,16 @@
-import { Data, Leaf, Group, Struct, Param, Datetime, Quantity } from "@/types";
+import {
+  Data,
+  Leaf,
+  Group,
+  Datetime,
+  Quantity,
+  List,
+  Dict,
+  ParamList,
+  ParamDict,
+  Struct,
+  Param,
+} from "@/types";
 import { formatDate } from "@/utils/timestamp";
 import { leafToString, getTimestamp, getType, getChildren } from "@/utils/data";
 
@@ -39,25 +51,74 @@ describe.each`
     expect(leafToString(leaf, true)).toBe(rounded));
 });
 
-const param: Param = { __type: "CustomParam", __last_updated: datetime };
-const struct: Struct = { __type: "CustomStruct", child: param } as unknown as Struct;
+const child1: Param = {
+  __type: "Child",
+  __last_updated: { __type: "datetime.datetime", isoformat: "2023-01-1T00:00:00.000Z" },
+};
+const child2: Param = {
+  __type: "Child",
+  __last_updated: { __type: "datetime.datetime", isoformat: "2023-01-3T00:00:00.000Z" },
+};
+const child3: Param = {
+  __type: "Child",
+  __last_updated: { __type: "datetime.datetime", isoformat: "2023-01-2T00:00:00.000Z" },
+};
+const list: List = [123, "test", child1, child2, child3];
+const dict: Dict = {
+  number: 123,
+  string: "test",
+  child1,
+  child2,
+  child3,
+} as unknown as Dict;
+const paramList: ParamList = { __type: "ParamList", __items: list };
+const paramDict: ParamDict = { __type: "ParamDict", ...dict };
+const struct: Struct = { __type: "CustomStruct", ...dict } as unknown as Struct;
+const emptyStruct: Struct = { __type: "EmptyStruct" } as unknown as Struct;
+const param: Param = { __type: "CustomParam", __last_updated: datetime, ...dict };
+
+const lastUpdated = (param: Param) => new Date(param.__last_updated.isoformat).getTime();
+const latestTimestamp = lastUpdated(child2);
+
+const listChildren = [
+  ["0", 123],
+  ["1", "test"],
+  ["2", child1],
+  ["3", child2],
+  ["4", child3],
+];
+const dictChildren = [
+  ["number", 123],
+  ["string", "test"],
+  ["child1", child1],
+  ["child2", child2],
+  ["child3", child3],
+];
 
 type groupTestParams = {
   group: Group;
-  timestamp: number;
   type: string;
+  timestamp: number;
   children: [string, Data][];
 };
 
 describe.each`
-  group     | timestamp    | type                       | children
-  ${param}  | ${timestamp} | ${"CustomParam (Param)"}   | ${[]}
-  ${struct} | ${timestamp} | ${"CustomStruct (Struct)"} | ${[["child", param]]}
-`("group data $group", ({ group, timestamp, type, children }: groupTestParams) => {
-  it(`gets timestamp ${timestamp}`, () => expect(getTimestamp(group)).toBe(timestamp));
+  group          | type                       | timestamp              | children
+  ${child1}      | ${"Child (Param)"}         | ${lastUpdated(child1)} | ${[]}
+  ${child2}      | ${"Child (Param)"}         | ${lastUpdated(child2)} | ${[]}
+  ${child3}      | ${"Child (Param)"}         | ${lastUpdated(child3)} | ${[]}
+  ${list}        | ${"list"}                  | ${latestTimestamp}     | ${listChildren}
+  ${list}        | ${"list"}                  | ${latestTimestamp}     | ${listChildren}
+  ${dict}        | ${"dict"}                  | ${latestTimestamp}     | ${dictChildren}
+  ${paramList}   | ${"ParamList"}             | ${latestTimestamp}     | ${listChildren}
+  ${paramDict}   | ${"ParamDict"}             | ${latestTimestamp}     | ${dictChildren}
+  ${struct}      | ${"CustomStruct (Struct)"} | ${latestTimestamp}     | ${dictChildren}
+  ${emptyStruct} | ${"EmptyStruct (Struct)"}  | ${-Infinity}           | ${[]}
+  ${param}       | ${"CustomParam (Param)"}   | ${lastUpdated(param)}  | ${dictChildren}
+`("group data $group", ({ group, type, timestamp, children }: groupTestParams) => {
+  it(`gets type`, () => expect(getType(group)).toBe(type));
 
-  it(`gets type "${type}"`, () => expect(getType(group)).toBe(type));
+  it(`gets timestamp`, () => expect(getTimestamp(group)).toBe(timestamp));
 
-  it(`gets children ${JSON.stringify(children)}`, () =>
-    expect(getChildren(group)).toEqual(children));
+  it(`gets children`, () => expect(getChildren(group)).toEqual(children));
 });
