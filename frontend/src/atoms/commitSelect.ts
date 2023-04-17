@@ -15,7 +15,7 @@ export const selectedCommitIndexAtom = atom(
   async (get) => {
     const commitHistoryLength = (await get(commitHistoryAtom)).length;
     if (commitHistoryLength === 0) {
-      throw Error(`Database ${await get(databaseNameAtom)} has no commits.`);
+      throw new Error(`Database ${await get(databaseNameAtom)} has no commits.`);
     }
     return get(syncLatestAtom) ? commitHistoryLength - 1 : get(commitIndexAtom);
   },
