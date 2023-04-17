@@ -19,7 +19,7 @@ import {
   isParamDict,
   isStruct,
   isParam,
-} from "@/utils/type";
+} from "./type";
 
 const allPredicates: ((data: Data) => boolean)[] = [
   isLeaf,

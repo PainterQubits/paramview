@@ -1,4 +1,4 @@
-import { formatDate } from "@/utils/timestamp";
+import { formatDate } from "./timestamp";
 
 const date = new Date();
 const timestamp = date.getTime();

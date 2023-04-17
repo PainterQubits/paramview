@@ -12,7 +12,7 @@ import {
   Param,
 } from "@/types";
 import { formatDate } from "@/utils/timestamp";
-import { leafToString, getTimestamp, getType, getChildren } from "@/utils/data";
+import { leafToString, getTimestamp, getType, getChildren } from "./data";
 
 describe("leaf data", () => {
   const date = new Date();
