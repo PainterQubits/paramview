@@ -1,6 +1,7 @@
 # Yarn
 .yarn/
 .pnp.*
+.yarnrc.yml
 
 # Build
 dist/
