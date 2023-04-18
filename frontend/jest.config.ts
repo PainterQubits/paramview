@@ -4,7 +4,7 @@ const config: Config = {
   preset: "ts-jest",
   testEnvironment: "jsdom",
   moduleNameMapper: { "@/(.*)": "<rootDir>/src/$1" },
-  setupFiles: ["<rootDir>/setupTests.ts"],
+  setupFilesAfterEnv: ["<rootDir>/setupTests.ts"],
 };
 
 export default config;

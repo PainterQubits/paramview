@@ -59,15 +59,24 @@ describe("leaf data", () => {
 describe("group data", () => {
   const child1: Param = {
     __type: "Child",
-    __last_updated: { __type: "datetime.datetime", isoformat: "2023-01-2T00:00:00.000Z" },
+    __last_updated: {
+      __type: "datetime.datetime",
+      isoformat: "2023-01-02T00:00:00.000Z",
+    },
   };
   const child2: Param = {
     __type: "Child",
-    __last_updated: { __type: "datetime.datetime", isoformat: "2023-01-4T00:00:00.000Z" },
+    __last_updated: {
+      __type: "datetime.datetime",
+      isoformat: "2023-01-04T00:00:00.000Z",
+    },
   };
   const child3: Param = {
     __type: "Child",
-    __last_updated: { __type: "datetime.datetime", isoformat: "2023-01-3T00:00:00.000Z" },
+    __last_updated: {
+      __type: "datetime.datetime",
+      isoformat: "2023-01-03T00:00:00.000Z",
+    },
   };
   const list: List = [123, "test", child1, child2, child3];
   const dict: Dict = {
@@ -83,7 +92,10 @@ describe("group data", () => {
   const emptyStruct: Struct = { __type: "EmptyStruct" } as unknown as Struct;
   const param: Param = {
     __type: "CustomParam",
-    __last_updated: { __type: "datetime.datetime", isoformat: "2023-01-1T00:00:00.000Z" },
+    __last_updated: {
+      __type: "datetime.datetime",
+      isoformat: "2023-01-01T00:00:00.000Z",
+    },
     ...dict,
   };
 
@@ -128,7 +140,10 @@ describe("group data", () => {
   `("$group", ({ group, type, timestamp, children }: groupTestParams) => {
     it(`gets type`, () => expect(getType(group)).toBe(type));
 
-    it(`gets timestamp`, () => expect(getTimestamp(group)).toBe(timestamp));
+    it(`gets timestamp`, () => {
+      expect(timestamp).not.toBeNaN();
+      expect(getTimestamp(group)).toBe(timestamp);
+    });
 
     it(`gets children`, () => expect(getChildren(group)).toEqual(children));
   });

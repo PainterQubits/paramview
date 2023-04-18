@@ -9,10 +9,22 @@
     "plugin:react/jsx-runtime",
     "plugin:react-hooks/recommended",
     "plugin:jsx-a11y/recommended",
+    "plugin:jest/recommended",
+    "plugin:jest-dom/recommended",
+    "plugin:testing-library/react",
     "prettier"
   ],
   "parser": "@typescript-eslint/parser",
-  "plugins": ["@typescript-eslint", "import", "react", "react-hooks", "jsx-a11y"],
+  "plugins": [
+    "@typescript-eslint",
+    "import",
+    "react",
+    "react-hooks",
+    "jsx-a11y",
+    "jest",
+    "jest-dom",
+    "testing-library"
+  ],
   "rules": {
     "react/self-closing-comp": "error"
   },

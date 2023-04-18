@@ -1,10 +1,8 @@
-import { render } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import Header from "./Header";
 
-const fetch = jest.spyOn(window, "fetch");
-
-fetch.mockResolvedValue(new Response(JSON.stringify("test.db")));
-
-it("renders", () => {
+it("renders", async () => {
   render(<Header />);
+
+  expect(await screen.findByText("test.db")).toBeVisible();
 });
