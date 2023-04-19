@@ -141,7 +141,7 @@ describe("group data", () => {
     it(`gets type`, () => expect(getType(group)).toBe(type));
 
     it(`gets timestamp`, () => {
-      expect(timestamp).not.toBeNaN();
+      expect(timestamp).not.toBeNaN(); // Ensures "isoformat" strings above are valid
       expect(getTimestamp(group)).toBe(timestamp);
     });
 

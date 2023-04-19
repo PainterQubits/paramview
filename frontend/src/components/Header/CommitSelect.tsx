@@ -148,10 +148,9 @@ function CommitSelectContents() {
       <Box>
         <FormGroup>
           <FormControlLabel
-            control={<Checkbox color="secondary" />}
+            control={<Checkbox color="secondary" checked={syncLatest} />}
             label="Latest"
             labelPlacement="start"
-            checked={syncLatest}
             onChange={() =>
               startTransition(() => {
                 setSyncLatest(!syncLatest);

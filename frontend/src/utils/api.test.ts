@@ -2,6 +2,8 @@ import { requestData } from "./api";
 
 const notRunningMessage = "\n\nPlease check that paramview is running.";
 
+// See setupTests.ts for mocked URL paths
+
 it("throws error on fetch error", () =>
   expect(requestData("error")).rejects.toThrow(
     "Cannot fetch from URL." + notRunningMessage,

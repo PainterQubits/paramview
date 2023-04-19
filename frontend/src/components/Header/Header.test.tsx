@@ -1,8 +1,16 @@
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
+import { render } from "test-utils";
 import Header from "./Header";
 
-it("renders", async () => {
-  render(<Header />);
+describe("database name", () => {
+  it("loads", async () => {
+    render(<Header />);
+    expect(screen.queryByRole("heading")).not.toBeInTheDocument(); // Loading
+    expect(await screen.findByRole("heading")).toBeInTheDocument(); // Loaded
+  });
 
-  expect(await screen.findByText("test.db")).toBeVisible();
+  it("contains the database name", async () => {
+    render(<Header />);
+    expect(await screen.findByRole("heading")).toHaveTextContent("test.db");
+  });
 });

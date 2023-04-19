@@ -12,10 +12,10 @@ const socket = io();
 export default function SocketIO() {
   const updateCommitHistory = useSetAtom(commitHistoryAtom);
 
-  /** Actions to perform when the database may have been updated. */
-  const databaseUpdate = () => startTransition(updateCommitHistory);
-
   useEffect(() => {
+    /** Actions to perform when the database may have been updated. */
+    const databaseUpdate = () => startTransition(updateCommitHistory);
+
     // Trigger an update when the WebSocket connection is established, when there is a
     // connection error, when disconnected, and when the database is updated.
     socket.on("connect", databaseUpdate);
@@ -27,7 +27,7 @@ export default function SocketIO() {
       // Remove listeners when this component is unmounted.
       socket.removeAllListeners();
     };
-  });
+  }, [updateCommitHistory]);
 
   return null;
 }
