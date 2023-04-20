@@ -2,11 +2,13 @@ import { startTransition, useState, useMemo, useCallback, Suspense } from "react
 import { useAtom } from "jotai";
 import {
   PaperProps,
+  PopperProps,
   autocompleteClasses,
   outlinedInputClasses,
   ThemeProvider,
   Box,
   Paper,
+  Popper,
   Typography,
   Autocomplete,
   TextField,
@@ -31,6 +33,13 @@ const autocompleteSx = {
     pt: 0.25,
     pb: 0,
     pl: 0.5,
+  },
+};
+
+const popperSx = {
+  [`& .${autocompleteClasses.listbox}`]: {
+    p: 0,
+    maxHeight: "none",
   },
 };
 
@@ -59,6 +68,11 @@ function LightModePaper(props: PaperProps) {
   );
 }
 
+/** Popper with additional styles. */
+function StyledPopper(props: PopperProps) {
+  return <Popper sx={popperSx} {...props} />;
+}
+
 /** Component to display when CommitSelect is done loading. */
 function CommitSelectContents() {
   const [selectedCommitIndex, setSelectedCommitIndex] = useAtom(selectedCommitIndexAtom);
@@ -69,6 +83,11 @@ function CommitSelectContents() {
 
   /** Index of the currently highlighted item in the commit list dropdown. */
   const [highlightedIndex, setHighlightedIndex] = useState<number | null>(null);
+
+  /** Whether to scroll to the currently selected commit or to the top. */
+  const [scrollToSelected, setScrollToSelected] = useState<boolean>(true);
+
+  const [scrollTrigger, setScrollTrigger] = useState<symbol>(Symbol());
 
   /** History indices in reverse. (Used as options for the autocomplete component.) */
   const historyIndices = useMemo(
@@ -88,11 +107,14 @@ function CommitSelectContents() {
   /** Functions to pass to the CommitSelectList component via a context. */
   const commitSelectListContextValue = useMemo(
     () => ({
-      scrollToIndex: commitHistory.length - 1 - selectedCommitIndex,
+      scrollToIndex: scrollToSelected
+        ? commitHistory.length - 1 - selectedCommitIndex
+        : 0,
+      scrollTrigger,
       getPrimary: getMessage,
       getSecondary: (option: number) => formatDate(commitHistory[option].timestamp),
     }),
-    [getMessage, commitHistory, selectedCommitIndex],
+    [scrollToSelected, commitHistory, selectedCommitIndex, scrollTrigger, getMessage],
   );
 
   return (
@@ -103,7 +125,6 @@ function CommitSelectContents() {
           fullWidth
           disablePortal
           disableListWrap
-          autoHighlight
           value={selectedCommitIndex}
           onChange={(_, index) => {
             if (index !== null) {
@@ -118,10 +139,15 @@ function CommitSelectContents() {
               startTransition(() => setHighlightedIndex(index));
             }
           }}
+          onInputChange={(_, __, reason) => {
+            setScrollToSelected(reason == "reset");
+            setScrollTrigger(Symbol());
+          }}
           onClose={() => startTransition(() => setHighlightedIndex(null))}
           options={historyIndices}
           getOptionLabel={getMessage}
           PaperComponent={LightModePaper}
+          PopperComponent={StyledPopper}
           ListboxComponent={CommitSelectList}
           renderOption={(props, option) => [props, option] as React.ReactNode}
           renderInput={(params) => (

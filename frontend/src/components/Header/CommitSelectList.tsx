@@ -1,6 +1,6 @@
 // Adapted from https://mui.com/material-ui/react-autocomplete/#virtualization
 
-import { createContext, forwardRef, useContext } from "react";
+import { createContext, forwardRef, useEffect, useContext, useRef } from "react";
 import { ListChildComponentProps, FixedSizeList } from "react-window";
 import { Box, List, ListItem, ListItemText } from "@mui/material";
 
@@ -17,8 +17,15 @@ function Item({ data, index, style }: ListChildComponentProps) {
 
   const [itemProps, option] = itemData[index];
 
+  // We need to add the Listbox padding here instead of as padding since MUI Autocomplete
+  // uses offsetTop to calculate the position to scroll to.
+  const styleWithTop = {
+    ...style,
+    top: (style.top as number) + listboxPadding,
+  };
+
   return (
-    <ListItem {...itemProps} style={style} sx={{ height: itemHeight }}>
+    <ListItem {...itemProps} style={styleWithTop} sx={{ height: itemHeight }}>
       <ListItemText
         primary={getPrimary(option)}
         secondary={getSecondary(option)}
@@ -52,7 +59,8 @@ const CommitSelectInnerElement = forwardRef<HTMLUListElement>(
 
 type CommitSelectListContextValue = {
   /** Index to scroll to in the commit select list. */
-  scrollToIndex: number | null;
+  scrollToIndex: number;
+  scrollTrigger: symbol;
   /**
    * Get the primary text to display in the commit select list for the given history
    * index.
@@ -69,6 +77,7 @@ type CommitSelectListContextValue = {
  * Autocomplete component. */
 export const CommitSelectListContext = createContext<CommitSelectListContextValue>({
   scrollToIndex: 0,
+  scrollTrigger: Symbol(),
   getPrimary: () => "",
   getSecondary: () => "",
 });
@@ -79,24 +88,33 @@ export const CommitSelectListContext = createContext<CommitSelectListContextValu
  */
 export default forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLElement>>(
   function CommitSelectList({ children, ...props }, ref) {
-    const { scrollToIndex, getPrimary, getSecondary } = useContext(
+    const { scrollToIndex, scrollTrigger, getPrimary, getSecondary } = useContext(
       CommitSelectListContext,
     );
 
+    const outerRef = useRef<HTMLElement>(null);
+    const listRef = useRef<FixedSizeList>(null);
+
     const itemData = children as [React.HTMLAttributes<HTMLLIElement>, number][];
+
+    useEffect(() => {
+      if (outerRef.current) outerRef.current.scrollTop = itemHeight * scrollToIndex;
+    }, [scrollToIndex, scrollTrigger]);
 
     return (
       <div ref={ref}>
         <OuterElementContext.Provider value={props}>
           <FixedSizeList
-            initialScrollOffset={scrollToIndex === null ? 0 : itemHeight * scrollToIndex}
+            ref={listRef}
+            outerRef={outerRef}
+            initialScrollOffset={itemHeight * scrollToIndex}
             itemData={{ itemData, getPrimary, getSecondary }}
             itemCount={itemData.length}
             itemSize={itemHeight}
             outerElementType={CommitSelectOuterElement}
             innerElementType={CommitSelectInnerElement}
             width="100%"
-            height={itemHeight * Math.min(itemData.length, 10) + 2 * listboxPadding}
+            height={itemHeight * Math.min(itemData.length, 5) + 2 * listboxPadding}
             overscanCount={5}
           >
             {Item}

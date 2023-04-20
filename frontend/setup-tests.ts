@@ -1,5 +1,4 @@
-// Polyfill Fetch API for JSDOM
-import "whatwg-fetch";
+import "whatwg-fetch"; // Polyfill Fetch API for JSDOM
 import "@testing-library/jest-dom";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -27,9 +26,9 @@ window.fetch = jest.fn(async (input) => {
       return response("test.db");
     case "api/commit-history":
       return response([
-        { id: 1, message: "Initial commit", timestamp: "Thu, 06 Apr 2023 20:08:57 GMT" },
-        { id: 2, message: "Second commit", timestamp: "Thu, 06 Apr 2023 20:09:26 GMT" },
-        { id: 3, message: "Third commit", timestamp: "Mon, 10 Apr 2023 17:34:28 GMT" },
+        { id: 1, message: "Initial commit", timestamp: "2023-01-01T00:00:00.000Z" },
+        { id: 2, message: "Updated something", timestamp: "2023-01-02T00:00:00.000Z" },
+        { id: 3, message: "Latest commit", timestamp: "2023-01-03T00:00:00.000Z" },
       ]);
   }
 
