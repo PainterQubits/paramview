@@ -84,12 +84,13 @@ function CommitSelectContents() {
   /** Index of the currently highlighted item in the commit list dropdown. */
   const [highlightedIndex, setHighlightedIndex] = useState<number | null>(null);
 
-  /** Whether to scroll to the currently selected commit or to the top. */
-  const [scrollToSelected, setScrollToSelected] = useState<boolean>(true);
-
+  /**
+   * The commit list should scroll to the currently selected or highlighted item when this
+   * changes.
+   */
   const [scrollTrigger, setScrollTrigger] = useState<symbol>(Symbol());
 
-  /** History indices in reverse. (Used as options for the autocomplete component.) */
+  /** History indices in reverse. (Used as options for the Autocomplete component.) */
   const historyIndices = useMemo(
     () => [...commitHistory.keys()].reverse(),
     [commitHistory],
@@ -105,17 +106,15 @@ function CommitSelectContents() {
   const displayIndex = highlightedIndex === null ? selectedCommitIndex : highlightedIndex;
 
   /** Functions to pass to the CommitSelectList component via a context. */
-  const commitSelectListContextValue = useMemo(
-    () => ({
-      scrollToIndex: scrollToSelected
-        ? commitHistory.length - 1 - selectedCommitIndex
-        : 0,
+  const commitSelectListContextValue = useMemo(() => {
+    return {
+      scrollToIndex: displayIndex,
       scrollTrigger,
+      getId: (option: number) => commitHistory[option].id,
       getPrimary: getMessage,
       getSecondary: (option: number) => formatDate(commitHistory[option].timestamp),
-    }),
-    [scrollToSelected, commitHistory, selectedCommitIndex, scrollTrigger, getMessage],
-  );
+    };
+  }, [displayIndex, commitHistory, scrollTrigger, getMessage]);
 
   return (
     <Box sx={commitSelectSx}>
@@ -125,6 +124,7 @@ function CommitSelectContents() {
           fullWidth
           disablePortal
           disableListWrap
+          autoHighlight
           value={selectedCommitIndex}
           onChange={(_, index) => {
             if (index !== null) {
@@ -134,15 +134,8 @@ function CommitSelectContents() {
               });
             }
           }}
-          onHighlightChange={(_, index) => {
-            if (index !== null) {
-              startTransition(() => setHighlightedIndex(index));
-            }
-          }}
-          onInputChange={(_, __, reason) => {
-            setScrollToSelected(reason == "reset");
-            setScrollTrigger(Symbol());
-          }}
+          onHighlightChange={(_, index) => setHighlightedIndex(index)}
+          onInputChange={() => setScrollTrigger(Symbol())}
           onClose={() => startTransition(() => setHighlightedIndex(null))}
           options={historyIndices}
           getOptionLabel={getMessage}

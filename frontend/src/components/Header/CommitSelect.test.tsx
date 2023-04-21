@@ -1,5 +1,4 @@
 import userEvent from "@testing-library/user-event";
-import { waitFor } from "@testing-library/react";
 import { render, screen, within } from "test-utils";
 import CommitSelect from "./CommitSelect";
 
@@ -96,22 +95,4 @@ describe("commit list", () => {
     expect(within(listbox).getByText("3: Latest commit")).toBeInTheDocument();
     expect(within(listbox).getByDate("2023-01-03T00:00:00.000Z")).toBeInTheDocument();
   });
-
-  // it("selects a commit when clicked", async () => {
-  //   render(<CommitSelect />);
-  //   const commitSelectBox = await screen.findByRole("combobox");
-  //   fireEvent.click(screen.getByTitle(/open/i));
-  //   const listbox = await screen.findByRole("listbox");
-  //   const commit = within(listbox).getByText("1: Initial commit");
-  //   fireEvent.click(commit);
-  //   fireEvent.change(commitSelectBox, { target: { value: "commit" } });
-  //   await waitFor(() =>
-  //     expect(within(listbox).queryByText("2: Updated something")).not.toBeInTheDocument(),
-  //   );
-  //   expect(screen.queryByRole("2023-01-02T00:00:00.000Z")).not.toBeInTheDocument();
-  //   expect(within(listbox).getByText("1: Initial commit")).toBeInTheDocument();
-  //   expect(within(listbox).getByDate("2023-01-01T00:00:00.000Z")).toBeInTheDocument();
-  //   expect(within(listbox).getByText("3: Latest commit")).toBeInTheDocument();
-  //   expect(within(listbox).getByDate("2023-01-03T00:00:00.000Z")).toBeInTheDocument();
-  // });
 });

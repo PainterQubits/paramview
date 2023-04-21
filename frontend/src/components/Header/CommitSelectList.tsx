@@ -60,7 +60,10 @@ const CommitSelectInnerElement = forwardRef<HTMLUListElement>(
 type CommitSelectListContextValue = {
   /** Index to scroll to in the commit select list. */
   scrollToIndex: number;
+  /** Commit list will scroll when this changes. */
   scrollTrigger: symbol;
+  /** Get the commit ID for the given item. */
+  getId: (option: number) => number;
   /**
    * Get the primary text to display in the commit select list for the given history
    * index.
@@ -78,6 +81,7 @@ type CommitSelectListContextValue = {
 export const CommitSelectListContext = createContext<CommitSelectListContextValue>({
   scrollToIndex: 0,
   scrollTrigger: Symbol(),
+  getId: () => 0,
   getPrimary: () => "",
   getSecondary: () => "",
 });
@@ -88,24 +92,29 @@ export const CommitSelectListContext = createContext<CommitSelectListContextValu
  */
 export default forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLElement>>(
   function CommitSelectList({ children, ...props }, ref) {
-    const { scrollToIndex, scrollTrigger, getPrimary, getSecondary } = useContext(
+    const { scrollToIndex, getId, scrollTrigger, getPrimary, getSecondary } = useContext(
       CommitSelectListContext,
     );
 
+    /** Ref to programmatically scroll the commit list. */
     const outerRef = useRef<HTMLElement>(null);
-    const listRef = useRef<FixedSizeList>(null);
 
     const itemData = children as [React.HTMLAttributes<HTMLLIElement>, number][];
 
     useEffect(() => {
-      if (outerRef.current) outerRef.current.scrollTop = itemHeight * scrollToIndex;
-    }, [scrollToIndex, scrollTrigger]);
+      if (outerRef.current) {
+        const filteredIndex = itemData.findIndex(
+          ([, option]) => getId(option) === getId(scrollToIndex),
+        );
+        const filteredScrollIndex = filteredIndex === -1 ? 0 : filteredIndex;
+        outerRef.current.scrollTop = itemHeight * filteredScrollIndex;
+      }
+    }, [scrollTrigger]); // eslint-disable-line react-hooks/exhaustive-deps
 
     return (
       <div ref={ref}>
         <OuterElementContext.Provider value={props}>
           <FixedSizeList
-            ref={listRef}
             outerRef={outerRef}
             initialScrollOffset={itemHeight * scrollToIndex}
             itemData={{ itemData, getPrimary, getSecondary }}
