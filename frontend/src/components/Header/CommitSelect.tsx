@@ -36,13 +36,6 @@ const autocompleteSx = {
   },
 };
 
-const popperSx = {
-  [`& .${autocompleteClasses.listbox}`]: {
-    p: 0,
-    maxHeight: "none",
-  },
-};
-
 const inputSx = {
   backgroundColor: "rgba(255, 255, 255, 0.1)",
 };
@@ -54,6 +47,13 @@ const timestampSx = {
   textOverflow: "ellipsis",
   overflow: "hidden",
   flexBasis: "100%",
+};
+
+const popperSx = {
+  [`& .${autocompleteClasses.listbox}`]: {
+    p: 0,
+    maxHeight: "none",
+  },
 };
 
 /**
@@ -77,44 +77,51 @@ function StyledPopper(props: PopperProps) {
 function CommitSelectContents() {
   const [selectedCommitIndex, setSelectedCommitIndex] = useAtom(selectedCommitIndexAtom);
   const [syncLatest, setSyncLatest] = useAtom(syncLatestAtom);
-
-  /** Commit history entries retrieved from the server. */
   const [commitHistory] = useAtom(commitHistoryAtom);
 
-  /** Index of the currently highlighted item in the commit list dropdown. */
-  const [highlightedIndex, setHighlightedIndex] = useState<number | null>(null);
+  /** Index in the commit history of the currently highlighted commit. */
+  const [highlightedCommitIndex, setHighlightedCommitIndex] = useState<number | null>(
+    null,
+  );
 
   /**
-   * The commit list should scroll to the currently selected or highlighted item when this
-   * changes.
+   * Indices of the commit history in reverse. Used as options for the Autocomplete
+   * component.
    */
-  const [scrollTrigger, setScrollTrigger] = useState<symbol>(Symbol());
-
-  /** History indices in reverse. (Used as options for the Autocomplete component.) */
-  const historyIndices = useMemo(
+  const commitIndices = useMemo(
     () => [...commitHistory.keys()].reverse(),
     [commitHistory],
   );
 
-  /** Get the commit message for the given history index. */
-  const getMessage = useCallback(
-    (index: number) => `${commitHistory[index].id}: ${commitHistory[index].message}`,
+  /** Get the primary text to show for a given index in the commit history. */
+  const getPrimary = useCallback(
+    (commitIndex: number) => {
+      const commit = commitHistory[commitIndex];
+      return `${commit.id}: ${commit.message}`;
+    },
     [commitHistory],
   );
 
-  /** Index of the history entry to display the timestamp for. */
-  const displayIndex = highlightedIndex === null ? selectedCommitIndex : highlightedIndex;
+  /** Get the secondary text to show for a given index in the commit history. */
+  const getSecondary = useCallback(
+    (commitIndex: number) => formatDate(commitHistory[commitIndex].timestamp),
+    [commitHistory],
+  );
+
+  /**
+   * Index in the commit history of the commit to display the timestamp for and scroll to.
+   */
+  const displayCommitIndex = highlightedCommitIndex ?? selectedCommitIndex;
 
   /** Functions to pass to the CommitSelectList component via a context. */
   const commitSelectListContextValue = useMemo(() => {
     return {
-      scrollToIndex: displayIndex,
-      scrollTrigger,
-      getId: (option: number) => commitHistory[option].id,
-      getPrimary: getMessage,
-      getSecondary: (option: number) => formatDate(commitHistory[option].timestamp),
+      scrollToCommitIndex: displayCommitIndex,
+      getId: (commitIndex: number) => commitHistory[commitIndex].id,
+      getPrimary,
+      getSecondary,
     };
-  }, [displayIndex, commitHistory, scrollTrigger, getMessage]);
+  }, [displayCommitIndex, commitHistory, getPrimary, getSecondary]);
 
   return (
     <Box sx={commitSelectSx}>
@@ -126,19 +133,18 @@ function CommitSelectContents() {
           disableListWrap
           autoHighlight
           value={selectedCommitIndex}
-          onChange={(_, index) => {
-            if (index !== null) {
+          onChange={(_, commitIndex) => {
+            if (commitIndex !== null) {
               startTransition(() => {
                 setSyncLatest(false);
-                setSelectedCommitIndex(index);
+                setSelectedCommitIndex(commitIndex);
               });
             }
           }}
-          onHighlightChange={(_, index) => setHighlightedIndex(index)}
-          onInputChange={() => setScrollTrigger(Symbol())}
-          onClose={() => startTransition(() => setHighlightedIndex(null))}
-          options={historyIndices}
-          getOptionLabel={getMessage}
+          onHighlightChange={(_, commitIndex) => setHighlightedCommitIndex(commitIndex)}
+          onClose={() => startTransition(() => setHighlightedCommitIndex(null))}
+          options={commitIndices}
+          getOptionLabel={getPrimary}
           PaperComponent={LightModePaper}
           PopperComponent={StyledPopper}
           ListboxComponent={CommitSelectList}
@@ -155,7 +161,7 @@ function CommitSelectContents() {
                   <>
                     {params.InputProps.endAdornment}
                     <Typography variant="body2" color="text.secondary" sx={timestampSx}>
-                      {formatDate(commitHistory[displayIndex].timestamp)}
+                      {getSecondary(displayCommitIndex)}
                     </Typography>
                   </>
                 ),

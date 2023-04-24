@@ -1,14 +1,16 @@
 // Adapted from https://mui.com/material-ui/react-autocomplete/#virtualization
 
-import { createContext, forwardRef, useEffect, useContext, useRef } from "react";
+import { createContext, forwardRef, useMemo, useContext, useRef } from "react";
 import { ListChildComponentProps, FixedSizeList } from "react-window";
 import { Box, List, ListItem, ListItemText } from "@mui/material";
 
 /** Height of an item in the commit select list. */
 const itemHeight = 60;
 
-/** Padding added to the ListboxComponent in a Material UI Autocomplete. Used to compute
- * the height of the list for React window. */
+/**
+ * Padding added to the ListboxComponent in a Material UI Autocomplete. Used to compute
+ * the height of the list for React window.
+ */
 const listboxPadding = 8;
 
 /** Item in the commit select list. */
@@ -58,20 +60,14 @@ const CommitSelectInnerElement = forwardRef<HTMLUListElement>(
 );
 
 type CommitSelectListContextValue = {
-  /** Index to scroll to in the commit select list. */
-  scrollToIndex: number;
-  /** Commit list will scroll when this changes. */
-  scrollTrigger: symbol;
-  /** Get the commit ID for the given item. */
-  getId: (option: number) => number;
-  /**
-   * Get the primary text to display in the commit select list for the given history
-   * index.
-   */
-  getPrimary: (option: number) => string;
-  /** Get the secondary text to display in the commit select list for the given
-   * history index. */
-  getSecondary: (option: number) => string;
+  /** Index in the commit history to scroll to. */
+  scrollToCommitIndex: number;
+  /** Get the commit ID for the given index in the commit history. */
+  getId: (commitIndex: number) => number;
+  /** Get the primary text to display for the given index in the commit history. */
+  getPrimary: (commitIndex: number) => string;
+  /** Get the secondary text to display for the given index in the commit history. */
+  getSecondary: (commitIndex: number) => string;
 };
 
 /**
@@ -79,8 +75,7 @@ type CommitSelectListContextValue = {
  * done using a context rather than props because of how it is passed to the Material UI
  * Autocomplete component. */
 export const CommitSelectListContext = createContext<CommitSelectListContextValue>({
-  scrollToIndex: 0,
-  scrollTrigger: Symbol(),
+  scrollToCommitIndex: 0,
   getId: () => 0,
   getPrimary: () => "",
   getSecondary: () => "",
@@ -92,7 +87,7 @@ export const CommitSelectListContext = createContext<CommitSelectListContextValu
  */
 export default forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLElement>>(
   function CommitSelectList({ children, ...props }, ref) {
-    const { scrollToIndex, getId, scrollTrigger, getPrimary, getSecondary } = useContext(
+    const { scrollToCommitIndex, getId, getPrimary, getSecondary } = useContext(
       CommitSelectListContext,
     );
 
@@ -101,22 +96,19 @@ export default forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLElement>>(
 
     const itemData = children as [React.HTMLAttributes<HTMLLIElement>, number][];
 
-    useEffect(() => {
-      if (outerRef.current) {
-        const filteredIndex = itemData.findIndex(
-          ([, option]) => getId(option) === getId(scrollToIndex),
-        );
-        const filteredScrollIndex = filteredIndex === -1 ? 0 : filteredIndex;
-        outerRef.current.scrollTop = itemHeight * filteredScrollIndex;
-      }
-    }, [scrollTrigger]); // eslint-disable-line react-hooks/exhaustive-deps
+    const itemIndex = useMemo(() => {
+      const findItemIndex = itemData.findIndex(
+        ([, commitIndex]) => getId(commitIndex) === getId(scrollToCommitIndex),
+      );
+      return findItemIndex === -1 ? 0 : findItemIndex;
+    }, [getId, itemData, scrollToCommitIndex]);
 
     return (
       <div ref={ref}>
         <OuterElementContext.Provider value={props}>
           <FixedSizeList
             outerRef={outerRef}
-            initialScrollOffset={itemHeight * scrollToIndex}
+            initialScrollOffset={itemHeight * itemIndex}
             itemData={{ itemData, getPrimary, getSecondary }}
             itemCount={itemData.length}
             itemSize={itemHeight}
