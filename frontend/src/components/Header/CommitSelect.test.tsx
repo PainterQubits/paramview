@@ -16,8 +16,7 @@ describe("commit select box", () => {
 
   it("initially contains the latest commit", async () => {
     render(<CommitSelect />);
-    const commitSelectBox = await screen.findByRole("combobox");
-    expect(commitSelectBox).toHaveValue("3: Latest commit");
+    expect(await screen.findByRole("combobox")).toHaveValue("3: Latest commit");
     expect(screen.getByDate("2023-01-03T00:00:00.000Z")).toBeInTheDocument();
   });
 
@@ -28,6 +27,28 @@ describe("commit select box", () => {
     await user.type(commitSelectBox, "initial{Enter}");
     expect(commitSelectBox).toHaveValue("1: Initial commit");
     expect(screen.getByDate("2023-01-01T00:00:00.000Z")).toBeInTheDocument();
+  });
+
+  it("switches to latest commit when latest checkbox is checked", async () => {
+    const user = userEvent.setup();
+    render(<CommitSelect />);
+    const commitSelectBox = await screen.findByRole("combobox");
+    const latestCheckbox = await screen.findByRole("checkbox");
+    await user.type(commitSelectBox, "initial{Enter}");
+    await user.click(latestCheckbox);
+    expect(commitSelectBox).toHaveValue("3: Latest commit");
+    expect(screen.getByDate("2023-01-03T00:00:00.000Z")).toBeInTheDocument();
+  });
+
+  it("displays timestamp of currently highlighted commit", async () => {
+    const user = userEvent.setup();
+    render(<CommitSelect />);
+    const commitSelectBox = await screen.findByRole("combobox");
+    await user.type(commitSelectBox, "{ArrowDown}");
+    expect(commitSelectBox).toHaveValue("3: Latest commit");
+    // Timestamp of the second commit should show up in two locations: the commit select
+    // box and the commit list.
+    expect(screen.getAllByDate("2023-01-02T00:00:00.000Z")).toHaveLength(2);
   });
 });
 
@@ -53,6 +74,14 @@ describe("latest checkbox", () => {
     await user.click(latestCheckbox);
     expect(latestCheckbox).toBeChecked(); // Checked again
   });
+
+  it("gets unchecked when value changes", async () => {
+    const user = userEvent.setup();
+    render(<CommitSelect />);
+    const commitSelectBox = await screen.findByRole("combobox");
+    await user.type(commitSelectBox, "initial{Enter}");
+    expect(await screen.findByRole("checkbox")).not.toBeChecked(); // Unchecked
+  });
 });
 
 describe("commit list", () => {
@@ -64,6 +93,17 @@ describe("commit list", () => {
     await user.click(commitSelectBox);
     expect(screen.getByRole("listbox")).toBeInTheDocument(); // Opened
     await user.click(document.body);
+    expect(screen.queryByRole("listbox")).not.toBeInTheDocument(); // Closed again
+  });
+
+  it("opens when typing and closes when commit is selected", async () => {
+    const user = userEvent.setup();
+    render(<CommitSelect />);
+    const commitSelectBox = await screen.findByRole("combobox");
+    expect(screen.queryByRole("listbox")).not.toBeInTheDocument(); // Initially closed
+    await user.type(commitSelectBox, "initial");
+    expect(screen.getByRole("listbox")).toBeInTheDocument(); // Opened
+    await user.type(commitSelectBox, "{Enter}");
     expect(screen.queryByRole("listbox")).not.toBeInTheDocument(); // Closed again
   });
 
