@@ -1,28 +1,36 @@
 import userEvent from "@testing-library/user-event";
 import { render, screen, within } from "test-utils";
+import { commitHistoryAtom } from "@/atoms/api";
 import CommitSelect from "./CommitSelect";
+
+/**
+ * Render the CommitSelect component, calling the commitHistoryAtom set function to
+ * trigger initial loading from the database.
+ */
+const renderWithCommitHistory = () =>
+  render(<CommitSelect />, { initialValues: [[commitHistoryAtom, undefined]] });
 
 describe("commit select box", () => {
   it("loads", async () => {
-    render(<CommitSelect />);
+    renderWithCommitHistory();
     expect(screen.queryByRole("combobox")).not.toBeInTheDocument(); // Loading
     expect(await screen.findByRole("combobox")).toBeInTheDocument(); // Loaded
   });
 
   it("is labeled", async () => {
-    render(<CommitSelect />);
+    renderWithCommitHistory();
     expect(await screen.findByRole("combobox")).toHaveAccessibleName("Commit");
   });
 
   it("initially contains the latest commit", async () => {
-    render(<CommitSelect />);
+    renderWithCommitHistory();
     expect(await screen.findByRole("combobox")).toHaveValue("3: Latest commit");
     expect(screen.getByDate("2023-01-03T00:00:00.000Z")).toBeInTheDocument();
   });
 
   it("can search for another commit by message and switch to it", async () => {
     const user = userEvent.setup();
-    render(<CommitSelect />);
+    renderWithCommitHistory();
     const commitSelectBox = await screen.findByRole("combobox");
     await user.type(commitSelectBox, "initial{Enter}");
     expect(commitSelectBox).toHaveValue("1: Initial commit");
@@ -31,7 +39,7 @@ describe("commit select box", () => {
 
   it("switches to latest commit when latest checkbox is checked", async () => {
     const user = userEvent.setup();
-    render(<CommitSelect />);
+    renderWithCommitHistory();
     const commitSelectBox = await screen.findByRole("combobox");
     const latestCheckbox = await screen.findByRole("checkbox");
     await user.type(commitSelectBox, "initial{Enter}");
@@ -42,7 +50,7 @@ describe("commit select box", () => {
 
   it("displays timestamp of currently highlighted commit", async () => {
     const user = userEvent.setup();
-    render(<CommitSelect />);
+    renderWithCommitHistory();
     const commitSelectBox = await screen.findByRole("combobox");
     await user.type(commitSelectBox, "{ArrowDown}");
     expect(commitSelectBox).toHaveValue("3: Latest commit");
@@ -54,19 +62,19 @@ describe("commit select box", () => {
 
 describe("latest checkbox", () => {
   it("loads", async () => {
-    render(<CommitSelect />);
+    renderWithCommitHistory();
     expect(screen.queryByRole("checkbox")).not.toBeInTheDocument(); // Loading
     expect(await screen.findByRole("checkbox")).toBeInTheDocument(); // Loaded
   });
 
   it("is labeled", async () => {
-    render(<CommitSelect />);
+    renderWithCommitHistory();
     expect(await screen.findByRole("checkbox")).toHaveAccessibleName("Latest");
   });
 
   it("can be checked and unchecked", async () => {
     const user = userEvent.setup();
-    render(<CommitSelect />);
+    renderWithCommitHistory();
     const latestCheckbox = await screen.findByRole("checkbox");
     expect(latestCheckbox).toBeChecked(); // Initially checked
     await user.click(latestCheckbox);
@@ -77,7 +85,7 @@ describe("latest checkbox", () => {
 
   it("gets unchecked when value changes", async () => {
     const user = userEvent.setup();
-    render(<CommitSelect />);
+    renderWithCommitHistory();
     const commitSelectBox = await screen.findByRole("combobox");
     await user.type(commitSelectBox, "initial{Enter}");
     expect(await screen.findByRole("checkbox")).not.toBeChecked(); // Unchecked
@@ -87,7 +95,7 @@ describe("latest checkbox", () => {
 describe("commit list", () => {
   it("opens and closes when commit select box is clicked and clicked off of", async () => {
     const user = userEvent.setup();
-    render(<CommitSelect />);
+    renderWithCommitHistory();
     const commitSelectBox = await screen.findByRole("combobox");
     expect(screen.queryByRole("listbox")).not.toBeInTheDocument(); // Initially closed
     await user.click(commitSelectBox);
@@ -98,7 +106,7 @@ describe("commit list", () => {
 
   it("opens when typing and closes when commit is selected", async () => {
     const user = userEvent.setup();
-    render(<CommitSelect />);
+    renderWithCommitHistory();
     const commitSelectBox = await screen.findByRole("combobox");
     expect(screen.queryByRole("listbox")).not.toBeInTheDocument(); // Initially closed
     await user.type(commitSelectBox, "initial");
@@ -109,7 +117,7 @@ describe("commit list", () => {
 
   it("contains commit ids, messages, and dates", async () => {
     const user = userEvent.setup();
-    render(<CommitSelect />);
+    renderWithCommitHistory();
     await user.click(await screen.findByRole("combobox"));
     const commitList = screen.getByRole("listbox");
     expect(within(commitList).getByText("1: Initial commit")).toBeInTheDocument();
@@ -122,7 +130,7 @@ describe("commit list", () => {
 
   it("filters commits when typing", async () => {
     const user = userEvent.setup();
-    render(<CommitSelect />);
+    renderWithCommitHistory();
     const commitSelectBox = await screen.findByRole("combobox");
     await user.type(commitSelectBox, "commit");
     const listbox = screen.getByRole("listbox");
