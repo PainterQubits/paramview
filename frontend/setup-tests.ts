@@ -4,6 +4,7 @@ import "@testing-library/jest-dom";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const response = (data: any) => new Response(JSON.stringify(data));
 
+// Mock window.fetch
 window.fetch = jest.fn(async (input) => {
   switch (input) {
     case "error":

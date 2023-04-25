@@ -1,5 +1,6 @@
-import userEvent from "@testing-library/user-event";
 import { render, screen, within } from "test-utils";
+import { waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { commitHistoryAtom } from "@/atoms/api";
 import CommitSelect from "./CommitSelect";
 
@@ -33,7 +34,7 @@ describe("commit select box", () => {
     renderWithCommitHistory();
     const commitSelectBox = await screen.findByRole("combobox");
     await user.type(commitSelectBox, "initial{Enter}");
-    expect(commitSelectBox).toHaveValue("1: Initial commit");
+    await waitFor(() => expect(commitSelectBox).toHaveValue("1: Initial commit"));
     expect(screen.getByDate("2023-01-01T00:00:00.000Z")).toBeInTheDocument();
   });
 
@@ -44,7 +45,7 @@ describe("commit select box", () => {
     const latestCheckbox = await screen.findByRole("checkbox");
     await user.type(commitSelectBox, "initial{Enter}");
     await user.click(latestCheckbox);
-    expect(commitSelectBox).toHaveValue("3: Latest commit");
+    await waitFor(() => expect(commitSelectBox).toHaveValue("3: Latest commit"));
     expect(screen.getByDate("2023-01-03T00:00:00.000Z")).toBeInTheDocument();
   });
 
@@ -78,9 +79,9 @@ describe("latest checkbox", () => {
     const latestCheckbox = await screen.findByRole("checkbox");
     expect(latestCheckbox).toBeChecked(); // Initially checked
     await user.click(latestCheckbox);
-    expect(latestCheckbox).not.toBeChecked(); // Unchecked
+    await waitFor(() => expect(latestCheckbox).not.toBeChecked()); // Unchecked
     await user.click(latestCheckbox);
-    expect(latestCheckbox).toBeChecked(); // Checked again
+    await waitFor(() => expect(latestCheckbox).toBeChecked()); // Checked again
   });
 
   it("gets unchecked when value changes", async () => {
@@ -88,7 +89,7 @@ describe("latest checkbox", () => {
     renderWithCommitHistory();
     const commitSelectBox = await screen.findByRole("combobox");
     await user.type(commitSelectBox, "initial{Enter}");
-    expect(await screen.findByRole("checkbox")).not.toBeChecked(); // Unchecked
+    await waitFor(() => expect(screen.getByRole("checkbox")).not.toBeChecked());
   });
 });
 
