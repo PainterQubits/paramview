@@ -3,8 +3,6 @@ import { startTransition, useEffect } from "react";
 import { useSetAtom } from "jotai";
 import { commitHistoryAtom } from "@/atoms/api";
 
-const socket = io();
-
 /**
  * Set up SocketIO. This component does not render anything, but the SocketIO event
  * handlers need to be within a component in order to update atoms.
@@ -13,6 +11,8 @@ export default function SocketIO() {
   const updateCommitHistory = useSetAtom(commitHistoryAtom);
 
   useEffect(() => {
+    const socket = io();
+
     /** Actions to perform when the database may have been updated. */
     const databaseUpdate = () => startTransition(updateCommitHistory);
 
@@ -24,8 +24,7 @@ export default function SocketIO() {
     socket.on("database_update", databaseUpdate);
 
     return () => {
-      // Remove listeners when this component is unmounted.
-      socket.removeAllListeners();
+      socket.disconnect();
     };
   }, [updateCommitHistory]);
 
