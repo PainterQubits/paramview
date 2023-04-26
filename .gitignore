@@ -23,3 +23,7 @@ node_modules/
 # Data files
 *.db
 *.db-journal
+
+# Cypress
+**/cypress/videos/
+**/cypress/screenshots/
