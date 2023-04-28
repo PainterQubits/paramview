@@ -37,8 +37,8 @@ jobs:
           path: frontend/.yarn/cache
           key: yarn-${{ runner.os }}-${{ hashFiles('frontend/yarn.lock') }}
 
-      - name: Enable Corepack for Yarn
-        run: corepack enable
+      - name: Install frontend dependencies
+        run: corepack enable && yarn
 
       - name: Build package
         run: make

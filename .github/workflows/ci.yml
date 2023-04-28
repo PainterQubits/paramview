@@ -28,7 +28,7 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: poetry
 
-      - name: Install dependencies
+      - name: Install backend dependencies
         run: poetry install
 
       - name: Check Formatting (Black)
@@ -74,11 +74,59 @@ jobs:
           path: frontend/.yarn/cache
           key: yarn-${{ runner.os }}-${{ hashFiles('frontend/yarn.lock') }}
 
-      - name: Install dependencies
+      - name: Install frontend dependencies
         run: corepack enable && yarn
 
       - name: Lint
         run: yarn lint
 
-      - name: Test
-        run: yarn test
+      - name: Unit tests
+        run: yarn test:unit
+
+  # e2e:
+  #   needs: [backend, frontend]
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v3
+
+  #     - name: Install Poetry
+  #       run: pipx install poetry==${{ env.POETRY_VERSION }}
+
+  #     - name: Set up Python with Poetry cache
+  #       uses: actions/setup-python@v4
+  #       with:
+  #         python-version: ${{ env.PYTHON_VERSION }}
+  #         cache: poetry
+
+  #     - name: Install backend dependencies
+  #       run: poetry install
+
+  #     - name: Set up Node
+  #         uses: actions/setup-node@v3
+  #         with:
+  #           node-version-file: frontend/.nvmrc
+
+  #     - name: Yarn cache
+  #       uses: actions/cache@v3
+  #       with:
+  #         path: frontend/.yarn/cache
+  #         key: yarn-${{ runner.os }}-${{ hashFiles('frontend/yarn.lock') }}
+
+  #     - name: Install frontend dependencies
+  #       run: corepack enable && yarn
+
+  #     - name: Build frontend
+  #       working-directory: frontend
+  #       run: yarn build
+
+  #     - name: Start backend server
+  #       run: poetry run python frontend/cypress/backend.py start &
+
+  #     - name: Start frontend server
+  #       working-directory: frontend
+  #       run: yarn preview &
+
+  #     - name: E2E tests
+  #       working-directory: frontend
+  #       run: yarn test:e2e

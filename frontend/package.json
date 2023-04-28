@@ -8,8 +8,8 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "lint": "tsc && eslint . && prettier --check .",
-    "test": "jest",
-    "test:e2e": "cypress run"
+    "test:unit": "jest",
+    "test:e2e": "wait-on http://127.0.0.1:5050 -t 1000 && wait-on http://localhost:4173 -t 1000 && cypress run"
   },
   "dependencies": {
     "@emotion/react": "^11.10.6",
@@ -37,6 +37,7 @@
     "@types/react-dom": "^18.0.11",
     "@types/react-window": "^1.8.5",
     "@types/testing-library__jest-dom": "^5.14.5",
+    "@types/wait-on": "^5.3.1",
     "@typescript-eslint/eslint-plugin": "^5.58.0",
     "@typescript-eslint/parser": "^5.58.0",
     "@vitejs/plugin-react-swc": "^3.3.0",
@@ -58,6 +59,7 @@
     "ts-node": "^10.9.1",
     "typescript": "^5.0.4",
     "vite": "^4.2.1",
+    "wait-on": "^7.0.1",
     "whatwg-fetch": "^3.6.2"
   },
   "packageManager": "yarn@3.5.0"

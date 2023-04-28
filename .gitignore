@@ -20,10 +20,10 @@ node_modules/
 .pnp.*
 .yarnrc.yml
 
-# Data files
-*.db
-*.db-journal
-
 # Cypress
 **/cypress/videos/
 **/cypress/screenshots/
+
+# Data files
+*.db
+*.db-journal
