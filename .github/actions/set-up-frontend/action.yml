@@ -19,6 +19,7 @@ runs:
     - name: Get Cypress version
       id: cypress-version
       shell: bash
+      working-directory: frontend
       run: echo "VERSION=$(yarn info cypress --json | jq ".children.Version" -r)" >> $GITHUB_OUTPUT
 
     - name: Cypress cache
@@ -31,6 +32,7 @@ runs:
 
     - name: Prune Cypress cache
       shell: bash
+      working-directory: frontend
       run: yarn cypress cache prune
 
     - name: Install frontend dependencies
