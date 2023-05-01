@@ -10,7 +10,7 @@ include = ["paramview/static/**/*"]
 
 [tool.poetry.dependencies]
 python = "^3.10"
-flask = "^2.2.3"
+flask = "^2.3.2"
 flask-socketio = "^5.3.3"
 eventlet = "^0.33.3"
 watchdog = "^3.0.0"
@@ -21,7 +21,7 @@ sqlalchemy = "^2.0.11"
 pytest = "^7.3.1"
 mypy = "^1.2.0"
 flake8 = "^6.0.0"
-pylint = "^2.17.2"
+pylint = "^2.17.3"
 black = "^23.3.0"
 
 [tool.poetry.scripts]
