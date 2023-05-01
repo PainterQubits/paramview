@@ -84,11 +84,8 @@ jobs:
       - name: Build frontend
         run: yarn build
 
-      - name: Start backend server
-        run: poetry run python cypress/backend.py start &
-
-      - name: Start frontend server
-        run: yarn preview &
-
-      - name: E2E tests
-        run: yarn test:e2e
+      - name: Start servers and E2E tests
+        run: |
+          poetry run python cypress/backend.py start &
+          yarn preview &
+          yarn test:e2e
