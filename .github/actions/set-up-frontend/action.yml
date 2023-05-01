@@ -16,6 +16,11 @@ runs:
         restore-keys: |
           yarn-${{ runner.os }}-
 
+    - name: Enable corepack
+      shell: bash
+      working-directory: frontend
+      run: corepack enable
+
     - name: Get Cypress version
       id: cypress-version
       shell: bash
