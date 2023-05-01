@@ -4,12 +4,13 @@
   "version": "0.1.1",
   "type": "module",
   "scripts": {
+    "backend": "poetry run python cypress/backend.py",
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
     "lint": "tsc && eslint . && prettier --check .",
     "test:unit": "jest",
-    "test:e2e": "wait-on http://127.0.0.1:5050 -t 1000 --verbose && wait-on http://localhost:4173 -t 1000 && cypress run"
+    "test:e2e": "wait-on http://127.0.0.1:5050 -t 1000 && wait-on http://localhost:4173 -t 1000 && cypress run"
   },
   "dependencies": {
     "@emotion/react": "^11.10.6",

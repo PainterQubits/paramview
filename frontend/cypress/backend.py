@@ -44,32 +44,27 @@ def commit(message: str) -> None:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    subparsers = parser.add_subparsers(title="commands")
-
+    subparsers = parser.add_subparsers(title="commands", required=True)
     parser_start = subparsers.add_parser(
         "start",
         help="reset the database and start the backend server",
     )
     parser_start.set_defaults(func=lambda args: start())
-
     parser_reset = subparsers.add_parser(
         "reset",
         help="clear the database and make some initial commits",
     )
     parser_reset.set_defaults(func=lambda args: reset())
-
     parser_clear = subparsers.add_parser(
         "clear",
         help="clear the database",
     )
     parser_clear.set_defaults(func=lambda args: clear())
-
     parser_commit = subparsers.add_parser(
         "commit",
         help="make a commit with the given message",
     )
     parser_commit.add_argument("message", metavar="<message>", help="commit message")
     parser_commit.set_defaults(func=lambda args: commit(args.message))
-
     args = parser.parse_args()
     args.func(args)
