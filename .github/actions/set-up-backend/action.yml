@@ -4,6 +4,7 @@ runs:
   using: composite
   steps:
     - name: Install Poetry
+      shell: bash
       run: pipx install poetry==1.4.2
 
     - name: Set up Python with Poetry cache
@@ -13,4 +14,5 @@ runs:
         cache: poetry
 
     - name: Install backend dependencies
+      shell: bash
       run: poetry install
