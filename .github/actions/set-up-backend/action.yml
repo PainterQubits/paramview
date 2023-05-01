@@ -2,6 +2,7 @@ name: Set up backend
 
 runs:
   using: composite
+
   steps:
     - name: Install Poetry
       shell: bash
