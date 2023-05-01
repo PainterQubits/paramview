@@ -1,0 +1,22 @@
+name: Set up frontend
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Node
+      uses: actions/setup-node@v3
+      with:
+        node-version-file: frontend/.nvmrc
+
+    - name: Yarn cache
+      uses: actions/cache@v3
+      with:
+        path: frontend/.yarn/cache
+        key: yarn-${{ runner.os }}-${{ hashFiles('frontend/yarn.lock') }}
+        restore-keys: |
+          yarn-${{ runner.os }}-
+
+    - name: Install frontend dependencies
+      shell: bash
+      working-directory: frontend
+      run: corepack enable && yarn

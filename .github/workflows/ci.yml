@@ -8,10 +8,6 @@ on:
     branches:
       - main
 
-env:
-  PYTHON_VERSION: "3.10"
-  POETRY_VERSION: "1.4.2"
-
 jobs:
   backend:
     runs-on: ubuntu-latest
@@ -19,17 +15,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Install Poetry
-        run: pipx install poetry==${{ env.POETRY_VERSION }}
-
-      - name: Set up Python with Poetry cache
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-          cache: poetry
-
-      - name: Install backend dependencies
-        run: poetry install
+      - name: Set up backend
+        uses: ./.github/actions/set-up-backend
 
       - name: Check Formatting (Black)
         run: poetry run black paramview tests --check
@@ -44,9 +31,9 @@ jobs:
         uses: actions/cache@v3
         with:
           path: .mypy_cache
-          key: mypy-${{ runner.os }}-python-${{ env.PYTHON_VERSION }}-${{ github.sha }}
+          key: mypy-${{ runner.os }}-${{ github.sha }}
           restore-keys: |
-            mypy-${{ runner.os }}-python-${{ env.PYTHON_VERSION }}-
+            mypy-${{ runner.os }}-
 
       - name: Type Check (Mypy)
         run: poetry run mypy paramview tests
@@ -63,19 +50,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Set up Node
-        uses: actions/setup-node@v3
-        with:
-          node-version-file: frontend/.nvmrc
-
-      - name: Yarn cache
-        uses: actions/cache@v3
-        with:
-          path: frontend/.yarn/cache
-          key: yarn-${{ runner.os }}-${{ hashFiles('frontend/yarn.lock') }}
-
-      - name: Install frontend dependencies
-        run: corepack enable && yarn
+      - name: Set up frontend
+        uses: ./.github/actions/set-up-frontend
 
       - name: Lint
         run: yarn lint
@@ -90,31 +66,14 @@ jobs:
   #     - name: Checkout
   #       uses: actions/checkout@v3
 
-  #     - name: Install Poetry
-  #       run: pipx install poetry==${{ env.POETRY_VERSION }}
-
-  #     - name: Set up Python with Poetry cache
-  #       uses: actions/setup-python@v4
+  #     - name: Set up backend
+  #       uses: ./.github/actions/set-up-backend
   #       with:
   #         python-version: ${{ env.PYTHON_VERSION }}
-  #         cache: poetry
+  #         poetry-version: ${{ env.POETRY_VERSION }}
 
-  #     - name: Install backend dependencies
-  #       run: poetry install
-
-  #     - name: Set up Node
-  #         uses: actions/setup-node@v3
-  #         with:
-  #           node-version-file: frontend/.nvmrc
-
-  #     - name: Yarn cache
-  #       uses: actions/cache@v3
-  #       with:
-  #         path: frontend/.yarn/cache
-  #         key: yarn-${{ runner.os }}-${{ hashFiles('frontend/yarn.lock') }}
-
-  #     - name: Install frontend dependencies
-  #       run: corepack enable && yarn
+  #     - name: Set up frontend
+  #       uses: ./.github/actions/set-up-frontend
 
   #     - name: Build frontend
   #       working-directory: frontend
