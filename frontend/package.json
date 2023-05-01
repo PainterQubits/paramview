@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "lint": "tsc && eslint . && prettier --check .",
     "test:unit": "jest",
-    "test:e2e": "wait-on http://127.0.0.1:5050 -t 20000 --verbose && wait-on http://localhost:4173 -t 20000 && cypress run"
+    "test:e2e": "wait-on http://127.0.0.1:5050 -t 1000 --verbose && wait-on http://localhost:4173 -t 1000 && cypress run"
   },
   "dependencies": {
     "@emotion/react": "^11.10.6",

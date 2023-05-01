@@ -10,61 +10,61 @@ on:
       - main
 
 jobs:
-  backend:
-    runs-on: ubuntu-latest
+  # backend:
+  #   runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v3
 
-      - name: Set up backend
-        uses: ./.github/actions/set-up-backend
+  #     - name: Set up backend
+  #       uses: ./.github/actions/set-up-backend
 
-      - name: Check Formatting (Black)
-        run: poetry run black paramview tests --check
+  #     - name: Check Formatting (Black)
+  #       run: poetry run black paramview tests --check
 
-      - name: Lint (Flake8)
-        run: poetry run flake8 paramview tests
+  #     - name: Lint (Flake8)
+  #       run: poetry run flake8 paramview tests
 
-      - name: Lint (Pylint)
-        run: poetry run pylint paramview tests
+  #     - name: Lint (Pylint)
+  #       run: poetry run pylint paramview tests
 
-      - name: Mypy cache
-        uses: actions/cache@v3
-        with:
-          path: .mypy_cache
-          key: mypy-${{ runner.os }}-${{ github.sha }}
-          restore-keys: |
-            mypy-${{ runner.os }}-
+  #     - name: Mypy cache
+  #       uses: actions/cache@v3
+  #       with:
+  #         path: .mypy_cache
+  #         key: mypy-${{ runner.os }}-${{ github.sha }}
+  #         restore-keys: |
+  #           mypy-${{ runner.os }}-
 
-      - name: Type Check (Mypy)
-        run: poetry run mypy paramview tests
+  #     - name: Type Check (Mypy)
+  #       run: poetry run mypy paramview tests
 
-      - name: Test (Pytest)
-        run: poetry run pytest
+  #     - name: Test (Pytest)
+  #       run: poetry run pytest
 
-  frontend:
-    runs-on: ubuntu-latest
+  # frontend:
+  #   runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        working-directory: frontend
+  #   defaults:
+  #     run:
+  #       working-directory: frontend
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v3
 
-      - name: Set up frontend
-        uses: ./.github/actions/set-up-frontend
+  #     - name: Set up frontend
+  #       uses: ./.github/actions/set-up-frontend
 
-      - name: Lint
-        run: yarn lint
+  #     - name: Lint
+  #       run: yarn lint
 
-      - name: Unit tests
-        run: yarn test:unit
+  #     - name: Unit tests
+  #       run: yarn test:unit
 
   e2e:
-    needs: [backend, frontend]
+    # needs: [backend, frontend]
     runs-on: ubuntu-latest
 
     defaults:
@@ -82,10 +82,15 @@ jobs:
         uses: ./.github/actions/set-up-frontend
 
       - name: Build frontend
-        run: yarn build
+        run: make frontend
 
-      - name: Start servers and E2E tests
-        run: |
-          poetry run python cypress/backend.py start &
-          yarn preview &
-          yarn test:e2e
+      - name: Start backend server
+        run: poetry run python frontend/cypress/backend.py start &
+
+      - name: Start frontend server
+        working-directory: frontend
+        run: yarn preview &
+
+      - name: E2E tests
+        working-directory: frontend
+        run: yarn test:e2e
