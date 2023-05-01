@@ -66,6 +66,11 @@ jobs:
   e2e:
     needs: [backend, frontend]
     runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: frontend
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -77,16 +82,13 @@ jobs:
         uses: ./.github/actions/set-up-frontend
 
       - name: Build frontend
-        working-directory: frontend
         run: yarn build
 
       - name: Start backend server
-        run: poetry run python frontend/cypress/backend.py start &
+        run: poetry run python cypress/backend.py start &
 
       - name: Start frontend server
-        working-directory: frontend
         run: yarn preview &
 
       - name: E2E tests
-        working-directory: frontend
         run: yarn test:e2e
