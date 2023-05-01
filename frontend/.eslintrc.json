@@ -23,5 +23,21 @@
     "react": {
       "version": "detect"
     }
-  }
+  },
+  "overrides": [
+    {
+      "files": "src/**/*.test.{ts,tsx}",
+      "extends": [
+        "plugin:jest/recommended",
+        "plugin:jest-dom/recommended",
+        "plugin:testing-library/react"
+      ],
+      "plugins": ["jest", "jest-dom", "testing-library"]
+    },
+    {
+      "files": "cypress/**/*.ts",
+      "extends": ["plugin:cypress/recommended"],
+      "plugins": ["cypress"]
+    }
+  ]
 }

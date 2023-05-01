@@ -8,7 +8,7 @@ export async function requestData<T>(url: string) {
     response = await fetch(url);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    throw Error(`${message}${notRunningMessage}`);
+    throw new Error(`${message}${notRunningMessage}`);
   }
 
   const responseText = await response.text();
@@ -21,6 +21,7 @@ export async function requestData<T>(url: string) {
     try {
       const responseData = await JSON.parse(responseText);
       message = responseData.description;
+      if (typeof responseData.description !== "string") throw new Error();
     } catch {
       message = responseText;
     }

@@ -7,7 +7,7 @@ import { getType, getTimestamp, getChildren } from "@/utils/data";
 import { dataAtom } from "@/atoms/api";
 import LeafItemContent from "./LeafItemContent";
 import GroupItemContent from "./GroupItemContent";
-import ParamCollapse from "./CollapseButton";
+import CollapseItem from "./CollapseItem";
 
 const rootListSx = {
   borderBottom: 1,
@@ -45,7 +45,7 @@ function ParamSublist({ items, root = false }: ParamSublistProps) {
           {isLeaf(data) ? (
             <LeafItemContent name={name} value={data} />
           ) : (
-            <ParamCollapse
+            <CollapseItem
               defaultOpen={root}
               itemContent={
                 <GroupItemContent
@@ -56,7 +56,7 @@ function ParamSublist({ items, root = false }: ParamSublistProps) {
               }
             >
               {<ParamSublist items={getChildren(data)} />}
-            </ParamCollapse>
+            </CollapseItem>
           )}
         </ListItem>
       ))}

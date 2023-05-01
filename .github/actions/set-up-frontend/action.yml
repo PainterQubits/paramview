@@ -1,0 +1,47 @@
+name: Set up frontend
+
+runs:
+  using: composite
+
+  steps:
+    - name: Set up Node
+      uses: actions/setup-node@v3
+      with:
+        node-version-file: frontend/.nvmrc
+
+    - name: Yarn cache
+      uses: actions/cache@v3
+      with:
+        path: frontend/.yarn/cache
+        key: yarn-${{ runner.os }}-${{ hashFiles('frontend/yarn.lock') }}
+        restore-keys: |
+          yarn-${{ runner.os }}-
+
+    - name: Enable corepack
+      shell: bash
+      working-directory: frontend
+      run: corepack enable
+
+    - name: Get Cypress version
+      id: cypress-version
+      shell: bash
+      working-directory: frontend
+      run: echo VERSION=$(yarn info cypress --json | jq ".children.Version" -r) >> $GITHUB_OUTPUT
+
+    - name: Cypress cache
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/Cypress
+        key: cypress-${{ runner.os }}-${{ steps.cypress-version.outputs.VERSION }}
+        restore-keys: |
+          cypress-${{ runner.os }}-
+
+    - name: Install frontend dependencies
+      shell: bash
+      working-directory: frontend
+      run: yarn
+
+    - name: Prune Cypress cache
+      shell: bash
+      working-directory: frontend
+      run: yarn cypress cache prune

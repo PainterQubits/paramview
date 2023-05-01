@@ -20,6 +20,13 @@ node_modules/
 .pnp.*
 .yarnrc.yml
 
+# Jest
+coverage/
+
+# Cypress
+**/cypress/videos/
+**/cypress/screenshots/
+
 # Data files
 *.db
 *.db-journal

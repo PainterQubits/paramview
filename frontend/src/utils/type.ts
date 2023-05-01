@@ -38,7 +38,7 @@ export function isList(data: Data): data is List {
 
 /** Whether the given Data is a Dict. */
 export function isDict(data: Data): data is Dict {
-  return data instanceof Object && !("__type" in data);
+  return data instanceof Object && !("__type" in data) && !isList(data);
 }
 
 /** Whether the given Data is a ParamList. */
@@ -49,11 +49,6 @@ export function isParamList(data: Data): data is ParamList {
 /** Whether the given Data is a ParamDict. */
 export function isParamDict(data: Data): data is ParamDict {
   return checkType(data, "ParamDict");
-}
-
-/** Whether the given Data is a Param. */
-export function isParam(data: Data): data is Param {
-  return data instanceof Object && "__last_updated" in data;
 }
 
 /** Whether the given Data is a Struct. */
@@ -67,4 +62,9 @@ export function isStruct(data: Data): data is Struct {
     data.__type !== "ParamList" &&
     data.__type !== "ParamDict"
   );
+}
+
+/** Whether the given Data is a Param. */
+export function isParam(data: Data): data is Param {
+  return data instanceof Object && "__last_updated" in data;
 }

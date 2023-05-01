@@ -1,7 +1,7 @@
 import { ErrorBoundary } from "react-error-boundary";
 import { Box } from "@mui/material";
 import { Header, ParamSection } from "@/components";
-import Error from "./Error";
+import ErrorAlert from "./ErrorAlert";
 import SocketIO from "./SocketIO";
 
 const appSx = {
@@ -20,7 +20,10 @@ const contentSx = {
 /** Root component for the entire app. */
 export default function App() {
   return (
-    <ErrorBoundary FallbackComponent={Error}>
+    <ErrorBoundary
+      FallbackComponent={ErrorAlert}
+      onReset={() => window.location.reload()}
+    >
       <SocketIO />
       <Box sx={appSx}>
         <Header />

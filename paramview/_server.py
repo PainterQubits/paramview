@@ -31,18 +31,23 @@ def _available_port(host: str, default_port: int) -> int:
 
 
 def start_server(
-    db_path: str, host: str = "127.0.0.1", default_port: int = 5050
+    db_path: str,
+    host: str = "127.0.0.1",
+    default_port: int = 5050,
+    auto_open: bool = True,
 ) -> None:
     """
     Start the server locally on the given port using SocketIO, and open in a new browser
-    window. If the given port is in use, find another available port.
+    window if auto_open is True. If the given port is in use, find another available
+    port.
     """
     port = _available_port(host, default_port)
     app, socketio = create_app(db_path)
     stop_watch_db = watch_db(db_path, socketio)
     try:
         print(f"Serving on http://{host}:{port}", file=sys.stderr)
-        webbrowser.open(f"http://{host}:{port}", new=2)
+        if auto_open:
+            webbrowser.open(f"http://{host}:{port}", new=2)
         socketio.run(app, host, port)
     finally:
         stop_watch_db()

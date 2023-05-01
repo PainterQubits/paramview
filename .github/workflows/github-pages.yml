@@ -3,42 +3,21 @@ name: Deploy to GitHub Pages
 on: workflow_dispatch
 
 env:
-  PYTHON_VERSION: "3.10"
-  POETRY_VERSION: "1.4.2"
   PARAMVIEW_VERSION: "0.1.1"
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Install Poetry
-        run: pipx install poetry==$POETRY_VERSION
+      - name: Set up backend
+        uses: ./.github/actions/set-up-backend
 
-      - name: Set up Python with Poetry cache
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-          cache: poetry
-
-      - name: Install backend dependencies
-        run: poetry install
-
-      - name: Set up Node
-        uses: actions/setup-node@v3
-        with:
-          node-version-file: frontend/.nvmrc
-
-      - name: Yarn cache
-        uses: actions/cache@v3
-        with:
-          path: frontend/.yarn/cache
-          key: yarn-${{ runner.os }}-${{ hashFiles('frontend/yarn.lock') }}
-
-      - name: Enable Corepack for Yarn
-        run: corepack enable
+      - name: Set up frontend
+        uses: ./.github/actions/set-up-frontend
 
       - name: Build package
         run: make
@@ -75,13 +54,17 @@ jobs:
 
   deploy:
     needs: build
+
     permissions:
       pages: write
       id-token: write
+
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
+
     runs-on: ubuntu-latest
+
     steps:
       - name: Deploy to GitHub Pages
         id: deployment

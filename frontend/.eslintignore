@@ -1,6 +1,9 @@
+# Build
+dist/
+
 # Yarn
 .yarn/
 .pnp.*
 
-# Build
-dist/
+# Jest
+coverage/
