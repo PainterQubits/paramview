@@ -1,7 +1,10 @@
+# Build
+dist/
+
 # Yarn
 .yarn/
 .pnp.*
 .yarnrc.yml
 
-# Build
-dist/
+# Jest
+coverage/
