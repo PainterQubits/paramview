@@ -20,10 +20,7 @@ const contentSx = {
 /** Root component for the entire app. */
 export default function App() {
   return (
-    <ErrorBoundary
-      FallbackComponent={ErrorAlert}
-      onReset={() => window.location.reload()}
-    >
+    <ErrorBoundary FallbackComponent={ErrorAlert}>
       <SocketIO />
       <Box sx={appSx}>
         <Header />

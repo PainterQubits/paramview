@@ -31,7 +31,7 @@ function DatabaseName() {
   const [databaseName] = useAtom(databaseNameAtom);
 
   return (
-    <Typography variant="h1" sx={databaseNameSx}>
+    <Typography data-testid="database-name" variant="h1" sx={databaseNameSx}>
       {databaseName}
     </Typography>
   );
@@ -43,7 +43,7 @@ export default function Header() {
     <AppBar position="static" elevation={0}>
       <ThemeProvider theme={theme("dark")}>
         <Box sx={toolbarSx}>
-          <Suspense fallback={<Box />}>
+          <Suspense fallback={<Box data-testid="database-name-loading" />}>
             <DatabaseName />
           </Suspense>
           <Box sx={commitSelectContainerSx}>
