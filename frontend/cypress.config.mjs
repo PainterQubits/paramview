@@ -12,8 +12,8 @@ export default defineConfig({
     baseUrl: "http://localhost:4173",
     setupNodeEvents(on) {
       on("task", {
-        resetDatabase: () => exec("yarn backend reset"),
-        clearDatabase: () => exec("yarn backend clear"),
+        resetDatabase: () => exec("python cypress/backend.py reset"),
+        clearDatabase: () => exec("python cypress/backend.py clear"),
       });
     },
   },
