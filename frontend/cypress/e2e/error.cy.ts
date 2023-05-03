@@ -1,7 +1,7 @@
 describe("error has occured", () => {
   before(() => {
     // Clearing results in an empty database, which causes an error in the UI.
-    cy.task("clearDatabase");
+    cy.task("db:clear");
   });
 
   beforeEach(() => {

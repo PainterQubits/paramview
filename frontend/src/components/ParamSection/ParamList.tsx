@@ -45,7 +45,13 @@ function ParamSublist({ items, root = false }: ParamSublistProps) {
       sx={root ? rootListSx : sublistSx}
     >
       {items.map(([name, data]) => (
-        <ListItem key={name} sx={listItemSx} disableGutters disablePadding>
+        <ListItem
+          data-testid={`parameter-list-item-${name}`}
+          key={name}
+          sx={listItemSx}
+          disableGutters
+          disablePadding
+        >
           {isLeaf(data) ? (
             <LeafItemContent name={name} value={data} />
           ) : (

@@ -3,6 +3,7 @@
 from typing import Any
 import os
 import argparse
+from datetime import datetime, timedelta
 from sqlalchemy import delete
 from freezegun import freeze_time
 from paramdb import ParamDB, ParamDict
@@ -24,15 +25,17 @@ def start() -> None:
     start_server(DB_PATH, auto_open=False)
 
 
-def reset() -> None:
+def reset(long: bool = False) -> None:
     """Clear the database and make some initial commits."""
+    num_commits = 100 if long else 3
     clear()
-    with freeze_time("2023-01-01"):
-        db.commit("Initial commit", ParamDict(a=1, b=2, c=3))
-    with freeze_time("2023-01-02"):
-        db.commit("Second commit", ParamDict(a=3, b=2, c=3))
-    with freeze_time("2023-01-03"):
-        db.commit("Third commit", ParamDict(a=1.2345, b=2, c=3))
+    date = datetime(2023, 1, 1)
+    with freeze_time(date):
+        db.commit("Initial commit", ParamDict(commit_id=1, b=2, c=3))
+    for commit_id in range(2, num_commits + 1):
+        date += timedelta(days=1)
+        with freeze_time(date):
+            db.commit(f"Commit {commit_id}", ParamDict(commit_id=commit_id, b=2, c=3))
 
 
 def clear() -> None:
@@ -41,9 +44,12 @@ def clear() -> None:
         session.execute(delete(_Snapshot))  # Clear all commits
 
 
-def commit(message: str) -> None:
+def commit() -> None:
     """Make a commit with the given message."""
-    db.commit(message, ParamDict(a=1, b=2, c=3))
+    num_commits = db.num_commits
+    commit_id = num_commits + 1
+    with freeze_time(datetime(2023, 1, 1) + timedelta(days=num_commits)):
+        db.commit(f"Commit {commit_id}", ParamDict(commit_id=commit_id, b=2, c=3))
 
 
 if __name__ == "__main__":
@@ -58,7 +64,10 @@ if __name__ == "__main__":
         "reset",
         help="clear the database and make some initial commits",
     )
-    parser_reset.set_defaults(func=lambda args: reset())
+    parser_reset.add_argument(
+        "--long", action="store_true", help="create a long commit history"
+    )
+    parser_reset.set_defaults(func=lambda args: reset(args.long))
     parser_clear = subparsers.add_parser(
         "clear",
         help="clear the database",
@@ -68,7 +77,6 @@ if __name__ == "__main__":
         "commit",
         help="make a commit with the given message",
     )
-    parser_commit.add_argument("message", metavar="<message>", help="commit message")
-    parser_commit.set_defaults(func=lambda args: commit(args.message))
+    parser_commit.set_defaults(func=lambda args: commit())
     args = parser.parse_args()
     args.func(args)

@@ -27,12 +27,8 @@
   "overrides": [
     {
       "files": "src/**/*.test.{ts,tsx}",
-      "extends": [
-        "plugin:jest/recommended",
-        "plugin:jest-dom/recommended",
-        "plugin:testing-library/react"
-      ],
-      "plugins": ["jest", "jest-dom", "testing-library"]
+      "extends": ["plugin:jest/recommended"],
+      "plugins": ["jest"]
     },
     {
       "files": "cypress/**/*.ts",

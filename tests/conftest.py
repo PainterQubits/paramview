@@ -26,8 +26,11 @@ def fixture_db_path(db_name: str, tmp_path: Path) -> str:
     db_path = str(tmp_path / db_name)
     db_path_init = f"{db_path}-init"
     db = ParamDB[Any](db_path_init)
-    db.commit("Initial commit", ParamDict(a=1, b=2, c=3))
-    db.commit("Increment all by 3", ParamDict(a=4, b=5, c=6))
+
+    # Keys b, a, c are purposely unsorted to ensure that Flask does not sort them in
+    # JSON responses
+    db.commit("Initial commit", ParamDict(b=1, a=2, c=3))
+    db.commit("Increment all by 3", ParamDict(b=4, a=5, c=6))
     db.commit("Convert to list", ParamList([4, 5, 6]))
     db.dispose()  # Explicitly close DB to avoid Windows permission error
     os.rename(db_path_init, db_path)

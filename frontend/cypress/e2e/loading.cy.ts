@@ -1,5 +1,5 @@
 before(() => {
-  cy.task("resetDatabase");
+  cy.task("db:reset");
 });
 
 describe("page is loading", () => {

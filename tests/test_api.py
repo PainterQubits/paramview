@@ -40,4 +40,9 @@ def test_data(db: ParamDB[Any], client: FlaskClient) -> None:
         response = client.get(f"/api/data/{entry.id}")
         assert response.status_code == 200  # Success
         assert response.mimetype == "application/json"
-        assert response.json == db.load(entry.id, load_classes=False)
+        response_data = response.json
+        loaded_data = db.load(entry.id, load_classes=False)
+        assert response_data == loaded_data
+        if isinstance(response_data, dict):
+            # Check that key order is the same (i.e. Flask does not sort the keys)
+            assert list(response_data) == list(loaded_data)

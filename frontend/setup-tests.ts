@@ -1,5 +1,4 @@
-import "whatwg-fetch"; // Polyfill Fetch API for JSDOM
-import "@testing-library/jest-dom";
+import "whatwg-fetch"; // Polyfill Fetch API
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const response = (data: any) => new Response(JSON.stringify(data));
