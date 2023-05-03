@@ -15,8 +15,12 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
-    "paths": { "@/*": ["./src/*"], "test-utils": ["./test-utils"] }
+    "paths": { "@/*": ["./src/*"], "test-utils": ["./test-utils"] },
+    "outDir": "./ts-cache"
   },
-  "include": ["src", "setup-tests.ts", "test-utils.tsx"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "include": ["src", "jest.config.ts", "setup-tests.ts", "test-utils.tsx"],
+  "references": [
+    { "path": "./tsconfig.node.json" },
+    { "path": "./cypress/tsconfig.json" }
+  ]
 }
