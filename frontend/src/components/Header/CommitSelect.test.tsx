@@ -12,23 +12,6 @@ const renderWithCommitHistory = () =>
   render(<CommitSelect />, { initialValues: [[commitHistoryAtom, undefined]] });
 
 describe("commit select box", () => {
-  it("loads", async () => {
-    renderWithCommitHistory();
-    expect(screen.queryByRole("combobox")).not.toBeInTheDocument(); // Loading
-    expect(await screen.findByRole("combobox")).toBeInTheDocument(); // Loaded
-  });
-
-  it("is labeled", async () => {
-    renderWithCommitHistory();
-    expect(await screen.findByRole("combobox")).toHaveAccessibleName("Commit");
-  });
-
-  it("initially contains the latest commit", async () => {
-    renderWithCommitHistory();
-    expect(await screen.findByRole("combobox")).toHaveValue("3: Latest commit");
-    expect(screen.getByDate("2023-01-03T00:00:00.000Z")).toBeInTheDocument();
-  });
-
   it("can search for another commit by message and switch to it", async () => {
     const user = userEvent.setup();
     renderWithCommitHistory();

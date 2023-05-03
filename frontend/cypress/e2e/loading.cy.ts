@@ -26,15 +26,25 @@ describe("page is loading", () => {
 
 describe("page is loaded", () => {
   beforeEach(() => {
+    cy.intercept("/api/database-name").as("databaseNameIntercept");
     cy.visit("/");
+    cy.wait("@databaseNameIntercept").then(({ response: { body } }) => {
+      cy.wrap(body).as("databaseName");
+    });
   });
 
   it("sets page title to database name", () => {
-    cy.title().should("eq", "param.db");
+    cy.get("@databaseName").then((databaseNameAlias: unknown) => {
+      const databaseName = databaseNameAlias as string;
+      cy.title().should("eq", databaseName);
+    });
   });
 
   it("displays loaded elements", () => {
-    cy.getByTestId("database-name").contains("param.db");
+    cy.get("@databaseName").then((databaseNameAlias: unknown) => {
+      const databaseName = databaseNameAlias as string;
+      cy.getByTestId("database-name").contains(databaseName);
+    });
     cy.getByTestId("commit-select-combobox").find("label").contains("Commit");
     cy.getByTestId("latest-checkbox").contains("Latest");
     cy.getByTestId("parameter-list").contains("root");

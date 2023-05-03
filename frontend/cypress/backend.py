@@ -4,6 +4,7 @@ from typing import Any
 import os
 import argparse
 from sqlalchemy import delete
+from freezegun import freeze_time
 from paramdb import ParamDB, ParamDict
 from paramdb._database import _Snapshot
 
@@ -26,9 +27,12 @@ def start() -> None:
 def reset() -> None:
     """Clear the database and make some initial commits."""
     clear()
-    db.commit("Initial commit", ParamDict(a=1, b=2, c=3))
-    db.commit("Second commit", ParamDict(a=3, b=2, c=3))
-    db.commit("Third commit", ParamDict(a=1.2345, b=2, c=3))
+    with freeze_time("2023-01-01"):
+        db.commit("Initial commit", ParamDict(a=1, b=2, c=3))
+    with freeze_time("2023-01-02"):
+        db.commit("Second commit", ParamDict(a=3, b=2, c=3))
+    with freeze_time("2023-01-03"):
+        db.commit("Third commit", ParamDict(a=1.2345, b=2, c=3))
 
 
 def clear() -> None:

@@ -55,7 +55,9 @@ const CommitSelectOuterElement = forwardRef<HTMLDivElement>(
 /** Custom innerElementType passed to React window. */
 const CommitSelectInnerElement = forwardRef<HTMLUListElement>(
   function CommitSelectInnerElement(props, ref) {
-    return <List disablePadding ref={ref} {...props} />;
+    return (
+      <List data-testid="commit-select-listbox" disablePadding ref={ref} {...props} />
+    );
   },
 );
 

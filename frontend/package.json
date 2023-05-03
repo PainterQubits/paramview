@@ -11,7 +11,7 @@
     "exit": "(exit 2) || echo hi",
     "test:unit": "jest",
     "test:e2e": "wait-on http://127.0.0.1:5050 -t 1000 && wait-on http://localhost:4173 -t 1000 && poetry run cypress run",
-    "cypress:open": "wait-on http://127.0.0.1:5050 -t 1000 && wait-on http://localhost:4173 -t 1000 && poetry run cypress open",
+    "cy:open": "wait-on http://127.0.0.1:5050 -t 1000 && wait-on http://localhost:4173 -t 1000 && poetry run cypress open",
     "backend": "poetry run python cypress/backend.py"
   },
   "dependencies": {
