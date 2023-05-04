@@ -10,26 +10,25 @@ on:
       - main
 
 jobs:
-  backend:
+  ci:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Set up backend
+      - name: "[Backend] Set up"
         uses: ./.github/actions/set-up-backend
 
-      - name: Check Formatting (Black)
+      - name: "[Backend] Check formatting (Black)"
         run: poetry run black paramview tests --check
 
-      - name: Lint (Flake8)
-        run: poetry run flake8 paramview tests
+      - name: "[Backend] Lint"
+        run: |
+          poetry run flake8 paramview tests
+          poetry run pylint paramview tests
 
-      - name: Lint (Pylint)
-        run: poetry run pylint paramview tests
-
-      - name: Mypy cache
+      - name: "[Backend] Mypy cache"
         uses: actions/cache@v3
         with:
           path: .mypy_cache
@@ -37,57 +36,34 @@ jobs:
           restore-keys: |
             mypy-${{ runner.os }}-
 
-      - name: Type Check (Mypy)
+      - name: "[Backend] Type check"
         run: poetry run mypy paramview tests
 
-      - name: Test (Pytest)
+      - name: "[Backend] Test"
         run: poetry run pytest
 
-  frontend:
-    runs-on: ubuntu-latest
-
-    defaults:
-      run:
-        working-directory: frontend
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Set up frontend
+      - name: "[Frontend] Set up"
         uses: ./.github/actions/set-up-frontend
 
-      - name: Lint
+      - name: "[Frontend] Lint"
+        working-directory: frontend
         run: yarn lint
 
-      - name: Unit tests
+      - name: "[Frontend] Test"
+        working-directory: frontend
         run: yarn test:unit
 
-  e2e:
-    needs: [backend, frontend]
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Set up backend
-        uses: ./.github/actions/set-up-backend
-
-      - name: Set up frontend
-        uses: ./.github/actions/set-up-frontend
-
-      - name: Build frontend
+      - name: "[E2E] Build"
         run: make frontend
 
-      - name: Start backend server
+      - name: "[E2E] Start backend server"
         working-directory: frontend
         run: yarn backend start &
 
-      - name: Start frontend server
+      - name: "[E2E] Start frontend server"
         working-directory: frontend
         run: yarn preview &
 
-      - name: E2E tests
+      - name: "[E2E] Test"
         working-directory: frontend
         run: yarn test:e2e

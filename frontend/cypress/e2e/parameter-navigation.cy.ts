@@ -78,6 +78,7 @@ describe("parameter data for latest commit", () => {
         cy.getByTestId("parameter-list-item-str").should("not.exist");
       });
 
+    // Click dict item
     cy.get("@dict").find('[role="button"]').click();
 
     // Children are visible (expended)
@@ -86,6 +87,7 @@ describe("parameter data for latest commit", () => {
       cy.getByTestId("parameter-list-item-str").should("be.visible");
     });
 
+    // Click dict item
     cy.get("@dict").find('[role="button"]').click();
 
     // Children do not exist (collapsed)
@@ -108,6 +110,7 @@ describe("parameter data for latest commit", () => {
         cy.getByTestId("parameter-list-item-int").should("not.exist");
       });
 
+    // Click dict and paramDict items
     cy.get("@dict").find('[role="button"]').click();
     cy.get("@paramDict").find('[role="button"]').click();
 
@@ -119,6 +122,7 @@ describe("parameter data for latest commit", () => {
       cy.getByTestId("parameter-list-item-int").should("be.visible");
     });
 
+    // Click collapse all button
     cy.getByTestId("collapse-all-button").click();
 
     // Children do not exist (collapsed)
@@ -142,6 +146,7 @@ describe("parameter data for latest commit", () => {
         cy.getByTestId("parameter-list-item-int").should("be.visible");
       });
 
+    // Click root item
     cy.get("@root").find('[role="button"]').first().click();
 
     // Children do not exist (collapsed)
@@ -151,6 +156,7 @@ describe("parameter data for latest commit", () => {
         cy.getByTestId("parameter-list-item-int").should("not.exist");
       });
 
+    // Click collapse all button
     cy.getByTestId("collapse-all-button").click();
 
     // Children are visible (expended)
