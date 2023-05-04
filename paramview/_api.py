@@ -71,10 +71,10 @@ def _commit() -> Response:
         message = request_data["message"]
         data = request_data["data"]
     except KeyError as exc:
-        raise KeyError(
+        raise ValueError(
             "request body must contain the keys 'message' and 'data'"
         ) from exc
     if not isinstance(message, str):
-        raise TypeError("message must be a string")
+        raise TypeError(f"message must be a string, not '{type(message).__name__}'")
     _current_db.commit(message, data)
     return jsonify()  # TODO: Return commit ID from previous line using ParamDB v0.7.0
