@@ -27,7 +27,12 @@ function Item({ data, index, style }: ListChildComponentProps) {
   };
 
   return (
-    <ListItem {...itemProps} style={styleWithTop} sx={{ height: itemHeight }}>
+    <ListItem
+      data-testid="commit-select-listbox-option"
+      {...itemProps}
+      style={styleWithTop}
+      sx={{ height: itemHeight }}
+    >
       <ListItemText
         primary={getPrimary(option)}
         secondary={getSecondary(option)}
@@ -55,7 +60,9 @@ const CommitSelectOuterElement = forwardRef<HTMLDivElement>(
 /** Custom innerElementType passed to React window. */
 const CommitSelectInnerElement = forwardRef<HTMLUListElement>(
   function CommitSelectInnerElement(props, ref) {
-    return <List disablePadding ref={ref} {...props} />;
+    return (
+      <List data-testid="commit-select-listbox" disablePadding ref={ref} {...props} />
+    );
   },
 );
 

@@ -15,16 +15,21 @@ const errorMesssageSx = {
 };
 
 /** Displays the given error and a button to reload the page. */
-export default function ErrorAlert({ error, resetErrorBoundary }: FallbackProps) {
+export default function ErrorAlert({ error }: FallbackProps) {
   document.title = "Error";
 
   return (
     <Alert severity="error" sx={errorAlertSx}>
-      <AlertTitle>Error</AlertTitle>
+      <AlertTitle data-testid="alert-title">Error</AlertTitle>
       <Box component="pre" sx={errorMesssageSx}>
-        <Typography>{error.message}</Typography>
+        <Typography data-testid="error-message">{error.message}</Typography>
       </Box>
-      <Button variant="contained" endIcon={<Refresh />} onClick={resetErrorBoundary}>
+      <Button
+        data-testid="reload-button"
+        variant="contained"
+        endIcon={<Refresh />}
+        onClick={() => window.location.reload()}
+      >
         Reload
       </Button>
     </Alert>

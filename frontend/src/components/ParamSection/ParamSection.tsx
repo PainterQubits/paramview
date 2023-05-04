@@ -30,7 +30,9 @@ export default function ParamSection() {
   return (
     <Box sx={paramSectionSx}>
       <Paper square elevation={2} sx={paramHeaderSx}>
-        <Typography variant="h2">Parameters</Typography>
+        <Typography data-testid="parameter-section-heading" variant="h2">
+          Parameters
+        </Typography>
         <ParamControls />
       </Paper>
       <ParamList />

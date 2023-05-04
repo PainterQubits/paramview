@@ -18,6 +18,7 @@ export default function ParamControls() {
     <Box sx={paramControlsSx}>
       <FormGroup>
         <FormControlLabel
+          data-testid="round-switch"
           sx={{ ml: 0 }}
           control={<Switch />}
           label="Round"
@@ -26,7 +27,12 @@ export default function ParamControls() {
           onChange={toggleRound}
         />
       </FormGroup>
-      <Button variant="contained" sx={{ whiteSpace: "nowrap" }} onClick={collapseAll}>
+      <Button
+        data-testid="collapse-all-button"
+        variant="contained"
+        sx={{ whiteSpace: "nowrap" }}
+        onClick={collapseAll}
+      >
         Collapse all
       </Button>
     </Box>

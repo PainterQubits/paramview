@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { useAtom } from "jotai";
-import { List, ListItem } from "@mui/material";
+import { Box, List, ListItem } from "@mui/material";
 import { Data } from "@/types";
 import { isLeaf } from "@/utils/type";
 import { getType, getTimestamp, getChildren } from "@/utils/data";
@@ -39,9 +39,19 @@ type ParamSublistProps = {
 /** Sublist in the parameter list. */
 function ParamSublist({ items, root = false }: ParamSublistProps) {
   return (
-    <List disablePadding sx={root ? rootListSx : sublistSx}>
+    <List
+      data-testid={root ? "parameter-list" : undefined}
+      disablePadding
+      sx={root ? rootListSx : sublistSx}
+    >
       {items.map(([name, data]) => (
-        <ListItem key={name} sx={listItemSx} disableGutters disablePadding>
+        <ListItem
+          data-testid={`parameter-list-item-${name}`}
+          key={name}
+          sx={listItemSx}
+          disableGutters
+          disablePadding
+        >
           {isLeaf(data) ? (
             <LeafItemContent name={name} value={data} />
           ) : (
@@ -77,7 +87,7 @@ function ParamListContents() {
 /** List of parameter data. */
 export default function ParamList() {
   return (
-    <Suspense>
+    <Suspense fallback={<Box data-testid="parameter-list-loading" />}>
       <ParamListContents />
     </Suspense>
   );
