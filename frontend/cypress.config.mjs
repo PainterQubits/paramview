@@ -12,8 +12,12 @@ export default defineConfig({
     baseUrl: "http://localhost:4173",
     setupNodeEvents(on) {
       on("task", {
-        "db:reset": ({ long } = { long: false }) =>
-          exec(`${BACKEND_COMMAND} reset ${long ? "--long" : ""}`),
+        "db:reset": ({ single = false, long = false } = { single: false, long: false }) =>
+          exec(
+            `${BACKEND_COMMAND} reset` +
+              (single ? " --single" : "") +
+              (long ? " --long" : ""),
+          ),
         "db:clear": () => exec(`${BACKEND_COMMAND} clear`),
         "db:commit": () => exec(`${BACKEND_COMMAND} commit`),
       });

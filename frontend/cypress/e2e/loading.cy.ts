@@ -49,4 +49,10 @@ describe("page is loaded", () => {
     cy.getByTestId("latest-checkbox").contains("Latest");
     cy.getByTestId("parameter-list").contains("root");
   });
+
+  it("displays parameter controls", () => {
+    cy.getByTestId("parameter-section-heading").contains("Parameters");
+    cy.getByTestId("round-switch").contains("Round");
+    cy.getByTestId("collapse-all-button").contains("Collapse all");
+  });
 });

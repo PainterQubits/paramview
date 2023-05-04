@@ -145,7 +145,7 @@ describe("long commit history", () => {
       cy.getByTestId("commit-select-listbox")
         .as("commitSelectListbox")
         .contains(latestFullMessage);
-      cy.get("@commitSelectListbox").should("not.contain.text", twentiethFullMessage);
+      cy.get("@commitSelectListbox").contains(twentiethFullMessage).should("not.exist");
 
       // Navigate down twenty commit entries using the down arrow
       cy.get("@commitSelectCombobox").type("{downArrow}".repeat(20));
@@ -160,7 +160,7 @@ describe("long commit history", () => {
       // Listbox contains the twentieth commit, but not the latest commit, which is not
       // loaded because of virtualization.
       cy.get("@commitSelectListbox").contains(twentiethFullMessage);
-      cy.get("@commitSelectListbox").should("not.contain.text", latestFullMessage);
+      cy.get("@commitSelectListbox").contains(latestFullMessage).should("not.exist");
     });
   });
 });

@@ -1,17 +1,30 @@
 """Script to perform actions relating to the backend."""
 
+from __future__ import annotations
 from typing import Any
 import os
 import argparse
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from sqlalchemy import delete
 from freezegun import freeze_time
-from paramdb import ParamDB, ParamDict
+import astropy.units as u  # type: ignore
+from paramdb import ParamDB, Param, Struct, ParamList, ParamDict
 from paramdb._database import _Snapshot
 
 
 DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "param.db")
 db = ParamDB[Any](DB_PATH)
+
+
+class CustomStruct(Struct):
+    int: int
+    str: str
+    param: CustomParam
+
+
+class CustomParam(Param):
+    int: int
+    str: str
 
 
 def start() -> None:
@@ -25,13 +38,38 @@ def start() -> None:
     start_server(DB_PATH, auto_open=False)
 
 
-def reset(long: bool = False) -> None:
+def reset(single: bool = False, long: bool = False) -> None:
     """Clear the database and make some initial commits."""
-    num_commits = 100 if long else 3
+    if single:
+        num_commits = 1
+    elif long:
+        num_commits = 100
+    else:
+        num_commits = 3
     clear()
-    date = datetime(2023, 1, 1)
+    date = datetime(2023, 1, 1, tzinfo=timezone.utc).astimezone()
     with freeze_time(date):
-        db.commit("Initial commit", ParamDict(commit_id=1, b=2, c=3))
+        db.commit(
+            "Initial commit",
+            ParamDict(
+                commit_id=1,
+                int=123,
+                float=1.2345,
+                bool=True,
+                str="test",
+                none=None,
+                date=date,
+                quantity=1.2345 * u.m,
+                list=[123, "test"],
+                dict={"int": 123, "str": "test"},
+                paramList=ParamList([123, "test"]),
+                paramDict=ParamDict(int=123, str="test"),
+                struct=CustomStruct(
+                    int=123, str="test", param=CustomParam(int=123, str="test")
+                ),
+                param=CustomParam(int=123, str="test"),
+            ),
+        )
     for commit_id in range(2, num_commits + 1):
         date += timedelta(days=1)
         with freeze_time(date):
@@ -65,9 +103,12 @@ if __name__ == "__main__":
         help="clear the database and make some initial commits",
     )
     parser_reset.add_argument(
+        "--single", action="store_true", help="only make a single commit"
+    )
+    parser_reset.add_argument(
         "--long", action="store_true", help="create a long commit history"
     )
-    parser_reset.set_defaults(func=lambda args: reset(args.long))
+    parser_reset.set_defaults(func=lambda args: reset(args.single, args.long))
     parser_clear = subparsers.add_parser(
         "clear",
         help="clear the database",
