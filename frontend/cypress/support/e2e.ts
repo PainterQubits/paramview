@@ -6,7 +6,7 @@ declare global {
       /**
        * Get a DOM element by `data-testid`.
        *
-       * This is a custom Cypress command defined in `cypress/support/commands.ts`.
+       * This is a custom Cypress command.
        */
       getByTestId(
         dataTestAttribute: string,
@@ -16,7 +16,7 @@ declare global {
        * Get the DOM element containing the date specified by the given timestamp or
        * string.
        *
-       * This is a custom Cypress command defined in `cypress/support/commands.ts`.
+       * This is a custom Cypress command.
        */
       containsDate(timestampOrString: number | string): Chainable<JQuery<HTMLElement>>;
     }
