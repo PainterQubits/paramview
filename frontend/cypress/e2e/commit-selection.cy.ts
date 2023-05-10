@@ -28,16 +28,15 @@ describe("short commit history", () => {
 
       // Combobox contains latest commit
       cy.getByTestId("commit-select-combobox")
-        .as("commitSelectCombobox")
+        .shouldContainDate(latestCommit.timestamp)
         .find("input")
         .should("have.value", getFullMessage(latestCommit));
-      cy.get("@commitSelectCombobox").containsDate(latestCommit.timestamp);
 
       // Latest checkbox is checked
       cy.getByTestId("latest-checkbox").find("input").should("be.checked");
 
       // Displays parameter data for the latest commit
-      cy.getByTestId("parameter-list-item-commit_id").contains(latestCommit.id);
+      cy.getByTestId("parameter-list-item-commit_id").should("contain", latestCommit.id);
     });
   });
 
@@ -54,16 +53,16 @@ describe("short commit history", () => {
         .type(partialMessage);
 
       // Combobox contains that part of the message and updates the timestamp
-      cy.get("@commitSelectCombobox").find("input").should("have.value", partialMessage);
-      cy.get("@commitSelectCombobox").containsDate(firstCommit.timestamp);
+      cy.get("@commitSelectCombobox")
+        .shouldContainDate(firstCommit.timestamp)
+        .find("input")
+        .should("have.value", partialMessage);
 
       // Listbox appears and contains the correct option
       cy.getByTestId("commit-select-listbox").within(() => {
-        cy.getByTestId("commit-select-listbox-option")
-          .first()
-          .as("option")
-          .contains(fullMessage);
-        cy.get("@option").containsDate(firstCommit.timestamp);
+        cy.getByTestId(`commit-select-option-${firstCommit.id}`)
+          .should("contain", fullMessage)
+          .shouldContainDate(firstCommit.timestamp);
       });
 
       // Type enter
@@ -74,10 +73,10 @@ describe("short commit history", () => {
 
       // Combobox contains full message and timestamp
       cy.get("@commitSelectCombobox").find("input").should("have.value", fullMessage);
-      cy.get("@commitSelectCombobox").containsDate(firstCommit.timestamp);
+      cy.get("@commitSelectCombobox").shouldContainDate(firstCommit.timestamp);
 
       // Displays parameter data for the first commit
-      cy.getByTestId("parameter-list-item-commit_id").contains(firstCommit.id);
+      cy.getByTestId("parameter-list-item-commit_id").should("contain", firstCommit.id);
     });
   });
 
@@ -106,10 +105,10 @@ describe("short commit history", () => {
       cy.get("@commitSelectCombobox")
         .find("input")
         .should("have.value", getFullMessage(latestCommit));
-      cy.get("@commitSelectCombobox").containsDate(latestCommit.timestamp);
+      cy.get("@commitSelectCombobox").shouldContainDate(latestCommit.timestamp);
 
       // Displays parameter data for the latest commit
-      cy.getByTestId("parameter-list-item-commit_id").contains(latestCommit.id);
+      cy.getByTestId("parameter-list-item-commit_id").should("contain", latestCommit.id);
     });
   });
 });
@@ -125,42 +124,50 @@ describe("long commit history", () => {
 
   it("can navigate using down arrow and uses virtualization in the listbox", () => {
     cy.get("@commitHistory").then((commitHistoryAlias: unknown) => {
+      const oldCommitIndex = 12;
       const commitHistory = commitHistoryAlias as CommitEntry[];
       const latestCommit = commitHistory[commitHistory.length - 1];
-      const twentiethLatestCommit = commitHistory[commitHistory.length - 21];
+      const oldCommit = commitHistory[commitHistory.length - oldCommitIndex];
       const latestFullMessage = getFullMessage(latestCommit);
-      const twentiethFullMessage = getFullMessage(twentiethLatestCommit);
 
       // Click on the combobox to open the listbox
       cy.getByTestId("commit-select-combobox").as("commitSelectCombobox").click();
 
       // Combobox contains the message and timestamp of the latest commit
       cy.get("@commitSelectCombobox")
+        .shouldContainDate(latestCommit.timestamp)
         .find("input")
         .should("have.value", latestFullMessage);
-      cy.get("@commitSelectCombobox").containsDate(latestCommit.timestamp);
 
-      // Listbox contains the latest commit, but not the twentieth commit, which is not
-      // loaded because of virtualization.
+      // Listbox contains the latest commit, but not the old commit, which is not loaded
+      // because of virtualization.
       cy.getByTestId("commit-select-listbox")
         .as("commitSelectListbox")
-        .contains(latestFullMessage);
-      cy.get("@commitSelectListbox").contains(twentiethFullMessage).should("not.exist");
+        .should("contain", latestFullMessage);
+      cy.getByTestId(`commit-select-option-${oldCommit.id}`).should("not.exist");
 
-      // Navigate down twenty commit entries using the down arrow
-      cy.get("@commitSelectCombobox").type("{downArrow}".repeat(20));
+      // Navigate down to the old commit using the down arrow
+      commitHistory
+        .slice(commitHistory.length - oldCommitIndex, commitHistory.length - 1)
+        .reverse()
+        .forEach(({ id }) => {
+          console.log(id);
+          cy.get("@commitSelectCombobox").type("{downArrow}");
+          cy.getByTestId(`commit-select-option-${id}`).should("exist");
+        });
 
       // Combobox still contains the message of the latest commit, but now contains the
       // timestamp of the twentieth commit.
       cy.get("@commitSelectCombobox")
+        .shouldContainDate(oldCommit.timestamp)
         .find("input")
         .should("have.value", latestFullMessage);
-      cy.get("@commitSelectCombobox").containsDate(twentiethLatestCommit.timestamp);
 
       // Listbox contains the twentieth commit, but not the latest commit, which is not
       // loaded because of virtualization.
-      cy.get("@commitSelectListbox").contains(twentiethFullMessage);
-      cy.get("@commitSelectListbox").contains(latestFullMessage).should("not.exist");
+      cy.get("@commitSelectListbox")
+        .should("contain", getFullMessage(oldCommit))
+        .should("not.contain", latestFullMessage);
     });
   });
 });
@@ -196,14 +203,17 @@ describe("update commit history", () => {
         cy.get("@commitSelectCombobox")
           .find("input")
           .should("have.value", updatedFullMessage);
-        cy.get("@commitSelectCombobox").containsDate(updatedLatestCommit.timestamp);
+        cy.get("@commitSelectCombobox").shouldContainDate(updatedLatestCommit.timestamp);
 
         // Listbox contains the updated latest commit
         cy.get("@commitSelectCombobox").click();
-        cy.getByTestId("commit-select-listbox").contains(updatedFullMessage);
+        cy.getByTestId("commit-select-listbox").should("contain", updatedFullMessage);
 
         // Displays parameter data for the updated latest commit
-        cy.getByTestId("parameter-list-item-commit_id").contains(updatedLatestCommit.id);
+        cy.getByTestId("parameter-list-item-commit_id").should(
+          "contain",
+          updatedLatestCommit.id,
+        );
       });
     });
   });
@@ -237,14 +247,17 @@ describe("update commit history", () => {
         cy.get("@commitSelectCombobox")
           .find("input")
           .should("have.value", getFullMessage(originalLatestCommit));
-        cy.get("@commitSelectCombobox").containsDate(originalLatestCommit.timestamp);
+        cy.get("@commitSelectCombobox").shouldContainDate(originalLatestCommit.timestamp);
 
         // Listbox contains the updated latest commit
         cy.get("@commitSelectCombobox").click();
-        cy.getByTestId("commit-select-listbox").contains(updatedFullMessage);
+        cy.getByTestId("commit-select-listbox").should("contain", updatedFullMessage);
 
         // Displays parameter data for the original latest commit
-        cy.getByTestId("parameter-list-item-commit_id").contains(originalLatestCommit.id);
+        cy.getByTestId("parameter-list-item-commit_id").should(
+          "contain",
+          originalLatestCommit.id,
+        );
       });
     });
   });

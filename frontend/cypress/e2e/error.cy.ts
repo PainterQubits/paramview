@@ -13,9 +13,12 @@ describe("error has occured", () => {
   });
 
   it("displays error alert", () => {
-    cy.getByTestId("alert-title").contains("Error");
-    cy.getByTestId("error-message").contains("Database param.db has no commits.");
-    cy.getByTestId("reload-button").contains("Reload");
+    cy.getByTestId("alert-title").should("contain", "Error");
+    cy.getByTestId("error-message").should(
+      "contain",
+      "Database param.db has no commits.",
+    );
+    cy.getByTestId("reload-button").should("contain", "Reload");
   });
 
   it("reloads when reload button is clicked", () => {

@@ -43,16 +43,16 @@ describe("page is loaded", () => {
   it("displays loaded elements", () => {
     cy.get("@databaseName").then((databaseNameAlias: unknown) => {
       const databaseName = databaseNameAlias as string;
-      cy.getByTestId("database-name").contains(databaseName);
+      cy.getByTestId("database-name").should("contain", databaseName);
     });
-    cy.getByTestId("commit-select-combobox").find("label").contains("Commit");
-    cy.getByTestId("latest-checkbox").contains("Latest");
-    cy.getByTestId("parameter-list").contains("root");
+    cy.getByTestId("commit-select-combobox").find("label").should("contain", "Commit");
+    cy.getByTestId("latest-checkbox").should("contain", "Latest");
+    cy.getByTestId("parameter-list").find('[role="button"]').should("contain", "root");
   });
 
   it("displays parameter controls", () => {
-    cy.getByTestId("parameter-section-heading").contains("Parameters");
-    cy.getByTestId("round-switch").contains("Round");
-    cy.getByTestId("collapse-all-button").contains("Collapse all");
+    cy.getByTestId("parameter-section-heading").should("contain", "Parameters");
+    cy.getByTestId("round-switch").should("contain", "Round");
+    cy.getByTestId("collapse-all-button").should("contain", "Collapse all");
   });
 });

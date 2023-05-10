@@ -15,9 +15,9 @@ const listboxPadding = 8;
 
 /** Item in the commit select list. */
 function Item({ data, index, style }: ListChildComponentProps) {
-  const { itemData, getPrimary, getSecondary } = data;
+  const { itemData, getId, getPrimary, getSecondary } = data;
 
-  const [itemProps, option] = itemData[index];
+  const [itemProps, commitIndex] = itemData[index];
 
   // We need to add the Listbox padding here instead of as padding since MUI Autocomplete
   // uses offsetTop to calculate the position to scroll to.
@@ -28,14 +28,14 @@ function Item({ data, index, style }: ListChildComponentProps) {
 
   return (
     <ListItem
-      data-testid="commit-select-listbox-option"
+      data-testid={`commit-select-option-${getId(commitIndex)}`}
       {...itemProps}
       style={styleWithTop}
       sx={{ height: itemHeight }}
     >
       <ListItemText
-        primary={getPrimary(option)}
-        secondary={getSecondary(option)}
+        primary={getPrimary(commitIndex)}
+        secondary={getSecondary(commitIndex)}
         primaryTypographyProps={{ noWrap: true }}
         secondaryTypographyProps={{ noWrap: true }}
       />
@@ -116,7 +116,7 @@ export default forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLElement>>(
           <FixedSizeList
             outerRef={outerRef}
             initialScrollOffset={itemHeight * itemIndex}
-            itemData={{ itemData, getPrimary, getSecondary }}
+            itemData={{ itemData, getId, getPrimary, getSecondary }}
             itemCount={itemData.length}
             itemSize={itemHeight}
             outerElementType={CommitSelectOuterElement}
