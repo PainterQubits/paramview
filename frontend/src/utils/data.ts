@@ -1,4 +1,4 @@
-import { Leaf, Group, Data } from "@/types";
+import { Path, Leaf, Group, Data } from "@/types";
 import {
   isLeaf,
   isDatetime,
@@ -68,16 +68,59 @@ export function getType(group: Group) {
 /** Get the last updated timestamp from the given Group. */
 export function getTimestamp(group: Group): number {
   if (isParam(group)) return new Date(group.__last_updated.isoformat).getTime();
+
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const timestamps = getChildren(group).map(([_, data]) =>
     isLeaf(data) ? -Infinity : getTimestamp(data),
   );
+
   return Math.max(...timestamps);
+}
+
+/** Return data at the given path within the given data. */
+export function getData(data: Data, path: Path): Data {
+  if (path.length === 0) return data;
+
+  if (isLeaf(data)) {
+    throw new Error(`cannot get child from data '${data}' with path ${path}`);
+  }
+
+  const [key, ...remainingPath] = path;
+
+  if (isParamList(data)) return getData(data.__items[Number(key)], remainingPath);
+
+  if (isList(data)) return getData(data[Number(key)], remainingPath);
+
+  // Dict, ParamDict, Struct, or Param
+  return getData(data[key], remainingPath);
+}
+
+/** Get the names of the child data within the given group. */
+export function getChildrenNames(group: Group) {
+  let children: Data[] | { [key: string]: Data };
+
+  if (isList(group) || isDict(group)) {
+    children = group;
+  } else if (isParamList(group)) {
+    children = group.__items;
+  } else if (isParam(group)) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { __type, __last_updated, ...rest } = group;
+    children = rest;
+  } else {
+    // ParamDict or Struct
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { __type, ...rest } = group;
+    children = rest;
+  }
+
+  return Object.keys(children);
 }
 
 /** Return the Data values contained with the given Group. */
 export function getChildren(group: Group): [string, Data][] {
   let children: Data[] | { [key: string]: Data };
+
   if (isList(group) || isDict(group)) {
     children = group;
   } else if (isParamList(group)) {
@@ -92,5 +135,6 @@ export function getChildren(group: Group): [string, Data][] {
     const { __type, ...rest } = group;
     children = rest;
   }
+
   return Object.entries(children);
 }

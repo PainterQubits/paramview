@@ -151,7 +151,6 @@ describe("long commit history", () => {
         .slice(commitHistory.length - oldCommitIndex, commitHistory.length - 1)
         .reverse()
         .forEach(({ id }) => {
-          console.log(id);
           cy.get("@commitSelectCombobox").type("{downArrow}");
           cy.getByTestId(`commit-select-option-${id}`).should("exist");
         });

@@ -5,6 +5,9 @@ export type CommitEntry = {
   timestamp: string;
 };
 
+/** Path to data from the root. */
+export type Path = string[];
+
 /** Data from the ParamDB database. */
 export type Data = Leaf | Group;
 
