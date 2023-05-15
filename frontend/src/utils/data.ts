@@ -98,7 +98,8 @@ export function parseLeaf(
 
     if (!Number.isNaN(dateInput.getTime())) {
       // Z is replaced for compatibility with Python parsing
-      return new Date(input).toISOString().replace("Z", "+00:00");
+      const isoformat = new Date(input).toISOString().replace("Z", "+00:00");
+      return { __type: "datetime.datetime", isoformat };
     }
   }
 
