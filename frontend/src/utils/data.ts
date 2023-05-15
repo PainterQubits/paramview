@@ -38,18 +38,18 @@ function numberToString(num: number, round: boolean) {
 /**
  * Convert the given Leaf to a string, rounding it if it is a number and round is true.
  */
-export function leafToString(value: Leaf, round: boolean) {
-  if (isDatetime(value)) return formatDate(value.isoformat);
+export function leafToString(leaf: Leaf, round: boolean) {
+  if (isDatetime(leaf)) return formatDate(leaf.isoformat);
 
-  if (isQuantity(value)) return `${numberToString(value.value, round)} ${value.unit}`;
+  if (isQuantity(leaf)) return `${numberToString(leaf.value, round)} ${leaf.unit}`;
 
-  if (typeof value === "boolean") return value ? "True" : "False";
+  if (typeof leaf === "boolean") return leaf ? "True" : "False";
 
-  if (value === null) return "None";
+  if (leaf === null) return "None";
 
-  if (typeof value === "number") return numberToString(value, round);
+  if (typeof leaf === "number") return numberToString(leaf, round);
 
-  return value;
+  return leaf;
 }
 
 function parseNumber(input: string) {
@@ -58,6 +58,14 @@ function parseNumber(input: string) {
   if (!Number.isNaN(Number.parseFloat(input)) && Number.isFinite(numberInput)) {
     return numberInput;
   }
+}
+
+export function leafToInput(leaf: Leaf) {
+  if (isQuantity(leaf)) {
+    return [String(leaf.value), leaf.unit];
+  }
+
+  return [leafToString(leaf, false), ""];
 }
 
 export function parseLeaf(

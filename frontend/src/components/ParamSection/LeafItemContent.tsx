@@ -2,8 +2,8 @@ import { useState, useEffect, useMemo } from "react";
 import { useAtom } from "jotai";
 import { Replay } from "@mui/icons-material";
 import { Box, Typography, TextField, MenuItem, IconButton } from "@mui/material";
-import { Path, LeafType, Leaf, Quantity } from "@/types";
-import { leafToString, parseLeaf, getData, setData } from "@/utils/data";
+import { Path, LeafType, Leaf } from "@/types";
+import { leafToString, leafToInput, parseLeaf, getData, setData } from "@/utils/data";
 import { getLeafType } from "@/utils/type";
 import { dataAtom } from "@/atoms/api";
 import { roundAtom, editModeAtom, editedDataAtom } from "@/atoms/paramList";
@@ -39,29 +39,34 @@ type LeafItemContentEditModeProps = {
 
 function LeafItemContentEditMode({ path }: LeafItemContentEditModeProps) {
   const [originalRootData] = useAtom(dataAtom);
-
   const originalLeafValue = useMemo(
     () => getData(originalRootData, path) as Leaf,
     [originalRootData, path],
   );
-
   const originalLeafType = useMemo(
     () => getLeafType(originalLeafValue),
     [originalLeafValue],
   );
-
-  const [initialInput, initialUnitInput] = useMemo(() => {
-    if (originalLeafType === LeafType.Quantity) {
-      const { value, unit } = originalLeafValue as Quantity;
-      return [String(value), unit];
-    }
-    return [leafToString(originalLeafValue, false), ""];
-  }, [originalLeafValue, originalLeafType]);
+  const [originalInput, originalUnitInput] = useMemo(
+    () => leafToInput(originalLeafValue),
+    [originalLeafValue],
+  );
 
   const [editedRootData] = useAtom(editedDataAtom);
-  const [editedLeafType, setEditedLeafType] = useState(originalLeafType);
-  const [input, setInput] = useState(initialInput);
-  const [unitInput, setUnitInput] = useState(initialUnitInput);
+  const editedLeafValue = useMemo(
+    () => getData(editedRootData, path) as Leaf,
+    [editedRootData, path],
+  );
+  const [editedLeafType, setEditedLeafType] = useState(() =>
+    getLeafType(editedLeafValue),
+  );
+  const [editedInput, editedUnitInput] = useMemo(
+    () => leafToInput(editedLeafValue),
+    [editedLeafValue],
+  );
+
+  const [input, setInput] = useState(editedInput);
+  const [unitInput, setUnitInput] = useState(editedUnitInput);
 
   useEffect(() => {
     const parsedLeaf = parseLeaf(input, unitInput, editedLeafType);
@@ -70,8 +75,8 @@ function LeafItemContentEditMode({ path }: LeafItemContentEditModeProps) {
     }
   }, [input, unitInput, editedLeafType, editedRootData, path]);
 
-  const changedInput = input !== initialInput;
-  const changedUnitInput = unitInput !== initialUnitInput;
+  const changedInput = input !== originalInput;
+  const changedUnitInput = unitInput !== originalUnitInput;
   const changedType = editedLeafType !== originalLeafType;
 
   return (
@@ -142,8 +147,8 @@ function LeafItemContentEditMode({ path }: LeafItemContentEditModeProps) {
         sx={{ width: "1.75rem", height: "1.75rem" }}
         size="small"
         onClick={() => {
-          setInput(initialInput);
-          setUnitInput(initialUnitInput);
+          setInput(originalInput);
+          setUnitInput(originalUnitInput);
           setEditedLeafType(originalLeafType);
         }}
       >

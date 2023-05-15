@@ -1,13 +1,17 @@
-import { startTransition } from "react";
+import { startTransition, useEffect } from "react";
 import { useAtom, useSetAtom } from "jotai";
 import { Box, FormGroup, FormControlLabel, Switch, Button } from "@mui/material";
 import { roundAtom, collapseAtom, editModeAtom, editedDataAtom } from "@/atoms/paramList";
 
-const paramControlsSx = {
+const subControlsSx = {
   display: "flex",
-  flexWrap: "wrap",
   alignItems: "center",
   columnGap: 2.25,
+};
+
+const buttonSx = {
+  px: 1.25,
+  py: 0.75,
 };
 
 /** Controls for the parameter section. */
@@ -17,40 +21,55 @@ export default function ParamControls() {
   const [editMode, toggleEditMode] = useAtom(editModeAtom);
   const resetEditedData = useSetAtom(editedDataAtom);
 
-  return (
-    <Box sx={paramControlsSx}>
-      <FormGroup>
-        <FormControlLabel
-          data-testid="round-switch"
-          sx={{ ml: 0 }}
-          control={<Switch />}
-          label="Round"
-          labelPlacement="start"
-          checked={round}
-          onChange={toggleRound}
-        />
-      </FormGroup>
+  useEffect(resetEditedData, [resetEditedData, editMode]);
 
-      <Button
-        data-testid="collapse-all-button"
-        variant="contained"
-        sx={{ px: 1.25, py: 0.75, whiteSpace: "nowrap" }}
-        onClick={collapseAll}
-      >
-        Collapse all
-      </Button>
-      <Button
-        variant="contained"
-        sx={{ px: 1.25, py: 0.75, minWidth: "76px" }}
-        onClick={() =>
-          startTransition(() => {
-            resetEditedData();
-            toggleEditMode();
-          })
-        }
-      >
-        {editMode ? "Cancel" : "Edit"}
-      </Button>
-    </Box>
+  return (
+    <>
+      <Box sx={subControlsSx}>
+        <FormGroup>
+          <FormControlLabel
+            data-testid="round-switch"
+            sx={{ ml: 0 }}
+            control={<Switch />}
+            label="Round"
+            labelPlacement="start"
+            checked={round}
+            onChange={toggleRound}
+          />
+        </FormGroup>
+        <Button
+          data-testid="collapse-all-button"
+          variant="contained"
+          sx={buttonSx}
+          onClick={collapseAll}
+        >
+          Collapse all
+        </Button>
+      </Box>
+      <Box sx={subControlsSx}>
+        {editMode ? (
+          <>
+            <Button
+              variant="contained"
+              sx={buttonSx}
+              onClick={() => startTransition(toggleEditMode)}
+            >
+              Cancel
+            </Button>
+            <Button variant="contained" sx={buttonSx}>
+              Commit
+            </Button>
+          </>
+        ) : (
+          <Button
+            variant="contained"
+            sx={buttonSx}
+            onClick={() => startTransition(toggleEditMode)}
+          >
+            Edit
+          </Button>
+        )}
+      </Box>
+    </>
   );
 }
