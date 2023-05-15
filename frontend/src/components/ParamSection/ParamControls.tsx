@@ -2,7 +2,14 @@ import { startTransition } from "react";
 import { useAtom, useSetAtom } from "jotai";
 import { Box, FormGroup, FormControlLabel, Switch, Button } from "@mui/material";
 import { syncLatestAtom, commitSelectFrozenAtom } from "@/atoms/commitSelect";
-import { roundAtom, collapseAtom, editModeAtom, editedDataAtom } from "@/atoms/paramList";
+import {
+  roundAtom,
+  collapseAtom,
+  editModeAtom,
+  editedDataAtom,
+  commitDialogOpenAtom,
+} from "@/atoms/paramList";
+import CommitDialog from "./CommitDialog";
 
 const subControlsSx = {
   display: "flex",
@@ -11,8 +18,7 @@ const subControlsSx = {
 };
 
 const buttonSx = {
-  px: 1.25,
-  py: 0.75,
+  px: 1.4,
   whiteSpace: "nowrap",
 };
 
@@ -21,6 +27,7 @@ export default function ParamControls() {
   const [round, toggleRound] = useAtom(roundAtom);
   const collapseAll = useSetAtom(collapseAtom);
   const [editMode, toggleEditMode] = useAtom(editModeAtom);
+  const setCommitDialogOpen = useSetAtom(commitDialogOpenAtom);
   const setSyncLatest = useSetAtom(syncLatestAtom);
   const setCommitSelectFrozen = useSetAtom(commitSelectFrozenAtom);
   const resetEditedData = useSetAtom(editedDataAtom);
@@ -63,9 +70,14 @@ export default function ParamControls() {
             <Button variant="contained" sx={buttonSx} onClick={toggleEditModeAndReset}>
               Cancel
             </Button>
-            <Button variant="contained" sx={buttonSx}>
+            <Button
+              variant="contained"
+              sx={buttonSx}
+              onClick={() => setCommitDialogOpen(true)}
+            >
               Commit
             </Button>
+            <CommitDialog />
           </>
         ) : (
           <Button variant="contained" sx={buttonSx} onClick={toggleEditModeAndReset}>

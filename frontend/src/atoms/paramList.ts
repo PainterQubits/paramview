@@ -51,3 +51,5 @@ export const editedDataAtom = atom(
       get(dataAtom).then((data) => JSON.parse(JSON.stringify(data))),
     ),
 );
+
+export const commitDialogOpenAtom = atom(false);
