@@ -12,7 +12,7 @@ import {
   Param,
 } from "@/types";
 import { formatDate } from "@/utils/timestamp";
-import { leafToString, getTimestamp, getType, getChildren } from "./data";
+import { leafToString, getTimestamp, getTypeString, getChildren } from "./data";
 
 describe("leaf data", () => {
   const date = new Date();
@@ -143,7 +143,7 @@ describe("group data", () => {
     ${emptyStruct} | ${"EmptyStruct (Struct)"}  | ${-Infinity}           | ${[]}
     ${param}       | ${"CustomParam (Param)"}   | ${lastUpdated(param)}  | ${dictChildren}
   `("$group", ({ group, type, timestamp, children }: groupTestParams) => {
-    it(`gets type`, () => expect(getType(group)).toBe(type));
+    it(`gets type`, () => expect(getTypeString(group)).toBe(type));
 
     it(`gets timestamp`, () => {
       expect(timestamp).not.toBeNaN(); // Ensures "isoformat" strings above are valid

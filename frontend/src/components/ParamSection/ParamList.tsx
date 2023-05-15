@@ -3,7 +3,7 @@ import { useAtom } from "jotai";
 import { Box, List, ListItem } from "@mui/material";
 import { Path } from "@/types";
 import { isLeaf } from "@/utils/type";
-import { getType, getTimestamp, getData, getChildrenNames } from "@/utils/data";
+import { getTypeString, getTimestamp, getData, getChildrenNames } from "@/utils/data";
 import { dataAtom } from "@/atoms/api";
 import LeafItemContent from "./LeafItemContent";
 import GroupItemContent from "./GroupItemContent";
@@ -36,6 +36,7 @@ type ParamListItemProps = {
 
 function ParamListItem({ path }: ParamListItemProps) {
   const [rootData] = useAtom(dataAtom);
+
   const data = getData(rootData, path);
 
   const name = path.length > 0 ? path[path.length - 1] : "root";
@@ -48,14 +49,14 @@ function ParamListItem({ path }: ParamListItemProps) {
       disablePadding
     >
       {isLeaf(data) ? (
-        <LeafItemContent name={name} value={data} />
+        <LeafItemContent name={name} path={path} />
       ) : (
         <CollapseItem
           defaultOpen={path.length === 0}
           itemContent={
             <GroupItemContent
               name={name}
-              type={getType(data)}
+              type={getTypeString(data)}
               timestamp={getTimestamp(data)}
             />
           }

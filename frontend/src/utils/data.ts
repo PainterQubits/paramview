@@ -52,8 +52,51 @@ export function leafToString(value: Leaf, round: boolean) {
   return value;
 }
 
+export function inputToLeaf(input: string): Leaf | undefined {
+  switch (input.toLowerCase()) {
+    case "true":
+      return true;
+    case "false":
+      return false;
+    case "none":
+      return null;
+  }
+
+  let jsonInput;
+  try {
+    jsonInput = JSON.parse(input);
+  } catch (e) {
+    // Leave jsonInput undefined
+  }
+
+  if (typeof jsonInput === "string") {
+    return jsonInput;
+  }
+
+  const [first, ...rest] = input.trim().split(/\s+/);
+  const numberInput = Number(first);
+
+  if (!Number.isNaN(Number.parseFloat(input)) && Number.isFinite(numberInput)) {
+    if (rest.length > 0) {
+      return {
+        __type: "astropy.units.quantity.Quantity",
+        value: numberInput,
+        unit: rest.join(" "),
+      };
+    }
+
+    return numberInput;
+  }
+
+  const dateInput = new Date(input);
+
+  if (!Number.isNaN(dateInput.getTime())) {
+    return dateInput.toISOString().replace("Z", "+00:00"); // Replace Z for Python parsing
+  }
+}
+
 /** Return a string representing the type of the given Group. */
-export function getType(group: Group) {
+export function getTypeString(group: Group) {
   if (isList(group)) return "list";
 
   if (isDict(group)) return "dict";
@@ -82,7 +125,7 @@ export function getData(data: Data, path: Path): Data {
   if (path.length === 0) return data;
 
   if (isLeaf(data)) {
-    throw new Error(`cannot get child from data '${data}' with path ${path}`);
+    throw new Error(`cannot get child of data '${data}' with path '${path}'`);
   }
 
   const [key, ...remainingPath] = path;
@@ -93,6 +136,32 @@ export function getData(data: Data, path: Path): Data {
 
   // Dict, ParamDict, Struct, or Param
   return getData(data[key], remainingPath);
+}
+
+/**
+ * Set the data at the given path to the given value. Note that this mutates the data
+ * object that is passed in.
+ */
+export function setData(data: Data, path: Path, value: Data) {
+  if (path.length === 0) {
+    throw new Error("cannot set data with no path");
+  }
+
+  const parentData = getData(data, path.slice(0, -1));
+  const key = path[path.length - 1];
+
+  if (isLeaf(parentData)) {
+    throw new Error(`cannot set child of data '${parentData}' with key '${key}'`);
+  }
+
+  if (isParamList(parentData)) {
+    parentData.__items[Number(key)] = value;
+  } else if (isList(parentData)) {
+    parentData[Number(key)] = value;
+  } else {
+    // Dict, ParamDict, Struct, or Param
+    parentData[key] = value;
+  }
 }
 
 /** Get the names of the child data within the given group. */

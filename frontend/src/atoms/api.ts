@@ -18,7 +18,7 @@ export const databaseNameAtom = atom(() => databaseName);
 
 /**
  * Primitive atom to store value of the commit history. Initializing to an infinite
- * promise means the commit history will load until commitHistoryAtom is set.
+ * promise means the commit history will be loading until commitHistoryAtom is set.
  */
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 const commitHistoryStateAtom = atom(new Promise<CommitEntry[]>(() => {}));
