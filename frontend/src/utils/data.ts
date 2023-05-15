@@ -1,4 +1,4 @@
-import { Path, Leaf, Group, Data } from "@/types";
+import { Path, LeafType, Data, Leaf, Group } from "@/types";
 import {
   isLeaf,
   isDatetime,
@@ -52,46 +52,57 @@ export function leafToString(value: Leaf, round: boolean) {
   return value;
 }
 
-export function inputToLeaf(input: string): Leaf | undefined {
-  switch (input.toLowerCase()) {
-    case "true":
-      return true;
-    case "false":
-      return false;
-    case "none":
-      return null;
-  }
-
-  let jsonInput;
-  try {
-    jsonInput = JSON.parse(input);
-  } catch (e) {
-    // Leave jsonInput undefined
-  }
-
-  if (typeof jsonInput === "string") {
-    return jsonInput;
-  }
-
-  const [first, ...rest] = input.trim().split(/\s+/);
-  const numberInput = Number(first);
+function parseNumber(input: string) {
+  const numberInput = Number(input);
 
   if (!Number.isNaN(Number.parseFloat(input)) && Number.isFinite(numberInput)) {
-    if (rest.length > 0) {
-      return {
-        __type: "astropy.units.quantity.Quantity",
-        value: numberInput,
-        unit: rest.join(" "),
-      };
-    }
-
     return numberInput;
   }
+}
 
-  const dateInput = new Date(input);
+export function parseLeaf(
+  input: string,
+  unit: string,
+  leafType: LeafType,
+): Leaf | undefined {
+  if (leafType === LeafType.String) {
+    return input;
+  }
 
-  if (!Number.isNaN(dateInput.getTime())) {
-    return dateInput.toISOString().replace("Z", "+00:00"); // Replace Z for Python parsing
+  if (leafType === LeafType.Number) {
+    return parseNumber(input);
+  }
+
+  if (leafType === LeafType.Quantity) {
+    const number = parseNumber(input);
+
+    if (number !== undefined && unit !== "") {
+      return {
+        __type: "astropy.units.quantity.Quantity",
+        value: number,
+        unit,
+      };
+    }
+  }
+
+  if (leafType === LeafType.Datetime) {
+    const dateInput = new Date(input);
+
+    if (!Number.isNaN(dateInput.getTime())) {
+      // Z is replaced for compatibility with Python parsing
+      return new Date(input).toISOString().replace("Z", "+00:00");
+    }
+  }
+
+  const lowerCaseInput = input.toLowerCase();
+
+  if (leafType === LeafType.Boolean) {
+    if (lowerCaseInput === "true") return true;
+    if (lowerCaseInput === "false") return false;
+  }
+
+  if (leafType === LeafType.Null) {
+    if (lowerCaseInput === "none") return null;
   }
 }
 

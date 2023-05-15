@@ -1,9 +1,10 @@
-import { startTransition, useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useAtom } from "jotai";
 import { Replay } from "@mui/icons-material";
 import { Box, Typography, TextField, MenuItem, IconButton } from "@mui/material";
-import { Path, LeafType, Leaf } from "@/types";
-import { leafToString, inputToLeaf, getTypeString, getData, setData } from "@/utils/data";
+import { Path, LeafType, Leaf, Quantity } from "@/types";
+import { leafToString, parseLeaf, getData, setData } from "@/utils/data";
+import { getLeafType } from "@/utils/type";
 import { dataAtom } from "@/atoms/api";
 import { roundAtom, editModeAtom, editedDataAtom } from "@/atoms/paramList";
 
@@ -38,49 +39,97 @@ type LeafItemContentEditModeProps = {
 
 function LeafItemContentEditMode({ path }: LeafItemContentEditModeProps) {
   const [originalRootData] = useAtom(dataAtom);
-  const [editedRootData] = useAtom(editedDataAtom);
+
   const originalLeafValue = useMemo(
     () => getData(originalRootData, path) as Leaf,
     [originalRootData, path],
   );
-  const editedLeafValue = useMemo(
-    () => getData(editedRootData, path) as Leaf,
-    [editedRootData, path],
+
+  const originalLeafType = useMemo(
+    () => getLeafType(originalLeafValue),
+    [originalLeafValue],
   );
 
-  const [input, setInput] = useState(() => leafToString(editedLeafValue, false));
+  const [initialInput, initialUnitInput] = useMemo(() => {
+    if (originalLeafType === LeafType.Quantity) {
+      const { value, unit } = originalLeafValue as Quantity;
+      return [String(value), unit];
+    }
+    return [leafToString(originalLeafValue, false), ""];
+  }, [originalLeafValue, originalLeafType]);
+
+  const [editedRootData] = useAtom(editedDataAtom);
+  const [editedLeafType, setEditedLeafType] = useState(originalLeafType);
+  const [input, setInput] = useState(initialInput);
+  const [unitInput, setUnitInput] = useState(initialUnitInput);
+
+  useEffect(() => {
+    const parsedLeaf = parseLeaf(input, unitInput, editedLeafType);
+    if (parsedLeaf !== undefined) {
+      setData(editedRootData, path, parsedLeaf);
+    }
+  }, [input, unitInput, editedLeafType, editedRootData, path]);
+
+  const changedInput = input !== initialInput;
+  const changedUnitInput = unitInput !== initialUnitInput;
+  const changedType = editedLeafType !== originalLeafType;
 
   return (
     <Box sx={{ display: "flex", columnGap: 1 }}>
       <TextField
         variant="standard"
-        inputProps={{ sx: [{ pt: "2.5px", pb: "2.5px", textAlign: "right" }] }}
-        value={input}
-        error={inputToLeaf(input) === undefined}
-        // focused={editMode || changed}
-        // color={changed ? "success" : undefined}
-        // error={!validInput}
-        // onChange={(event) => {
-        //   const newInput = event.target.value;
-        //   const parsedLeaf = inputToLeaf(newInput);
-        //   const newValidInput = parsedLeaf !== undefined;
-        //   if (newValidInput) {
-        //     setData(editedRootData, path, parsedLeaf);
-        //   }
-        //   setInput(newInput);
-        //   setValidInput(newValidInput);
-        //   setChanged(parsedLeaf !== originalDataValue);
-        // }}
-        onChange={({ target: { value: newInput } }) => {
-          setInput(newInput);
+        sx={{
+          ml: 1,
+          width:
+            editedLeafType === LeafType.Quantity
+              ? "calc(12.5rem - 8px - 6ch)"
+              : "12.5rem",
         }}
-      />
+        inputProps={{ sx: [{ pt: "2.5px", pb: "2.5px" }] }}
+        select={editedLeafType === LeafType.Boolean}
+        disabled={editedLeafType === LeafType.Null}
+        value={input}
+        error={parseLeaf(input, "u", editedLeafType) === undefined}
+        focused={changedInput}
+        color={changedInput ? "success" : undefined}
+        onChange={({ target: { value } }) => setInput(value)}
+      >
+        <MenuItem value="True">True</MenuItem>
+        <MenuItem value="False">False</MenuItem>
+      </TextField>
+      {editedLeafType === LeafType.Quantity && (
+        <TextField
+          variant="standard"
+          sx={{ width: "6ch" }}
+          inputProps={{ sx: [{ pt: "2.5px", pb: "2.5px" }] }}
+          value={unitInput}
+          error={parseLeaf("0", unitInput, editedLeafType) === undefined}
+          focused={changedUnitInput}
+          color={changedUnitInput ? "success" : undefined}
+          onChange={({ target: { value } }) => setUnitInput(value)}
+        />
+      )}
       <TextField
         select
         variant="standard"
         sx={{ width: "90px" }}
         inputProps={{ sx: [{ pt: "2.5px", pb: "2.5px" }] }}
-        value={getType(editedLeafValue)}
+        value={editedLeafType}
+        focused={changedType}
+        color={changedType ? "success" : undefined}
+        onChange={({ target: { value } }) => {
+          const newLeafType = value as unknown as LeafType;
+
+          if (newLeafType === LeafType.Boolean) {
+            setInput(input.toLowerCase() === "true" ? "True" : "False");
+          }
+
+          if (newLeafType === LeafType.Null) {
+            setInput("None");
+          }
+
+          setEditedLeafType(newLeafType);
+        }}
       >
         <MenuItem value={LeafType.Number}>int/float</MenuItem>
         <MenuItem value={LeafType.Boolean}>bool</MenuItem>
@@ -89,80 +138,19 @@ function LeafItemContentEditMode({ path }: LeafItemContentEditModeProps) {
         <MenuItem value={LeafType.Quantity}>Quantity</MenuItem>
         <MenuItem value={LeafType.Datetime}>datetime</MenuItem>
       </TextField>
+      <IconButton
+        sx={{ width: "1.75rem", height: "1.75rem" }}
+        size="small"
+        onClick={() => {
+          setInput(initialInput);
+          setUnitInput(initialUnitInput);
+          setEditedLeafType(originalLeafType);
+        }}
+      >
+        <Replay fontSize="small" />
+      </IconButton>
     </Box>
   );
-
-  // const [editMode, setEditMode] = useState(false);
-  // const [validInput, setValidInput] = useState(true);
-  // const [changed, setChanged] = useState(false);
-  // const [editedLeafValue, setEditedLeafValue] = useState<Leaf>(
-  //   () => getData(editedRootData, path) as Leaf,
-  // );
-  // const [input, setInput] = useState(() => leafToString(editedLeafValue, false));
-  // const [reset, setReset] = useState(Symbol());
-
-  // const originalDataValue = useMemo(
-  //   () => getData(originalRootData, path),
-  //   [originalRootData, path],
-  // );
-
-  // useEffect(() => {
-  //   const newEditedLeafValue = getData(editedRootData, path) as Leaf;
-  //   setEditedLeafValue(newEditedLeafValue);
-  //   setInput(leafToString(newEditedLeafValue, false));
-  //   setValidInput(true);
-  //   setChanged(newEditedLeafValue !== originalDataValue);
-  // }, [editedRootData, path, originalDataValue, editMode, reset, setInput]);
-
-  // return (
-  //   <Box sx={{ display: "flex", columnGap: 1 }}>
-  //     <TextField
-  //       variant="standard"
-  //       inputProps={{ sx: [{ pt: "2px", pb: "3px", textAlign: "right" }] }}
-  //       value={input}
-  //       focused={editMode || changed}
-  //       color={changed ? "success" : undefined}
-  //       error={!validInput}
-  //       onFocus={() => setEditMode(true)}
-  //       onBlur={() => startTransition(() => setEditMode(false))}
-  //       onChange={(event) => {
-  //         const newInput = event.target.value;
-  //         const parsedLeaf = inputToLeaf(newInput);
-  //         const newValidInput = parsedLeaf !== undefined;
-  //         if (newValidInput) {
-  //           setData(editedRootData, path, parsedLeaf);
-  //         }
-  //         setInput(newInput);
-  //         setValidInput(newValidInput);
-  //         setChanged(parsedLeaf !== originalDataValue);
-  //       }}
-  //     />
-  //     <TextField
-  //       select
-  //       variant="standard"
-  //       sx={{ width: "90px" }}
-  //       inputProps={{ sx: [{ pt: "2px", pb: "3px" }] }}
-  //       value={getType(editedLeafValue)}
-  //     >
-  //       <MenuItem value="int/float">int/float</MenuItem>
-  //       <MenuItem value="bool">bool</MenuItem>
-  //       <MenuItem value="str">str</MenuItem>
-  //       <MenuItem value="None">None</MenuItem>
-  //       <MenuItem value="Quantity">Quantity</MenuItem>
-  //       <MenuItem value="datetime">datetime</MenuItem>
-  //     </TextField>
-  //     <IconButton
-  //       sx={{ width: "1.75rem", height: "1.75rem" }}
-  //       size="small"
-  //       // onClick={() => {
-  //       //   setData(editedRootData, path, originalDataValue);
-  //       //   setReset(Symbol());
-  //       // }}
-  //     >
-  //       <Replay fontSize="small" />
-  //     </IconButton>
-  //   </Box>
-  // );
 }
 
 type LeafItemContentProps = {

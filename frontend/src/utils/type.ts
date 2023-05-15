@@ -71,11 +71,18 @@ export function isParam(data: Data): data is Param {
 }
 
 export function getLeafType(leaf: Leaf) {
-  if (typeof leaf === "number") return LeafType.Number;
+  switch (typeof leaf) {
+    case "number":
+      return LeafType.Number;
+    case "boolean":
+      return LeafType.Boolean;
+    case "string":
+      return LeafType.String;
+  }
 
-  if (typeof leaf === "boolean") return LeafType.Boolean;
+  if (leaf === null) return LeafType.Null;
 
-  if (typeof leaf === "string") return LeafType.String;
+  if (isDatetime(leaf)) return LeafType.Datetime;
 
-  if (typeof leaf === "string") return LeafType.String;
+  return LeafType.Quantity;
 }
