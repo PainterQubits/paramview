@@ -20,7 +20,11 @@ import {
 import theme from "@/theme";
 import { formatDate } from "@/utils/timestamp";
 import { commitHistoryAtom } from "@/atoms/api";
-import { syncLatestAtom, selectedCommitIndexAtom } from "@/atoms/commitSelect";
+import {
+  syncLatestAtom,
+  selectedCommitIndexAtom,
+  commitSelectFrozenAtom,
+} from "@/atoms/commitSelect";
 import CommitSelectList, { CommitSelectListContext } from "./CommitSelectList";
 
 const commitSelectSx = {
@@ -78,6 +82,7 @@ function CommitSelectContents() {
   const [selectedCommitIndex, setSelectedCommitIndex] = useAtom(selectedCommitIndexAtom);
   const [syncLatest, setSyncLatest] = useAtom(syncLatestAtom);
   const [commitHistory] = useAtom(commitHistoryAtom);
+  const [commitSelectFrozen] = useAtom(commitSelectFrozenAtom);
 
   /** Index in the commit history of the currently highlighted commit. */
   const [highlightedCommitIndex, setHighlightedCommitIndex] = useState<number | null>(
@@ -133,6 +138,7 @@ function CommitSelectContents() {
           disablePortal
           disableListWrap
           autoHighlight
+          disabled={commitSelectFrozen}
           value={selectedCommitIndex}
           onChange={(_, commitIndex) => {
             if (commitIndex !== null) {
@@ -178,10 +184,11 @@ function CommitSelectContents() {
             control={<Checkbox color="secondary" checked={syncLatest} />}
             label="Latest"
             labelPlacement="start"
+            disabled={commitSelectFrozen}
             onChange={() =>
               startTransition(() => {
-                setSyncLatest(!syncLatest);
                 setSelectedCommitIndex(commitHistory.length - 1);
+                setSyncLatest(!syncLatest);
               })
             }
           />

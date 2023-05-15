@@ -24,3 +24,6 @@ export const selectedCommitIndexAtom = atom(
   (_, set, selectedCommitIndex: number) =>
     set(selectedCommitIndexStateAtom, selectedCommitIndex),
 );
+
+/** Whether commit selection is currently frozen, meaning the commit cannot be changed. */
+export const commitSelectFrozenAtom = atom(false);

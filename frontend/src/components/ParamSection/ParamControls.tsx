@@ -1,6 +1,7 @@
-import { startTransition, useEffect } from "react";
+import { startTransition } from "react";
 import { useAtom, useSetAtom } from "jotai";
 import { Box, FormGroup, FormControlLabel, Switch, Button } from "@mui/material";
+import { syncLatestAtom, commitSelectFrozenAtom } from "@/atoms/commitSelect";
 import { roundAtom, collapseAtom, editModeAtom, editedDataAtom } from "@/atoms/paramList";
 
 const subControlsSx = {
@@ -12,6 +13,7 @@ const subControlsSx = {
 const buttonSx = {
   px: 1.25,
   py: 0.75,
+  whiteSpace: "nowrap",
 };
 
 /** Controls for the parameter section. */
@@ -19,9 +21,18 @@ export default function ParamControls() {
   const [round, toggleRound] = useAtom(roundAtom);
   const collapseAll = useSetAtom(collapseAtom);
   const [editMode, toggleEditMode] = useAtom(editModeAtom);
+  const setSyncLatest = useSetAtom(syncLatestAtom);
+  const setCommitSelectFrozen = useSetAtom(commitSelectFrozenAtom);
   const resetEditedData = useSetAtom(editedDataAtom);
 
-  useEffect(resetEditedData, [resetEditedData, editMode]);
+  const toggleEditModeAndReset = () => {
+    startTransition(() => {
+      setCommitSelectFrozen(!editMode);
+      setSyncLatest(false);
+      resetEditedData();
+      toggleEditMode();
+    });
+  };
 
   return (
     <>
@@ -49,11 +60,7 @@ export default function ParamControls() {
       <Box sx={subControlsSx}>
         {editMode ? (
           <>
-            <Button
-              variant="contained"
-              sx={buttonSx}
-              onClick={() => startTransition(toggleEditMode)}
-            >
+            <Button variant="contained" sx={buttonSx} onClick={toggleEditModeAndReset}>
               Cancel
             </Button>
             <Button variant="contained" sx={buttonSx}>
@@ -61,11 +68,7 @@ export default function ParamControls() {
             </Button>
           </>
         ) : (
-          <Button
-            variant="contained"
-            sx={buttonSx}
-            onClick={() => startTransition(toggleEditMode)}
-          >
+          <Button variant="contained" sx={buttonSx} onClick={toggleEditModeAndReset}>
             Edit
           </Button>
         )}

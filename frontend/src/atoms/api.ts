@@ -1,7 +1,7 @@
 import { atom } from "jotai";
 import { CommitEntry, Data } from "@/types";
 import { requestData } from "@/utils/api";
-import { selectedCommitIndexAtom } from "@/atoms/commitSelect";
+import { syncLatestAtom, selectedCommitIndexAtom } from "@/atoms/commitSelect";
 
 /**
  * Request for the database name that also sets the page title as a side effect. This
@@ -26,8 +26,17 @@ const commitHistoryStateAtom = atom(new Promise<CommitEntry[]>(() => {}));
 /** Commit history retrieved from the server. */
 export const commitHistoryAtom = atom(
   (get) => get(commitHistoryStateAtom),
-  (_, set) =>
-    set(commitHistoryStateAtom, requestData<CommitEntry[]>("api/commit-history")),
+  (get, set) =>
+    set(
+      commitHistoryStateAtom,
+      requestData<CommitEntry[]>("api/commit-history").then((newCommitHistory) => {
+        if (get(syncLatestAtom)) {
+          set(selectedCommitIndexAtom, newCommitHistory.length - 1);
+        }
+
+        return newCommitHistory;
+      }),
+    ),
 );
 
 /** Data for the currently selected commit. */
