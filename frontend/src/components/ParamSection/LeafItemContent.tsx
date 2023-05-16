@@ -52,7 +52,7 @@ function LeafItemEditMode({ path }: LeafItemEditModeProps) {
     [originalLeafValue],
   );
 
-  const [editedRootData] = useAtom(editedDataAtom);
+  const [editedRootData, editedDataDispatch] = useAtom(editedDataAtom);
   const editedLeafValue = useMemo(
     () => getData(editedRootData, path) as Leaf,
     [editedRootData, path],
@@ -71,9 +71,13 @@ function LeafItemEditMode({ path }: LeafItemEditModeProps) {
   useEffect(() => {
     const parsedLeaf = parseLeaf(input, unitInput, editedLeafType);
     if (parsedLeaf !== undefined) {
-      setData(editedRootData, path, parsedLeaf);
+      if (path.length === 0) {
+        editedDataDispatch({ type: "set", value: parsedLeaf });
+      } else {
+        setData(editedRootData, path, parsedLeaf);
+      }
     }
-  }, [input, unitInput, editedLeafType, editedRootData, path]);
+  }, [input, unitInput, editedLeafType, editedDataDispatch, editedRootData, path]);
 
   const changedInput = input !== originalInput;
   const changedUnitInput = unitInput !== originalUnitInput;
@@ -126,9 +130,7 @@ function LeafItemEditMode({ path }: LeafItemEditModeProps) {
 
           if (newLeafType === LeafType.Boolean) {
             setInput(input.toLowerCase() === "true" ? "True" : "False");
-          }
-
-          if (newLeafType === LeafType.Null) {
+          } else if (newLeafType === LeafType.Null) {
             setInput("None");
           }
 

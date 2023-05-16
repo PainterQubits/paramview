@@ -2,6 +2,7 @@ import { atom } from "jotai";
 import { CommitEntry, Data } from "@/types";
 import { requestData } from "@/utils/api";
 import { syncLatestAtom, selectedCommitIndexAtom } from "@/atoms/commitSelect";
+import { editModeAtom } from "@/atoms/paramList";
 
 /**
  * Request for the database name that also sets the page title as a side effect. This
@@ -30,7 +31,7 @@ export const commitHistoryAtom = atom(
     set(
       commitHistoryStateAtom,
       requestData<CommitEntry[]>("api/commit-history").then((newCommitHistory) => {
-        if (get(syncLatestAtom)) {
+        if (!get(editModeAtom) && get(syncLatestAtom)) {
           set(selectedCommitIndexAtom, newCommitHistory.length - 1);
         }
 

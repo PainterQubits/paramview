@@ -178,7 +178,7 @@ function CommitSelectContents() {
         <FormGroup>
           <FormControlLabel
             data-testid="latest-checkbox"
-            control={<Checkbox color="secondary" checked={syncLatest} />}
+            control={<Checkbox color="secondary" checked={!editMode && syncLatest} />}
             label="Latest"
             labelPlacement="start"
             disabled={editMode}

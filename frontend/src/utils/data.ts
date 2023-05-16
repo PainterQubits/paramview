@@ -160,11 +160,12 @@ export function getData(data: Data, path: Path): Data {
 
 /**
  * Set the data at the given path to the given value. Note that this mutates the data
- * object that is passed in.
+ * object that is passed in. The path must not be empty (the root data must be reassigned
+ * separately).
  */
 export function setData(data: Data, path: Path, value: Data) {
   if (path.length === 0) {
-    throw new Error("cannot set data with no path");
+    throw new Error("cannot set root data using the setData function");
   }
 
   const parentData = getData(data, path.slice(0, -1));

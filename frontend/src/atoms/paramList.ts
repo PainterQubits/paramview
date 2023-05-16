@@ -32,22 +32,31 @@ export const editModeAtom = atom(
   (get, set) => set(editModeStateAtom, !get(editModeStateAtom)),
 );
 
-/** Primitive atom to store value of edited data. */
-const editedDataStateAtom = atom<Promise<Data> | undefined>(undefined);
+/**
+ * Primitive atom to store value of edited data. Initializing to an infinite promise means
+ * the edited data will be loading until editedDataAtom is set.
+ */
+// eslint-disable-next-line @typescript-eslint/no-empty-function
+const editedDataStateAtom = atom<Data | Promise<Data>>(new Promise<Data>(() => {}));
 
 /**
  * Current data that has been potentially edited by the user. The set function resets the
  * edited data to a new copy of the data for the current commit.
  */
 export const editedDataAtom = atom(
-  (get) => get(editedDataStateAtom) ?? get(originalDataAtom),
-  (get, set) =>
-    set(
-      editedDataStateAtom,
-      get(originalDataAtom).then((originalData) =>
-        JSON.parse(JSON.stringify(originalData)),
-      ),
-    ),
+  (get) => (get(editModeAtom) ? get(editedDataStateAtom) : get(originalDataAtom)),
+  (get, set, action: { type: "reset" } | { type: "set"; value: Data }) => {
+    if (action.type === "reset") {
+      set(
+        editedDataStateAtom,
+        get(originalDataAtom).then((originalData) =>
+          JSON.parse(JSON.stringify(originalData)),
+        ),
+      );
+    } else {
+      set(editedDataStateAtom, action.value);
+    }
+  },
 );
 
 export const commitDialogOpenAtom = atom(false);
