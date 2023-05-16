@@ -19,12 +19,12 @@ const leafItemContentSx = {
   background: "white",
 };
 
-type LeafItemContentReadModeProps = {
+type LeafItemReadModeProps = {
   /** Path to the data this item represents. */
   path: Path;
 };
 
-function LeafItemContentReadMode({ path }: LeafItemContentReadModeProps) {
+function LeafItemReadMode({ path }: LeafItemReadModeProps) {
   const [rootData] = useAtom(editedDataAtom);
   const [round] = useAtom(roundAtom);
   const leafValue = useMemo(() => getData(rootData, path) as Leaf, [rootData, path]);
@@ -32,12 +32,12 @@ function LeafItemContentReadMode({ path }: LeafItemContentReadModeProps) {
   return <Typography align="right">{leafToString(leafValue, round)}</Typography>;
 }
 
-type LeafItemContentEditModeProps = {
+type LeafItemEditModeProps = {
   /** Path to the data this item represents. */
   path: Path;
 };
 
-function LeafItemContentEditMode({ path }: LeafItemContentEditModeProps) {
+function LeafItemEditMode({ path }: LeafItemEditModeProps) {
   const [originalRootData] = useAtom(originalDataAtom);
   const originalLeafValue = useMemo(
     () => getData(originalRootData, path) as Leaf,
@@ -86,13 +86,12 @@ function LeafItemContentEditMode({ path }: LeafItemContentEditModeProps) {
         sx={{
           ml: 1,
           width:
-            editedLeafType === LeafType.Quantity
-              ? "calc(12.5rem - 8px - 6ch)"
-              : "12.5rem",
+            editedLeafType === LeafType.Quantity ? "calc(14rem - 8px - 6ch)" : "14rem",
         }}
         inputProps={{ sx: [{ pt: "2.5px", pb: "2.5px" }] }}
         select={editedLeafType === LeafType.Boolean}
         disabled={editedLeafType === LeafType.Null}
+        type={editedLeafType === LeafType.Datetime ? "datetime-local" : undefined}
         value={input}
         error={parseLeaf(input, "u", editedLeafType) === undefined}
         focused={changedInput}
@@ -172,11 +171,7 @@ export default function LeafItemContent({ name, path }: LeafItemContentProps) {
   return (
     <Box sx={leafItemContentSx}>
       <Typography>{name}</Typography>
-      {editMode ? (
-        <LeafItemContentEditMode path={path} />
-      ) : (
-        <LeafItemContentReadMode path={path} />
-      )}
+      {editMode ? <LeafItemEditMode path={path} /> : <LeafItemReadMode path={path} />}
     </Box>
   );
 }
