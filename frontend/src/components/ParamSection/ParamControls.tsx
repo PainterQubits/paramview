@@ -1,7 +1,6 @@
 import { startTransition } from "react";
 import { useAtom, useSetAtom } from "jotai";
 import { Box, FormGroup, FormControlLabel, Switch, Button } from "@mui/material";
-import { syncLatestAtom } from "@/atoms/commitSelect";
 import {
   roundAtom,
   collapseAtom,
@@ -28,12 +27,10 @@ export default function ParamControls() {
   const collapseAll = useSetAtom(collapseAtom);
   const [editMode, toggleEditMode] = useAtom(editModeAtom);
   const setCommitDialogOpen = useSetAtom(commitDialogOpenAtom);
-  const setSyncLatest = useSetAtom(syncLatestAtom);
   const resetEditedData = useSetAtom(editedDataAtom);
 
-  const toggleEditModeAndReset = () => {
+  const resetAndToggleEditMode = () => {
     startTransition(() => {
-      setSyncLatest(false);
       resetEditedData();
       toggleEditMode();
     });
@@ -65,7 +62,7 @@ export default function ParamControls() {
       <Box sx={subControlsSx}>
         {editMode ? (
           <>
-            <Button variant="contained" sx={buttonSx} onClick={toggleEditModeAndReset}>
+            <Button variant="contained" sx={buttonSx} onClick={resetAndToggleEditMode}>
               Cancel
             </Button>
             <Button
@@ -78,7 +75,7 @@ export default function ParamControls() {
             <CommitDialog />
           </>
         ) : (
-          <Button variant="contained" sx={buttonSx} onClick={toggleEditModeAndReset}>
+          <Button variant="contained" sx={buttonSx} onClick={resetAndToggleEditMode}>
             Edit
           </Button>
         )}

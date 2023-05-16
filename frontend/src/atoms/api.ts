@@ -39,9 +39,9 @@ export const commitHistoryAtom = atom(
     ),
 );
 
-/** Data for the currently selected commit. */
-export const dataAtom = atom(async (get) => {
+/** Original (i.e. unedited) data for the currently selected commit. */
+export const originalDataAtom = atom(async (get) => {
   const commitHistory = await get(commitHistoryAtom);
-  const selectedCommitIndex = await get(selectedCommitIndexAtom);
+  const selectedCommitIndex = get(selectedCommitIndexAtom);
   return requestData<Data>(`api/data/${commitHistory[selectedCommitIndex].id}`);
 });

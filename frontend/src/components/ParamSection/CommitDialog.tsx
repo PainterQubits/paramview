@@ -9,7 +9,7 @@ import {
   DialogContent,
   DialogActions,
 } from "@mui/material";
-import { dataAtom } from "@/atoms/api";
+import { originalDataAtom } from "@/atoms/api";
 import { editedDataAtom, commitDialogOpenAtom } from "@/atoms/paramList";
 
 const dialogContentSx = {
@@ -19,13 +19,13 @@ const dialogContentSx = {
 };
 
 export default function CommitDialog() {
-  const [rootData] = useAtom(dataAtom);
-  const [editedRootData] = useAtom(editedDataAtom);
+  const [originalData] = useAtom(originalDataAtom);
+  const [editedData] = useAtom(editedDataAtom);
   const [commitDialogOpen, setCommitDialogOpen] = useAtom(commitDialogOpenAtom);
 
   const close = () => setCommitDialogOpen(false);
 
-  const changes = detailedDiff({ root: rootData }, { root: editedRootData });
+  const changes = detailedDiff({ root: originalData }, { root: editedData });
 
   return (
     <Dialog fullWidth open={commitDialogOpen} onClose={close}>

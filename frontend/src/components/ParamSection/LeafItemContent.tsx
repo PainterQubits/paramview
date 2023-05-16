@@ -5,7 +5,7 @@ import { Box, Typography, TextField, MenuItem, IconButton } from "@mui/material"
 import { Path, LeafType, Leaf } from "@/types";
 import { leafToString, leafToInput, parseLeaf, getData, setData } from "@/utils/data";
 import { getLeafType } from "@/utils/type";
-import { dataAtom } from "@/atoms/api";
+import { originalDataAtom } from "@/atoms/api";
 import { roundAtom, editModeAtom, editedDataAtom } from "@/atoms/paramList";
 
 const leafItemContentSx = {
@@ -25,7 +25,7 @@ type LeafItemContentReadModeProps = {
 };
 
 function LeafItemContentReadMode({ path }: LeafItemContentReadModeProps) {
-  const [rootData] = useAtom(dataAtom);
+  const [rootData] = useAtom(editedDataAtom);
   const [round] = useAtom(roundAtom);
   const leafValue = useMemo(() => getData(rootData, path) as Leaf, [rootData, path]);
 
@@ -38,7 +38,7 @@ type LeafItemContentEditModeProps = {
 };
 
 function LeafItemContentEditMode({ path }: LeafItemContentEditModeProps) {
-  const [originalRootData] = useAtom(dataAtom);
+  const [originalRootData] = useAtom(originalDataAtom);
   const originalLeafValue = useMemo(
     () => getData(originalRootData, path) as Leaf,
     [originalRootData, path],

@@ -1,6 +1,6 @@
 import { atom } from "jotai";
 import { Data } from "@/types";
-import { dataAtom } from "@/atoms/api";
+import { originalDataAtom } from "@/atoms/api";
 
 /** Primitive atom to store the current value of collapseAtom. */
 const collapseStateAtom = atom(Symbol());
@@ -32,23 +32,21 @@ export const editModeAtom = atom(
   (get, set) => set(editModeStateAtom, !get(editModeStateAtom)),
 );
 
-/**
- * Primitive atom to store value of edited data. Initializing to an infinite promise means
- * the commit history will be loading until editedDataAtom is set.
- */
-// eslint-disable-next-line @typescript-eslint/no-empty-function
-const editedDataStateAtom = atom(new Promise<Data>(() => {}));
+/** Primitive atom to store value of edited data. */
+const editedDataStateAtom = atom<Promise<Data> | undefined>(undefined);
 
 /**
  * Current data that has been potentially edited by the user. The set function resets the
  * edited data to a new copy of the data for the current commit.
  */
 export const editedDataAtom = atom(
-  (get) => get(editedDataStateAtom),
+  (get) => get(editedDataStateAtom) ?? get(originalDataAtom),
   (get, set) =>
     set(
       editedDataStateAtom,
-      get(dataAtom).then((data) => JSON.parse(JSON.stringify(data))),
+      get(originalDataAtom).then((originalData) =>
+        JSON.parse(JSON.stringify(originalData)),
+      ),
     ),
 );
 

@@ -4,7 +4,7 @@ import { Box, List, ListItem } from "@mui/material";
 import { Path } from "@/types";
 import { isLeaf } from "@/utils/type";
 import { getTypeString, getTimestamp, getData, getChildrenNames } from "@/utils/data";
-import { dataAtom } from "@/atoms/api";
+import { editedDataAtom } from "@/atoms/paramList";
 import LeafItemContent from "./LeafItemContent";
 import GroupItemContent from "./GroupItemContent";
 import CollapseItem from "./CollapseItem";
@@ -35,7 +35,7 @@ type ParamListItemProps = {
 };
 
 function ParamListItem({ path }: ParamListItemProps) {
-  const [rootData] = useAtom(dataAtom);
+  const [rootData] = useAtom(editedDataAtom);
 
   const data = getData(rootData, path);
 

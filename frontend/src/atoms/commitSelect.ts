@@ -1,29 +1,16 @@
 import { atom } from "jotai";
-import { databaseNameAtom, commitHistoryAtom } from "@/atoms/api";
+import { editModeAtom } from "@/atoms/paramList";
+
+export const syncLatestStateAtom = atom(true);
 
 /** Whether to sync the current commit index with the latest commit. */
-export const syncLatestAtom = atom(true);
-
-/** Keeps track of the index of the selected commit to use when sync latest is false. */
-const selectedCommitIndexStateAtom = atom<number>(0);
-
-/**
- * Index of the currently selected commit in the commit history. This will be the latest
- * commit if syncLatestAtom is true, or the selected commit otherwise.
- */
-export const selectedCommitIndexAtom = atom(
-  async (get) => {
-    const commitHistoryLength = (await get(commitHistoryAtom)).length;
-    if (commitHistoryLength === 0) {
-      throw new Error(`Database ${await get(databaseNameAtom)} has no commits.`);
-    }
-    return get(syncLatestAtom)
-      ? commitHistoryLength - 1
-      : get(selectedCommitIndexStateAtom);
-  },
-  (_, set, selectedCommitIndex: number) =>
-    set(selectedCommitIndexStateAtom, selectedCommitIndex),
+export const syncLatestAtom = atom(
+  (get) => !get(editModeAtom) && get(syncLatestStateAtom),
+  (_, set, newSyncLatest: boolean) => set(syncLatestStateAtom, newSyncLatest),
 );
+
+/** Index of the currently selected commit in the commit history. */
+export const selectedCommitIndexAtom = atom<number>(0);
 
 /** Whether commit selection is currently frozen, meaning the commit cannot be changed. */
 export const commitSelectFrozenAtom = atom(false);
