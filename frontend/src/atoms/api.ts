@@ -16,6 +16,14 @@ const databaseName = requestData<string>("api/database-name").then((name) => {
 /** Database name retrieved from the server. */
 export const databaseNameAtom = atom(() => databaseName);
 
+/**
+ * Asynchronous atom to allow the app to expose the status of the promise that updates
+ * commitHistoryAtom. Initializing to an infinite promise means the commit history will be
+ * loading until commitHistoryAtom is set.
+ */
+// eslint-disable-next-line @typescript-eslint/no-empty-function
+export const commitHistoryAsyncAtom = atom(new Promise<void>(() => {}));
+
 /** Primitive atom to store the value of the commit history. */
 const commitHistoryStateAtom = atom<CommitEntry[] | null>(null);
 
@@ -26,12 +34,13 @@ const commitHistoryStateAtom = atom<CommitEntry[] | null>(null);
 export const commitHistoryAtom = atom(
   (get) => get(commitHistoryStateAtom),
   (_, set) =>
-    requestData<CommitEntry[]>("api/commit-history").then((newCommitHistory) =>
-      set(commitHistoryStateAtom, newCommitHistory),
+    set(
+      commitHistoryAsyncAtom,
+      requestData<CommitEntry[]>("api/commit-history").then((newCommitHistory) =>
+        set(commitHistoryStateAtom, newCommitHistory),
+      ),
     ),
 );
-
-// export const commitHistoryAsyncAtom = atom(commitHistoryAtom === null ? )
 
 /** Original (i.e. unedited) data for the currently selected commit. */
 export const originalDataAtom = atom(async (get) => {

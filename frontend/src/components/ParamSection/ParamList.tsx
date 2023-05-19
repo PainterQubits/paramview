@@ -49,7 +49,7 @@ function ParamListItem({ path }: ParamListItemProps) {
       disablePadding
     >
       {isLeaf(data) ? (
-        <LeafItemContent name={name} path={path} />
+        <LeafItemContent name={name} leaf={data} path={path} />
       ) : (
         <CollapseItem
           defaultOpen={path.length === 0}

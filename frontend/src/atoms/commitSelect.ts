@@ -30,7 +30,6 @@ export const selectedCommitIndexAtom = atom(
     return commitHistory !== null ? commitHistory.length - 1 : 0;
   },
   (get, set, action: selectCommitIndexAction) => {
-    console.log(action);
     if (action.type === "sync") {
       set(selectedCommitIndexStateAtom, get(selectedCommitIndexAtom));
     } else {

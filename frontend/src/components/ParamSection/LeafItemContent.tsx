@@ -4,7 +4,7 @@ import { Replay } from "@mui/icons-material";
 import { Box, Typography, TextField, MenuItem, IconButton } from "@mui/material";
 import { Path, LeafType, Leaf } from "@/types";
 import { leafToString, leafToInput, parseLeaf, getData, setData } from "@/utils/data";
-import { getLeafType } from "@/utils/type";
+import { isLeaf, getLeafType } from "@/utils/type";
 import { originalDataAtom } from "@/atoms/api";
 import { roundAtom, editModeAtom, editedDataAtom } from "@/atoms/paramList";
 
@@ -20,56 +20,56 @@ const leafItemContentSx = {
 };
 
 type LeafItemReadModeProps = {
-  /** Path to the data this item represents. */
-  path: Path;
+  /** Leaf value to display. */
+  leaf: Leaf;
 };
 
-function LeafItemReadMode({ path }: LeafItemReadModeProps) {
-  const [rootData] = useAtom(editedDataAtom);
+function LeafItemReadMode({ leaf }: LeafItemReadModeProps) {
   const [round] = useAtom(roundAtom);
-  const leafValue = useMemo(() => getData(rootData, path) as Leaf, [rootData, path]);
 
-  return <Typography align="right">{leafToString(leafValue, round)}</Typography>;
+  return <Typography align="right">{leafToString(leaf, round)}</Typography>;
 }
 
 type LeafItemEditModeProps = {
+  /** Edited leaf value. */
+  editedLeaf: Leaf;
   /** Path to the data this item represents. */
   path: Path;
 };
 
-function LeafItemEditMode({ path }: LeafItemEditModeProps) {
+function LeafItemEditMode({ editedLeaf, path }: LeafItemEditModeProps) {
   const [originalRootData] = useAtom(originalDataAtom);
-  const originalLeafValue = useMemo(
-    () => getData(originalRootData, path) as Leaf,
-    [originalRootData, path],
-  );
-  const originalLeafType = useMemo(
-    () => getLeafType(originalLeafValue),
-    [originalLeafValue],
-  );
-  const [originalInput, originalUnitInput] = useMemo(
-    () => leafToInput(originalLeafValue),
-    [originalLeafValue],
-  );
-
   const [editedRootData, editedDataDispatch] = useAtom(editedDataAtom);
-  const editedLeafValue = useMemo(
-    () => getData(editedRootData, path) as Leaf,
-    [editedRootData, path],
-  );
-  const [editedLeafType, setEditedLeafType] = useState(() =>
-    getLeafType(editedLeafValue),
-  );
-  const [editedInput, editedUnitInput] = useMemo(
-    () => leafToInput(editedLeafValue),
-    [editedLeafValue],
+
+  const {
+    leafType: originalLeafType,
+    input: originalInput,
+    unitInput: originalUnitInput,
+  } = useMemo(() => {
+    const originalData = getData(originalRootData, path);
+
+    if (!isLeaf(originalData)) {
+      throw new Error("original data for leaf input is not a leaf");
+    }
+
+    return { leafType: getLeafType(originalData), ...leafToInput(originalData) };
+  }, [originalRootData, path]);
+
+  const {
+    leafType: editedLeafType,
+    input: editedInput,
+    unitInput: editedUnitInput,
+  } = useMemo(
+    () => ({ leafType: getLeafType(editedLeaf), ...leafToInput(editedLeaf) }),
+    [editedLeaf],
   );
 
+  const [leafType, setLeafType] = useState(editedLeafType);
   const [input, setInput] = useState(editedInput);
   const [unitInput, setUnitInput] = useState(editedUnitInput);
 
   useEffect(() => {
-    const parsedLeaf = parseLeaf(input, unitInput, editedLeafType);
+    const parsedLeaf = parseLeaf(leafType, input, unitInput);
     if (parsedLeaf !== undefined) {
       if (path.length === 0) {
         editedDataDispatch({ type: "set", value: parsedLeaf });
@@ -77,11 +77,11 @@ function LeafItemEditMode({ path }: LeafItemEditModeProps) {
         setData(editedRootData, path, parsedLeaf);
       }
     }
-  }, [input, unitInput, editedLeafType, editedDataDispatch, editedRootData, path]);
+  }, [leafType, input, unitInput, editedRootData, path, editedDataDispatch]);
 
   const changedInput = input !== originalInput;
   const changedUnitInput = unitInput !== originalUnitInput;
-  const changedType = editedLeafType !== originalLeafType;
+  const changedLeafType = leafType !== originalLeafType;
 
   return (
     <Box sx={{ display: "flex", columnGap: 1 }}>
@@ -89,15 +89,14 @@ function LeafItemEditMode({ path }: LeafItemEditModeProps) {
         variant="standard"
         sx={{
           ml: 1,
-          width:
-            editedLeafType === LeafType.Quantity ? "calc(14rem - 8px - 6ch)" : "14rem",
+          width: leafType === LeafType.Quantity ? "calc(14rem - 8px - 6ch)" : "14rem",
         }}
         inputProps={{ sx: [{ pt: "2.5px", pb: "2.5px" }] }}
-        select={editedLeafType === LeafType.Boolean}
-        disabled={editedLeafType === LeafType.Null}
-        type={editedLeafType === LeafType.Datetime ? "datetime-local" : undefined}
+        select={leafType === LeafType.Boolean}
+        disabled={leafType === LeafType.Null}
+        type={leafType === LeafType.Datetime ? "datetime-local" : undefined}
         value={input}
-        error={parseLeaf(input, "u", editedLeafType) === undefined}
+        error={parseLeaf(leafType, input, "u") === undefined}
         focused={changedInput}
         color={changedInput ? "success" : undefined}
         onChange={({ target: { value } }) => setInput(value)}
@@ -105,13 +104,13 @@ function LeafItemEditMode({ path }: LeafItemEditModeProps) {
         <MenuItem value="True">True</MenuItem>
         <MenuItem value="False">False</MenuItem>
       </TextField>
-      {editedLeafType === LeafType.Quantity && (
+      {leafType === LeafType.Quantity && (
         <TextField
           variant="standard"
           sx={{ width: "6ch" }}
           inputProps={{ sx: [{ pt: "2.5px", pb: "2.5px" }] }}
           value={unitInput}
-          error={parseLeaf("0", unitInput, editedLeafType) === undefined}
+          error={parseLeaf(leafType, "0", unitInput) === undefined}
           focused={changedUnitInput}
           color={changedUnitInput ? "success" : undefined}
           onChange={({ target: { value } }) => setUnitInput(value)}
@@ -122,9 +121,9 @@ function LeafItemEditMode({ path }: LeafItemEditModeProps) {
         variant="standard"
         sx={{ width: "90px" }}
         inputProps={{ sx: [{ pt: "2.5px", pb: "2.5px" }] }}
-        value={editedLeafType}
-        focused={changedType}
-        color={changedType ? "success" : undefined}
+        value={leafType}
+        focused={changedLeafType}
+        color={changedLeafType ? "success" : undefined}
         onChange={({ target: { value } }) => {
           const newLeafType = value as unknown as LeafType;
 
@@ -134,7 +133,7 @@ function LeafItemEditMode({ path }: LeafItemEditModeProps) {
             setInput("None");
           }
 
-          setEditedLeafType(newLeafType);
+          setLeafType(newLeafType);
         }}
       >
         <MenuItem value={LeafType.Number}>int/float</MenuItem>
@@ -148,9 +147,9 @@ function LeafItemEditMode({ path }: LeafItemEditModeProps) {
         sx={{ width: "1.75rem", height: "1.75rem" }}
         size="small"
         onClick={() => {
+          setLeafType(originalLeafType);
           setInput(originalInput);
           setUnitInput(originalUnitInput);
-          setEditedLeafType(originalLeafType);
         }}
       >
         <Replay fontSize="small" />
@@ -162,18 +161,24 @@ function LeafItemEditMode({ path }: LeafItemEditModeProps) {
 type LeafItemContentProps = {
   /** Name to display. */
   name: string;
+  /** Leaf value to display, or the edited leaf value in edit mode. */
+  leaf: Leaf;
   /** Path to the data this item represents. */
   path: Path;
 };
 
 /** Item content for a Leaf. */
-export default function LeafItemContent({ name, path }: LeafItemContentProps) {
+export default function LeafItemContent({ name, leaf, path }: LeafItemContentProps) {
   const [editMode] = useAtom(editModeAtom);
 
   return (
     <Box sx={leafItemContentSx}>
       <Typography>{name}</Typography>
-      {editMode ? <LeafItemEditMode path={path} /> : <LeafItemReadMode path={path} />}
+      {editMode ? (
+        <LeafItemEditMode editedLeaf={leaf} path={path} />
+      ) : (
+        <LeafItemReadMode leaf={leaf} />
+      )}
     </Box>
   );
 }

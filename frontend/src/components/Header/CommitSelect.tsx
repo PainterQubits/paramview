@@ -20,7 +20,7 @@ import {
 import theme from "@/theme";
 import { CommitEntry } from "@/types";
 import { formatDate } from "@/utils/timestamp";
-import { commitHistoryAtom } from "@/atoms/api";
+import { commitHistoryAtom, commitHistoryAsyncAtom } from "@/atoms/api";
 import { syncLatestAtom, selectedCommitIndexAtom } from "@/atoms/commitSelect";
 import { editModeAtom } from "@/atoms/paramList";
 import CommitSelectList, { CommitSelectListContext } from "./CommitSelectList";
@@ -81,6 +81,10 @@ type CommitSelectContentsProps = {
 
 /** Component to display when CommitSelect is done loading. */
 function CommitSelectContents({ commitHistory }: CommitSelectContentsProps) {
+  // Exposes errors from the promise that loads the commit history (e.g. if the backend is
+  // offline).
+  useAtom(commitHistoryAsyncAtom);
+
   const [selectedCommitIndex, setSelectedCommitIndex] = useAtom(selectedCommitIndexAtom);
   const [syncLatest, setSyncLatest] = useAtom(syncLatestAtom);
   const [editMode] = useAtom(editModeAtom);
@@ -128,8 +132,6 @@ function CommitSelectContents({ commitHistory }: CommitSelectContentsProps) {
       getSecondary,
     };
   }, [displayCommitIndex, commitHistory, getPrimary, getSecondary]);
-
-  console.log(selectedCommitIndex);
 
   return (
     <Box sx={commitSelectSx}>

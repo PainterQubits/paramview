@@ -62,16 +62,16 @@ function parseNumber(input: string) {
 
 export function leafToInput(leaf: Leaf) {
   if (isQuantity(leaf)) {
-    return [String(leaf.value), leaf.unit];
+    return { input: String(leaf.value), unitInput: leaf.unit };
   }
 
-  return [leafToString(leaf, false), ""];
+  return { input: leafToString(leaf, false), unitInput: "" };
 }
 
 export function parseLeaf(
+  leafType: LeafType,
   input: string,
   unit: string,
-  leafType: LeafType,
 ): Leaf | undefined {
   if (leafType === LeafType.String) {
     return input;

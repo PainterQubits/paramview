@@ -1,4 +1,4 @@
-import { startTransition } from "react";
+import { startTransition, Suspense } from "react";
 import { useAtom, useSetAtom } from "jotai";
 import { Box, FormGroup, FormControlLabel, Switch, Button } from "@mui/material";
 import { roundAtom, collapseAtom, editModeAtom, editedDataAtom } from "@/atoms/paramList";
@@ -67,7 +67,9 @@ export default function ParamControls() {
           Collapse all
         </Button>
       </Box>
-      <CommitControls />
+      <Suspense fallback={<Button variant="contained">Edit</Button>}>
+        <CommitControls />
+      </Suspense>
     </>
   );
 }
