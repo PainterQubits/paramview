@@ -76,5 +76,4 @@ def _commit() -> Response:
         ) from exc
     if not isinstance(message, str):
         raise TypeError(f"message must be a string, not '{type(message).__name__}'")
-    _current_db.commit(message, data)
-    return jsonify()  # TODO: Return commit ID from previous line using ParamDB v0.7.0
+    return jsonify(_current_db.commit(message, data))

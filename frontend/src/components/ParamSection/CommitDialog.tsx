@@ -17,7 +17,7 @@ import { requestData } from "@/utils/api";
 import { originalDataAtom } from "@/atoms/api";
 import { editModeAtom, editedDataAtom } from "@/atoms/paramList";
 
-const commitIdAtom = atom<Promise<number> | undefined>(undefined);
+const commitIdAtom = atom<Promise<number> | null>(null);
 
 const dialogContentSx = {
   display: "flex",
@@ -63,8 +63,8 @@ export default function CommitDialog() {
   const changes = detailedDiff({ root: originalData }, { root: editedData });
 
   useEffect(() => {
-    if (commitId !== undefined) {
-      setCommitId(undefined);
+    if (commitId !== null) {
+      setCommitId(null);
       setCommitDialogOpen(false);
       setEditMode(false);
     }
