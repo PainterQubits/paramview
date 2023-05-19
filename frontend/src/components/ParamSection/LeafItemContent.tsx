@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useAtom } from "jotai";
 import { Replay } from "@mui/icons-material";
 import { Box, Typography, TextField, MenuItem, IconButton } from "@mui/material";
@@ -24,14 +24,16 @@ type LeafItemReadModeProps = {
   leaf: Leaf;
 };
 
+/** Displays the string value of the given leaf. */
 function LeafItemReadMode({ leaf }: LeafItemReadModeProps) {
   const [round] = useAtom(roundAtom);
 
   return <Typography align="right">{leafToString(leaf, round)}</Typography>;
 }
 
+/** Input for entering a new leaf value. */
 type LeafItemEditModeProps = {
-  /** Edited leaf value. */
+  /** Edited leaf value that is used as the initial value. */
   editedLeaf: Leaf;
   /** Path to the data this item represents. */
   path: Path;
@@ -41,19 +43,24 @@ function LeafItemEditMode({ editedLeaf, path }: LeafItemEditModeProps) {
   const [originalRootData] = useAtom(originalDataAtom);
   const [editedRootData, editedDataDispatch] = useAtom(editedDataAtom);
 
-  const {
-    leafType: originalLeafType,
-    input: originalInput,
-    unitInput: originalUnitInput,
-  } = useMemo(() => {
+  const originalLeaf = useMemo(() => {
     const originalData = getData(originalRootData, path);
 
     if (!isLeaf(originalData)) {
       throw new Error("original data for leaf input is not a leaf");
     }
 
-    return { leafType: getLeafType(originalData), ...leafToInput(originalData) };
+    return originalData;
   }, [originalRootData, path]);
+
+  const {
+    leafType: originalLeafType,
+    input: originalInput,
+    unitInput: originalUnitInput,
+  } = useMemo(
+    () => ({ leafType: getLeafType(originalLeaf), ...leafToInput(originalLeaf) }),
+    [originalLeaf],
+  );
 
   const {
     leafType: editedLeafType,
@@ -68,16 +75,21 @@ function LeafItemEditMode({ editedLeaf, path }: LeafItemEditModeProps) {
   const [input, setInput] = useState(editedInput);
   const [unitInput, setUnitInput] = useState(editedUnitInput);
 
+  const setEditedData = useCallback(
+    (value: Leaf) => {
+      if (path.length === 0) {
+        editedDataDispatch({ type: "set", value });
+      } else {
+        setData(editedRootData, path, value);
+      }
+    },
+    [editedRootData, path, editedDataDispatch],
+  );
+
   useEffect(() => {
     const parsedLeaf = parseLeaf(leafType, input, unitInput);
-    if (parsedLeaf !== undefined) {
-      if (path.length === 0) {
-        editedDataDispatch({ type: "set", value: parsedLeaf });
-      } else {
-        setData(editedRootData, path, parsedLeaf);
-      }
-    }
-  }, [leafType, input, unitInput, editedRootData, path, editedDataDispatch]);
+    setEditedData(parsedLeaf !== undefined ? parsedLeaf : originalLeaf);
+  }, [leafType, input, unitInput, originalLeaf, setEditedData]);
 
   const changedInput = input !== originalInput;
   const changedUnitInput = unitInput !== originalUnitInput;

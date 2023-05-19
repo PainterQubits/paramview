@@ -18,8 +18,8 @@ export const databaseNameAtom = atom(() => databaseName);
 
 /**
  * Asynchronous atom to allow the app to expose the status of the promise that updates
- * commitHistoryAtom. Initializing to an infinite promise means the commit history will be
- * loading until commitHistoryAtom is set.
+ * commitHistoryAtom (e.g. to trigger the error screen). Initializing to an infinite
+ * promise means the commit history will be loading until commitHistoryAtom is set.
  */
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 export const commitHistoryAsyncAtom = atom(new Promise<void>(() => {}));

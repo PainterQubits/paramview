@@ -52,14 +52,7 @@ export function leafToString(leaf: Leaf, round: boolean) {
   return leaf;
 }
 
-function parseNumber(input: string) {
-  const numberInput = Number(input);
-
-  if (!Number.isNaN(Number.parseFloat(input)) && Number.isFinite(numberInput)) {
-    return numberInput;
-  }
-}
-
+/** Convert the given leaf to an input string and a unit input string. */
 export function leafToInput(leaf: Leaf) {
   if (isQuantity(leaf)) {
     return { input: String(leaf.value), unitInput: leaf.unit };
@@ -68,10 +61,26 @@ export function leafToInput(leaf: Leaf) {
   return { input: leafToString(leaf, false), unitInput: "" };
 }
 
+/**
+ * Return a number for the given input string, or undefined if the input is not a valid
+ * number.
+ */
+function parseNumber(input: string) {
+  const numberInput = Number(input);
+
+  if (!Number.isNaN(Number.parseFloat(input)) && Number.isFinite(numberInput)) {
+    return numberInput;
+  }
+}
+
+/**
+ * Return a leaf for the given leaf type, input, and unit input, or undefined if
+ * the input is not valid for the given leaf type.
+ */
 export function parseLeaf(
   leafType: LeafType,
   input: string,
-  unit: string,
+  unitInput: string,
 ): Leaf | undefined {
   if (leafType === LeafType.String) {
     return input;
@@ -84,11 +93,11 @@ export function parseLeaf(
   if (leafType === LeafType.Quantity) {
     const number = parseNumber(input);
 
-    if (number !== undefined && unit !== "") {
+    if (number !== undefined && unitInput !== "") {
       return {
         __type: "astropy.units.quantity.Quantity",
         value: number,
-        unit,
+        unit: unitInput,
       };
     }
   }

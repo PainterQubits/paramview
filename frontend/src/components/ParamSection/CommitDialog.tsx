@@ -38,6 +38,10 @@ const commitButtonSx = {
   },
 };
 
+/**
+ * Dialog displaying changes to the data, a text field for entering the commit message,
+ * and a commit button.
+ */
 export default function CommitDialog() {
   const [commitLoading, startCommitTransition] = useTransition();
 

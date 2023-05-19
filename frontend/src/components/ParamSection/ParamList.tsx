@@ -34,6 +34,10 @@ type ParamListItemProps = {
   path: Path;
 };
 
+/**
+ * Item in the parameter list displaying the data at the given path. If the data is a
+ * group, then the item will contain a sublist.
+ */
 function ParamListItem({ path }: ParamListItemProps) {
   const [rootData] = useAtom(editedDataAtom);
 

@@ -1,4 +1,4 @@
-import { startTransition, Suspense } from "react";
+import { startTransition } from "react";
 import { useAtom, useSetAtom } from "jotai";
 import { Box, FormGroup, FormControlLabel, Switch, Button } from "@mui/material";
 import { roundAtom, collapseAtom, editModeAtom, editedDataAtom } from "@/atoms/paramList";
@@ -10,6 +10,7 @@ const subControlsSx = {
   columnGap: 2.25,
 };
 
+/** Controls for toggling edit mode and opening the commit dialog. */
 function CommitControls() {
   const [editMode, setEditMode] = useAtom(editModeAtom);
   const editedDataDispatch = useSetAtom(editedDataAtom);
@@ -67,9 +68,7 @@ export default function ParamControls() {
           Collapse all
         </Button>
       </Box>
-      <Suspense fallback={<Button variant="contained">Edit</Button>}>
-        <CommitControls />
-      </Suspense>
+      <CommitControls />
     </>
   );
 }
