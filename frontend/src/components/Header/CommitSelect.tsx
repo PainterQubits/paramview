@@ -1,4 +1,4 @@
-import { startTransition, useState, useMemo, useCallback, Suspense } from "react";
+import { startTransition, useState, useMemo, useCallback } from "react";
 import { useAtom } from "jotai";
 import {
   PaperProps,
@@ -18,6 +18,7 @@ import {
   Skeleton,
 } from "@mui/material";
 import theme from "@/theme";
+import { CommitEntry } from "@/types";
 import { formatDate } from "@/utils/timestamp";
 import { commitHistoryAtom } from "@/atoms/api";
 import { syncLatestAtom, selectedCommitIndexAtom } from "@/atoms/commitSelect";
@@ -74,11 +75,14 @@ function StyledPopper(props: PopperProps) {
   return <Popper sx={popperSx} {...props} />;
 }
 
+type CommitSelectContentsProps = {
+  commitHistory: CommitEntry[];
+};
+
 /** Component to display when CommitSelect is done loading. */
-function CommitSelectContents() {
+function CommitSelectContents({ commitHistory }: CommitSelectContentsProps) {
   const [selectedCommitIndex, setSelectedCommitIndex] = useAtom(selectedCommitIndexAtom);
   const [syncLatest, setSyncLatest] = useAtom(syncLatestAtom);
-  const [commitHistory] = useAtom(commitHistoryAtom);
   const [editMode] = useAtom(editModeAtom);
 
   /** Index in the commit history of the currently highlighted commit. */
@@ -125,6 +129,8 @@ function CommitSelectContents() {
     };
   }, [displayCommitIndex, commitHistory, getPrimary, getSecondary]);
 
+  console.log(selectedCommitIndex);
+
   return (
     <Box sx={commitSelectSx}>
       <CommitSelectListContext.Provider value={commitSelectListContextValue}>
@@ -141,7 +147,7 @@ function CommitSelectContents() {
             if (commitIndex !== null) {
               startTransition(() => {
                 setSyncLatest(false);
-                setSelectedCommitIndex(commitIndex);
+                setSelectedCommitIndex({ type: "set", value: commitIndex });
               });
             }
           }}
@@ -178,13 +184,12 @@ function CommitSelectContents() {
         <FormGroup>
           <FormControlLabel
             data-testid="latest-checkbox"
-            control={<Checkbox color="secondary" checked={!editMode && syncLatest} />}
+            control={<Checkbox color="secondary" checked={syncLatest} />}
             label="Latest"
             labelPlacement="start"
             disabled={editMode}
             onChange={() =>
               startTransition(() => {
-                setSelectedCommitIndex(commitHistory.length - 1);
                 setSyncLatest(!syncLatest);
               })
             }
@@ -197,13 +202,11 @@ function CommitSelectContents() {
 
 /** Controls that affect the entire dashboard. */
 export default function CommitSelect() {
-  return (
-    <Suspense
-      fallback={
-        <Skeleton data-testid="commit-select-loading" variant="rounded" height="4rem" />
-      }
-    >
-      <CommitSelectContents />
-    </Suspense>
+  const [commitHistory] = useAtom(commitHistoryAtom);
+
+  return commitHistory === null ? (
+    <Skeleton data-testid="commit-select-loading" variant="rounded" height="4rem" />
+  ) : (
+    <CommitSelectContents commitHistory={commitHistory} />
   );
 }

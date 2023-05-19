@@ -1,15 +1,7 @@
-import { startTransition, Suspense } from "react";
+import { startTransition } from "react";
 import { useAtom, useSetAtom } from "jotai";
 import { Box, FormGroup, FormControlLabel, Switch, Button } from "@mui/material";
-import { commitHistoryAtom } from "@/atoms/api";
-import { syncLatestAtom, selectedCommitIndexAtom } from "@/atoms/commitSelect";
-import {
-  roundAtom,
-  collapseAtom,
-  editModeAtom,
-  editedDataAtom,
-  commitDialogOpenAtom,
-} from "@/atoms/paramList";
+import { roundAtom, collapseAtom, editModeAtom, editedDataAtom } from "@/atoms/paramList";
 import CommitDialog from "./CommitDialog";
 
 const subControlsSx = {
@@ -18,59 +10,29 @@ const subControlsSx = {
   columnGap: 2.25,
 };
 
-const buttonSx = {
-  px: 1.4,
-  whiteSpace: "nowrap",
-};
-
 function CommitControls() {
-  const [commitHistory] = useAtom(commitHistoryAtom);
-  const [syncLatest] = useAtom(syncLatestAtom);
-  const setSelectedCommitIndex = useSetAtom(selectedCommitIndexAtom);
-
-  const [editMode, toggleEditMode] = useAtom(editModeAtom);
-  const setCommitDialogOpen = useSetAtom(commitDialogOpenAtom);
+  const [editMode, setEditMode] = useAtom(editModeAtom);
   const editedDataDispatch = useSetAtom(editedDataAtom);
 
-  const resetAndToggleEditMode = () => {
+  const startEditMode = () =>
     startTransition(() => {
-      if (syncLatest) {
-        setSelectedCommitIndex(commitHistory.length - 1);
-      }
       editedDataDispatch({ type: "reset" });
-      toggleEditMode();
+      setEditMode(true);
     });
-  };
+
+  const endEditMode = () => startTransition(() => setEditMode(false));
 
   return (
     <Box sx={subControlsSx}>
       {editMode ? (
         <>
-          <Button
-            key="cancel"
-            variant="contained"
-            sx={buttonSx}
-            onClick={resetAndToggleEditMode}
-          >
+          <Button key="cancel" variant="contained" onClick={endEditMode}>
             Cancel
           </Button>
-          <Button
-            key="commit"
-            variant="contained"
-            sx={buttonSx}
-            onClick={() => setCommitDialogOpen(true)}
-          >
-            Commit
-          </Button>
-          <CommitDialog />
+          <CommitDialog key="commit" />
         </>
       ) : (
-        <Button
-          key="edit"
-          variant="contained"
-          sx={buttonSx}
-          onClick={resetAndToggleEditMode}
-        >
+        <Button key="edit" variant="contained" onClick={startEditMode}>
           Edit
         </Button>
       )}
@@ -100,21 +62,12 @@ export default function ParamControls() {
         <Button
           data-testid="collapse-all-button"
           variant="contained"
-          sx={buttonSx}
           onClick={collapseAll}
         >
           Collapse all
         </Button>
       </Box>
-      <Suspense
-        fallback={
-          <Button variant="contained" sx={buttonSx}>
-            Edit
-          </Button>
-        }
-      >
-        <CommitControls />
-      </Suspense>
+      <CommitControls />
     </>
   );
 }

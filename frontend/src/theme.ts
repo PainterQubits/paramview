@@ -19,5 +19,21 @@ export default function theme(mode: PaletteMode = "light") {
         fontSize: "1.625rem",
       },
     },
+    components: {
+      MuiButton: {
+        styleOverrides: {
+          root: {
+            padding: "5px 11px",
+            whiteSpace: "nowrap",
+          },
+          startIcon: {
+            marginRight: "5px",
+          },
+          endIcon: {
+            marginLeft: "5px",
+          },
+        },
+      },
+    },
   });
 }

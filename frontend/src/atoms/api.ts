@@ -1,8 +1,7 @@
 import { atom } from "jotai";
 import { CommitEntry, Data } from "@/types";
 import { requestData } from "@/utils/api";
-import { syncLatestAtom, selectedCommitIndexAtom } from "@/atoms/commitSelect";
-import { editModeAtom } from "@/atoms/paramList";
+import { selectedCommitIndexAtom } from "@/atoms/commitSelect";
 
 /**
  * Request for the database name that also sets the page title as a side effect. This
@@ -17,32 +16,32 @@ const databaseName = requestData<string>("api/database-name").then((name) => {
 /** Database name retrieved from the server. */
 export const databaseNameAtom = atom(() => databaseName);
 
-/**
- * Primitive atom to store value of the commit history. Initializing to an infinite
- * promise means the commit history will be loading until commitHistoryAtom is set.
- */
-// eslint-disable-next-line @typescript-eslint/no-empty-function
-const commitHistoryStateAtom = atom(new Promise<CommitEntry[]>(() => {}));
+/** Primitive atom to store the value of the commit history. */
+const commitHistoryStateAtom = atom<CommitEntry[] | null>(null);
 
-/** Commit history retrieved from the server. */
+/**
+ * Commit history retrieved from the server. The set function loads the commit history
+ * asynchronously and then sets the value of the atom.
+ */
 export const commitHistoryAtom = atom(
   (get) => get(commitHistoryStateAtom),
-  (get, set) =>
-    set(
-      commitHistoryStateAtom,
-      requestData<CommitEntry[]>("api/commit-history").then((newCommitHistory) => {
-        if (!get(editModeAtom) && get(syncLatestAtom)) {
-          set(selectedCommitIndexAtom, newCommitHistory.length - 1);
-        }
-
-        return newCommitHistory;
-      }),
+  (_, set) =>
+    requestData<CommitEntry[]>("api/commit-history").then((newCommitHistory) =>
+      set(commitHistoryStateAtom, newCommitHistory),
     ),
 );
 
+// export const commitHistoryAsyncAtom = atom(commitHistoryAtom === null ? )
+
 /** Original (i.e. unedited) data for the currently selected commit. */
 export const originalDataAtom = atom(async (get) => {
-  const commitHistory = await get(commitHistoryAtom);
+  const commitHistory = get(commitHistoryAtom);
+
+  if (commitHistory === null) {
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    return new Promise<Data>(() => {});
+  }
+
   const selectedCommitIndex = get(selectedCommitIndexAtom);
   return requestData<Data>(`api/data/${commitHistory[selectedCommitIndex].id}`);
 });

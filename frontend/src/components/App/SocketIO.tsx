@@ -1,5 +1,5 @@
 import { io } from "socket.io-client";
-import { startTransition, useEffect } from "react";
+import { useEffect } from "react";
 import { useSetAtom } from "jotai";
 import { commitHistoryAtom } from "@/atoms/api";
 
@@ -13,15 +13,12 @@ export default function SocketIO() {
   useEffect(() => {
     const socket = io();
 
-    /** Actions to perform when the database may have been updated. */
-    const databaseUpdate = () => startTransition(updateCommitHistory);
-
     // Trigger an update when the WebSocket connection is established, when there is a
     // connection error, when disconnected, and when the database is updated.
-    socket.on("connect", databaseUpdate);
-    socket.on("connect_error", databaseUpdate);
-    socket.on("disconnect", databaseUpdate);
-    socket.on("database_update", databaseUpdate);
+    socket.on("connect", updateCommitHistory);
+    socket.on("connect_error", updateCommitHistory);
+    socket.on("disconnect", updateCommitHistory);
+    socket.on("database_update", updateCommitHistory);
 
     return () => {
       socket.disconnect();

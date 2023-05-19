@@ -1,15 +1,40 @@
 import { atom } from "jotai";
+import { commitHistoryAtom } from "@/atoms/api";
+import { editModeAtom } from "@/atoms/paramList";
 
-export const syncLatestStateAtom = atom(true);
+/** Primitive atom to store the current value of syncLatestAtom. */
+const syncLatestStateAtom = atom(true);
 
 /** Whether to sync the current commit index with the latest commit. */
 export const syncLatestAtom = atom(
-  (get) => get(syncLatestStateAtom),
-  (_, set, newSyncLatest: boolean) => set(syncLatestStateAtom, newSyncLatest),
+  (get) => !get(editModeAtom) && get(syncLatestStateAtom),
+  (_, set, newSyncLatest: boolean) => {
+    set(selectedCommitIndexAtom, { type: "sync" });
+    set(syncLatestStateAtom, newSyncLatest);
+  },
 );
 
-/** Index of the currently selected commit in the commit history. */
-export const selectedCommitIndexAtom = atom<number>(0);
+type selectCommitIndexAction = { type: "sync" } | { type: "set"; value: number };
 
-/** Whether commit selection is currently frozen, meaning the commit cannot be changed. */
-export const commitSelectFrozenAtom = atom(false);
+/** Primitive atom to store the current value of selectedCommitIndexAtom. */
+const selectedCommitIndexStateAtom = atom(0);
+
+/** Index of the currently selected commit in the commit history. */
+export const selectedCommitIndexAtom = atom(
+  (get) => {
+    if (!get(syncLatestAtom)) {
+      return get(selectedCommitIndexStateAtom);
+    }
+
+    const commitHistory = get(commitHistoryAtom);
+    return commitHistory !== null ? commitHistory.length - 1 : 0;
+  },
+  (get, set, action: selectCommitIndexAction) => {
+    console.log(action);
+    if (action.type === "sync") {
+      set(selectedCommitIndexStateAtom, get(selectedCommitIndexAtom));
+    } else {
+      set(selectedCommitIndexStateAtom, action.value);
+    }
+  },
+);
