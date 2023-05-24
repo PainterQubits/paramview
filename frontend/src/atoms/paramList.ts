@@ -7,7 +7,7 @@ import { selectedCommitIndexAtom } from "@/atoms/commitSelect";
 const collapseStateAtom = atom(Symbol());
 
 /**
- * Value that causes parameter lists to collapse when it changes, and a function to change
+ * Value that causes parameter lists to collapse when it changes and a function to change
  * it.
  */
 export const collapseAtom = atom(
@@ -27,7 +27,7 @@ export const roundAtom = atom(
 /** Primitive atom to store the current value of editModeAtom. */
 const editModeStateAtom = atom(false);
 
-/** Whether edit mode is currently enabled. */
+/** Whether edit mode is currently enabled and a function to update it. */
 export const editModeAtom = atom(
   (get) => get(editModeStateAtom),
   (_, set, newEditMode: boolean) => {
@@ -37,17 +37,18 @@ export const editModeAtom = atom(
 );
 
 /**
- * Primitive atom to store value of edited data. Initializing to an infinite promise means
- * the edited data will be loading until editedDataAtom is set.
+ * Primitive atom to store value of editedDataAtom. Initializing to an infinite promise
+ * means the edited data will be loading until editedDataAtom is set.
  */
-// eslint-disable-next-line @typescript-eslint/no-empty-function
 const editedDataStateAtom = atom<Data | Promise<Data>>(new Promise<Data>(() => {}));
 
 type editedDataAction = { type: "reset" } | { type: "set"; value: Data };
 
 /**
- * Current data that has been potentially edited by the user. The set function resets the
- * edited data to a new copy of the data for the current commit.
+ * Current data that has been potentially edited by the user.
+ *
+ * The set function can reset the edited data to a new copy of the original data for the
+ * current commit, or set the edited data to a new value.
  */
 export const editedDataAtom = atom(
   (get) => (get(editModeAtom) ? get(editedDataStateAtom) : get(originalDataAtom)),

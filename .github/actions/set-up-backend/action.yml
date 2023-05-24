@@ -6,7 +6,7 @@ runs:
   steps:
     - name: Install Poetry
       shell: bash
-      run: pipx install poetry==1.5.0
+      run: pipx install poetry==1.4.2
 
     - name: Set up Python with Poetry cache
       uses: actions/setup-python@v4

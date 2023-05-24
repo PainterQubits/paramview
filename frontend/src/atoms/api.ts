@@ -8,49 +8,52 @@ import { selectedCommitIndexAtom } from "@/atoms/commitSelect";
  * request is defined outside of databaseNameAtom so the page title is set whether or
  * not the atom is used.
  */
-const databaseName = requestData<string>("api/database-name").then((name) => {
+const databaseNameRequest = requestData<string>("api/database-name").then((name) => {
   document.title = name;
   return name;
 });
 
 /** Database name retrieved from the server. */
-export const databaseNameAtom = atom(() => databaseName);
+export const databaseNameAtom = atom(() => databaseNameRequest);
+
+/** Primitive atom to store the value of commitHistorySyncAtom. */
+const commitHistorySyncStateAtom = atom<CommitEntry[] | null>(null);
 
 /**
- * Asynchronous atom to allow the app to expose the status of the promise that updates
- * commitHistoryAtom (e.g. to trigger the error screen). Initializing to an infinite
- * promise means the commit history will be loading until commitHistoryAtom is set.
+ * Synchronous atom containing the commit history retrieved from the server, or null while
+ * it is loading. The purpose of this atom is mainly so that selectedCommitIndexAtom can
+ * be updated synchronously.
  */
-// eslint-disable-next-line @typescript-eslint/no-empty-function
-export const commitHistoryAsyncAtom = atom(new Promise<void>(() => {}));
-
-/** Primitive atom to store the value of the commit history. */
-const commitHistoryStateAtom = atom<CommitEntry[] | null>(null);
+export const commitHistorySyncAtom = atom((get) => get(commitHistorySyncStateAtom));
 
 /**
- * Commit history retrieved from the server. The set function loads the commit history
- * asynchronously and then sets the value of the atom.
+ * Primitive atom to store the state of commitHistoryAtom. Initializing to an infinite
+ * promise means the commit history will be loading until this atom is set.
+ */
+const commitHistoryStateAtom = atom(new Promise<CommitEntry[]>(() => {}));
+
+/**
+ * Commit history retrieved from the server.
+ *
+ * The set function requests the latest commit history, updates this atom to the
+ * asynchronous request, and updates commitHistorySyncAtom once it is loaded.
  */
 export const commitHistoryAtom = atom(
   (get) => get(commitHistoryStateAtom),
-  (_, set) =>
-    set(
-      commitHistoryAsyncAtom,
-      requestData<CommitEntry[]>("api/commit-history").then((newCommitHistory) =>
-        set(commitHistoryStateAtom, newCommitHistory),
-      ),
-    ),
+  (_, set) => {
+    const commitHistoryRequest = (async () => {
+      const newCommitHistory = await requestData<CommitEntry[]>("api/commit-history");
+      set(commitHistorySyncStateAtom, newCommitHistory);
+      return newCommitHistory;
+    })();
+
+    set(commitHistoryStateAtom, commitHistoryRequest);
+  },
 );
 
 /** Original (i.e. unedited) data for the currently selected commit. */
 export const originalDataAtom = atom(async (get) => {
-  const commitHistory = get(commitHistoryAtom);
-
-  if (commitHistory === null) {
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    return new Promise<Data>(() => {});
-  }
-
+  const commitHistory = await get(commitHistoryAtom);
   const selectedCommitIndex = get(selectedCommitIndexAtom);
   return requestData<Data>(`api/data/${commitHistory[selectedCommitIndex].id}`);
 });

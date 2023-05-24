@@ -1,4 +1,4 @@
-import { startTransition, useState, useMemo, useCallback } from "react";
+import { startTransition, useState, useMemo, useCallback, Suspense } from "react";
 import { useAtom } from "jotai";
 import {
   PaperProps,
@@ -18,9 +18,8 @@ import {
   Skeleton,
 } from "@mui/material";
 import theme from "@/theme";
-import { CommitEntry } from "@/types";
 import { formatDate } from "@/utils/timestamp";
-import { commitHistoryAtom, commitHistoryAsyncAtom } from "@/atoms/api";
+import { commitHistoryAtom } from "@/atoms/api";
 import { syncLatestAtom, selectedCommitIndexAtom } from "@/atoms/commitSelect";
 import { editModeAtom } from "@/atoms/paramList";
 import CommitSelectList, { CommitSelectListContext } from "./CommitSelectList";
@@ -75,15 +74,9 @@ function StyledPopper(props: PopperProps) {
   return <Popper sx={popperSx} {...props} />;
 }
 
-type CommitSelectContentsProps = {
-  commitHistory: CommitEntry[];
-};
-
 /** Component to display when CommitSelect is done loading. */
-function CommitSelectContents({ commitHistory }: CommitSelectContentsProps) {
-  // Exposes errors from the promise that loads the commit history (e.g. if the backend is
-  // offline).
-  useAtom(commitHistoryAsyncAtom);
+function CommitSelectContents() {
+  const [commitHistory] = useAtom(commitHistoryAtom);
 
   const [selectedCommitIndex, setSelectedCommitIndex] = useAtom(selectedCommitIndexAtom);
   const [syncLatest, setSyncLatest] = useAtom(syncLatestAtom);
@@ -204,11 +197,13 @@ function CommitSelectContents({ commitHistory }: CommitSelectContentsProps) {
 
 /** Controls that affect the entire dashboard. */
 export default function CommitSelect() {
-  const [commitHistory] = useAtom(commitHistoryAtom);
-
-  return commitHistory === null ? (
-    <Skeleton data-testid="commit-select-loading" variant="rounded" height="4rem" />
-  ) : (
-    <CommitSelectContents commitHistory={commitHistory} />
+  return (
+    <Suspense
+      fallback={
+        <Skeleton data-testid="commit-select-loading" variant="rounded" height="4rem" />
+      }
+    >
+      <CommitSelectContents />
+    </Suspense>
   );
 }

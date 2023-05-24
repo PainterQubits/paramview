@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 import { Path, LeafType, Data, Leaf, Group } from "@/types";
 import {
   isLeaf,
@@ -141,8 +143,7 @@ export function getTypeString(group: Group) {
 export function getTimestamp(group: Group): number {
   if (isParam(group)) return new Date(group.__last_updated.isoformat).getTime();
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const timestamps = getChildren(group).map(([_, data]) =>
+  const timestamps = getChildren(group).map(([, data]) =>
     isLeaf(data) ? -Infinity : getTimestamp(data),
   );
 
@@ -203,12 +204,10 @@ export function getChildrenNames(group: Group) {
   } else if (isParamList(group)) {
     children = group.__items;
   } else if (isParam(group)) {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { __type, __last_updated, ...rest } = group;
     children = rest;
   } else {
     // ParamDict or Struct
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { __type, ...rest } = group;
     children = rest;
   }
@@ -225,12 +224,10 @@ export function getChildren(group: Group): [string, Data][] {
   } else if (isParamList(group)) {
     children = group.__items;
   } else if (isParam(group)) {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { __type, __last_updated, ...rest } = group;
     children = rest;
   } else {
     // Struct, ParamDict, or unknown type
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { __type, ...rest } = group;
     children = rest;
   }
