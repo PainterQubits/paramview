@@ -1,5 +1,4 @@
 import {
-  LeafType,
   Data,
   Leaf,
   Datetime,
@@ -68,21 +67,4 @@ export function isStruct(data: Data): data is Struct {
 /** Whether the given Data is a Param. */
 export function isParam(data: Data): data is Param {
   return data instanceof Object && "__last_updated" in data;
-}
-
-export function getLeafType(leaf: Leaf) {
-  switch (typeof leaf) {
-    case "number":
-      return LeafType.Number;
-    case "boolean":
-      return LeafType.Boolean;
-    case "string":
-      return LeafType.String;
-  }
-
-  if (leaf === null) return LeafType.Null;
-
-  if (isDatetime(leaf)) return LeafType.Datetime;
-
-  return LeafType.Quantity;
 }

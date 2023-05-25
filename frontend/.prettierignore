@@ -6,5 +6,8 @@ dist/
 .pnp.*
 .yarnrc.yml
 
+# SWC
+.swc/
+
 # Jest
 coverage/

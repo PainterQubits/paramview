@@ -9,7 +9,7 @@ export type CommitEntry = {
 export type Path = string[];
 
 /** Enum of leaf types. */
-export const enum LeafType {
+export enum LeafType {
   Number,
   Boolean,
   String,

@@ -17,6 +17,11 @@ import { requestData } from "@/utils/api";
 import { originalDataAtom } from "@/atoms/api";
 import { editModeAtom, editedDataAtom } from "@/atoms/paramList";
 
+/**
+ * The commit ID from the most recent unhandled commit request, or null if there is no
+ * such request. (When a request resolves, it will set this atom to the ID of the created
+ * commit. Then once the request is handled, it sets this atom back to null.)
+ */
 const commitIdAtom = atom<Promise<number> | null>(null);
 
 const dialogContentSx = {
@@ -40,7 +45,7 @@ const commitButtonSx = {
 
 /**
  * Dialog displaying changes to the data, a text field for entering the commit message,
- * and a commit button.
+ * a commit button, and a close button.
  */
 export default function CommitDialog() {
   const [commitLoading, startCommitTransition] = useTransition();

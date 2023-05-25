@@ -3,8 +3,15 @@ import { useAtom } from "jotai";
 import { Replay } from "@mui/icons-material";
 import { Box, Typography, TextField, MenuItem, IconButton } from "@mui/material";
 import { Path, LeafType, Leaf } from "@/types";
-import { leafToString, leafToInput, parseLeaf, getData, setData } from "@/utils/data";
-import { isLeaf, getLeafType } from "@/utils/type";
+import {
+  leafToString,
+  getLeafType,
+  leafToInput,
+  parseLeaf,
+  getData,
+  setData,
+} from "@/utils/data";
+import { isLeaf } from "@/utils/type";
 import { originalDataAtom } from "@/atoms/api";
 import { roundAtom, editModeAtom, editedDataAtom } from "@/atoms/paramList";
 
@@ -31,7 +38,6 @@ function LeafItemReadMode({ leaf }: LeafItemReadModeProps) {
   return <Typography align="right">{leafToString(leaf, round)}</Typography>;
 }
 
-/** Input for entering a new leaf value. */
 type LeafItemEditModeProps = {
   /** Edited leaf value that is used as the initial value. */
   editedLeaf: Leaf;
@@ -39,15 +45,16 @@ type LeafItemEditModeProps = {
   path: Path;
 };
 
+/** Input fields for entering a new leaf value. */
 function LeafItemEditMode({ editedLeaf, path }: LeafItemEditModeProps) {
   const [originalRootData] = useAtom(originalDataAtom);
-  const [editedRootData, editedDataDispatch] = useAtom(editedDataAtom);
+  const [editedRootData, setEditedRootData] = useAtom(editedDataAtom);
 
   const originalLeaf = useMemo(() => {
     const originalData = getData(originalRootData, path);
 
     if (!isLeaf(originalData)) {
-      throw new Error("original data for leaf input is not a leaf");
+      throw new TypeError("original data for leaf input is not a leaf");
     }
 
     return originalData;
@@ -76,14 +83,14 @@ function LeafItemEditMode({ editedLeaf, path }: LeafItemEditModeProps) {
   const [unitInput, setUnitInput] = useState(editedUnitInput);
 
   const setEditedData = useCallback(
-    (value: Leaf) => {
+    (leaf: Leaf) => {
       if (path.length === 0) {
-        editedDataDispatch({ type: "set", value });
+        setEditedRootData(leaf);
       } else {
-        setData(editedRootData, path, value);
+        setData(editedRootData, path, leaf);
       }
     },
-    [editedRootData, path, editedDataDispatch],
+    [editedRootData, path, setEditedRootData],
   );
 
   useEffect(() => {

@@ -54,6 +54,24 @@ export function leafToString(leaf: Leaf, round: boolean) {
   return leaf;
 }
 
+/** Get the type (as a LeafType enum value) of the given leaf. */
+export function getLeafType(leaf: Leaf) {
+  switch (typeof leaf) {
+    case "number":
+      return LeafType.Number;
+    case "boolean":
+      return LeafType.Boolean;
+    case "string":
+      return LeafType.String;
+  }
+
+  if (leaf === null) return LeafType.Null;
+
+  if (isDatetime(leaf)) return LeafType.Datetime;
+
+  return LeafType.Quantity;
+}
+
 /** Convert the given leaf to an input string and a unit input string. */
 export function leafToInput(leaf: Leaf) {
   if (isQuantity(leaf)) {
@@ -126,36 +144,15 @@ export function parseLeaf(
   }
 }
 
-/** Return a string representing the type of the given Group. */
-export function getTypeString(group: Group) {
-  if (isList(group)) return "list";
-
-  if (isDict(group)) return "dict";
-
-  if (isParam(group)) return `${group.__type} (Param)`;
-
-  if (isStruct(group)) return `${group.__type} (Struct)`;
-
-  return group.__type;
-}
-
-/** Get the last updated timestamp from the given Group. */
-export function getTimestamp(group: Group): number {
-  if (isParam(group)) return new Date(group.__last_updated.isoformat).getTime();
-
-  const timestamps = getChildren(group).map(([, data]) =>
-    isLeaf(data) ? -Infinity : getTimestamp(data),
-  );
-
-  return Math.max(...timestamps);
-}
-
 /** Return data at the given path within the given data. */
 export function getData(data: Data, path: Path): Data {
   if (path.length === 0) return data;
 
   if (isLeaf(data)) {
-    throw new Error(`cannot get child of data '${data}' with path '${path}'`);
+    throw new TypeError(
+      `data '${leafToString(data, false)}' has no children` +
+        ` (trying to get path ${JSON.stringify(path)})`,
+    );
   }
 
   const [key, ...remainingPath] = path;
@@ -175,14 +172,17 @@ export function getData(data: Data, path: Path): Data {
  */
 export function setData(data: Data, path: Path, value: Data) {
   if (path.length === 0) {
-    throw new Error("cannot set root data using the setData function");
+    throw new RangeError("path is empty (setData cannot set the root data)");
   }
 
   const parentData = getData(data, path.slice(0, -1));
   const key = path[path.length - 1];
 
   if (isLeaf(parentData)) {
-    throw new Error(`cannot set child of data '${parentData}' with key '${key}'`);
+    throw new TypeError(
+      `data '${leafToString(parentData, false)}' has no children` +
+        ` (trying to set child "${key}")`,
+    );
   }
 
   if (isParamList(parentData)) {
@@ -193,6 +193,19 @@ export function setData(data: Data, path: Path, value: Data) {
     // Dict, ParamDict, Struct, or Param
     parentData[key] = value;
   }
+}
+
+/** Return a string representing the type of the given Group. */
+export function getTypeString(group: Group) {
+  if (isList(group)) return "list";
+
+  if (isDict(group)) return "dict";
+
+  if (isParam(group)) return `${group.__type} (Param)`;
+
+  if (isStruct(group)) return `${group.__type} (Struct)`;
+
+  return group.__type;
 }
 
 /** Get the names of the child data within the given group. */
@@ -215,22 +228,17 @@ export function getChildrenNames(group: Group) {
   return Object.keys(children);
 }
 
-/** Return the Data values contained with the given Group. */
-export function getChildren(group: Group): [string, Data][] {
-  let children: Data[] | { [key: string]: Data };
+/**
+ * Get the last updated timestamp from the given Group, or -Infinity if there is no
+ * timestamp.
+ */
+export function getTimestamp(group: Group): number {
+  if (isParam(group)) return new Date(group.__last_updated.isoformat).getTime();
 
-  if (isList(group) || isDict(group)) {
-    children = group;
-  } else if (isParamList(group)) {
-    children = group.__items;
-  } else if (isParam(group)) {
-    const { __type, __last_updated, ...rest } = group;
-    children = rest;
-  } else {
-    // Struct, ParamDict, or unknown type
-    const { __type, ...rest } = group;
-    children = rest;
-  }
+  const timestamps = getChildrenNames(group).map((childName) => {
+    const childData = getData(group, [childName]);
+    return isLeaf(childData) ? -Infinity : getTimestamp(childData);
+  });
 
-  return Object.entries(children);
+  return Math.max(...timestamps);
 }

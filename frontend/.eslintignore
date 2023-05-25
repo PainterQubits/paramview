@@ -5,5 +5,8 @@ dist/
 .yarn/
 .pnp.*
 
+# SWC
+.swc/
+
 # Jest
 coverage/
