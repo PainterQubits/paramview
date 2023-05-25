@@ -401,7 +401,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/types@npm:^7.0.0, @babel/types@npm:^7.18.6, @babel/types@npm:^7.20.7, @babel/types@npm:^7.21.0, @babel/types@npm:^7.21.4, @babel/types@npm:^7.21.5, @babel/types@npm:^7.3.0, @babel/types@npm:^7.3.3, @babel/types@npm:^7.8.3":
+"@babel/types@npm:^7.0.0, @babel/types@npm:^7.18.6, @babel/types@npm:^7.20.7, @babel/types@npm:^7.21.0, @babel/types@npm:^7.21.4, @babel/types@npm:^7.21.5, @babel/types@npm:^7.3.3, @babel/types@npm:^7.8.3":
   version: 7.21.5
   resolution: "@babel/types@npm:7.21.5"
   dependencies:
@@ -1456,8 +1456,8 @@ __metadata:
   linkType: hard
 
 "@pkgr/utils@npm:^2.3.1":
-  version: 2.4.0
-  resolution: "@pkgr/utils@npm:2.4.0"
+  version: 2.4.1
+  resolution: "@pkgr/utils@npm:2.4.1"
   dependencies:
     cross-spawn: ^7.0.3
     fast-glob: ^3.2.12
@@ -1465,7 +1465,7 @@ __metadata:
     open: ^9.1.0
     picocolors: ^1.0.0
     tslib: ^2.5.0
-  checksum: 2ed93a92fd58d612c7a7d04f91ce50c967d2e2d5c4f63802f62a882fcb7d91208cf89640bb3baad10ef7d42bea1e196fba956e7e36a68e9f94d2738e8974a24a
+  checksum: 654682860272541a40485b01e0763b155ec31faeba85b2c51e38b59c4ff1f8918c37b87b5ecbda3ff482d8486eba086e92b991fe4a8ed62efbbbdf83c0f64409
   languageName: node
   linkType: hard
 
@@ -1531,24 +1531,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@swc/core-darwin-arm64@npm:1.3.59":
-  version: 1.3.59
-  resolution: "@swc/core-darwin-arm64@npm:1.3.59"
-  conditions: os=darwin & cpu=arm64
-  languageName: node
-  linkType: hard
-
 "@swc/core-darwin-arm64@npm:1.3.60":
   version: 1.3.60
   resolution: "@swc/core-darwin-arm64@npm:1.3.60"
   conditions: os=darwin & cpu=arm64
-  languageName: node
-  linkType: hard
-
-"@swc/core-darwin-x64@npm:1.3.59":
-  version: 1.3.59
-  resolution: "@swc/core-darwin-x64@npm:1.3.59"
-  conditions: os=darwin & cpu=x64
   languageName: node
   linkType: hard
 
@@ -1559,24 +1545,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@swc/core-linux-arm-gnueabihf@npm:1.3.59":
-  version: 1.3.59
-  resolution: "@swc/core-linux-arm-gnueabihf@npm:1.3.59"
-  conditions: os=linux & cpu=arm
-  languageName: node
-  linkType: hard
-
 "@swc/core-linux-arm-gnueabihf@npm:1.3.60":
   version: 1.3.60
   resolution: "@swc/core-linux-arm-gnueabihf@npm:1.3.60"
   conditions: os=linux & cpu=arm
-  languageName: node
-  linkType: hard
-
-"@swc/core-linux-arm64-gnu@npm:1.3.59":
-  version: 1.3.59
-  resolution: "@swc/core-linux-arm64-gnu@npm:1.3.59"
-  conditions: os=linux & cpu=arm64 & libc=glibc
   languageName: node
   linkType: hard
 
@@ -1587,24 +1559,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@swc/core-linux-arm64-musl@npm:1.3.59":
-  version: 1.3.59
-  resolution: "@swc/core-linux-arm64-musl@npm:1.3.59"
-  conditions: os=linux & cpu=arm64 & libc=musl
-  languageName: node
-  linkType: hard
-
 "@swc/core-linux-arm64-musl@npm:1.3.60":
   version: 1.3.60
   resolution: "@swc/core-linux-arm64-musl@npm:1.3.60"
   conditions: os=linux & cpu=arm64 & libc=musl
-  languageName: node
-  linkType: hard
-
-"@swc/core-linux-x64-gnu@npm:1.3.59":
-  version: 1.3.59
-  resolution: "@swc/core-linux-x64-gnu@npm:1.3.59"
-  conditions: os=linux & cpu=x64 & libc=glibc
   languageName: node
   linkType: hard
 
@@ -1615,24 +1573,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@swc/core-linux-x64-musl@npm:1.3.59":
-  version: 1.3.59
-  resolution: "@swc/core-linux-x64-musl@npm:1.3.59"
-  conditions: os=linux & cpu=x64 & libc=musl
-  languageName: node
-  linkType: hard
-
 "@swc/core-linux-x64-musl@npm:1.3.60":
   version: 1.3.60
   resolution: "@swc/core-linux-x64-musl@npm:1.3.60"
   conditions: os=linux & cpu=x64 & libc=musl
-  languageName: node
-  linkType: hard
-
-"@swc/core-win32-arm64-msvc@npm:1.3.59":
-  version: 1.3.59
-  resolution: "@swc/core-win32-arm64-msvc@npm:1.3.59"
-  conditions: os=win32 & cpu=arm64
   languageName: node
   linkType: hard
 
@@ -1643,24 +1587,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@swc/core-win32-ia32-msvc@npm:1.3.59":
-  version: 1.3.59
-  resolution: "@swc/core-win32-ia32-msvc@npm:1.3.59"
-  conditions: os=win32 & cpu=ia32
-  languageName: node
-  linkType: hard
-
 "@swc/core-win32-ia32-msvc@npm:1.3.60":
   version: 1.3.60
   resolution: "@swc/core-win32-ia32-msvc@npm:1.3.60"
   conditions: os=win32 & cpu=ia32
-  languageName: node
-  linkType: hard
-
-"@swc/core-win32-x64-msvc@npm:1.3.59":
-  version: 1.3.59
-  resolution: "@swc/core-win32-x64-msvc@npm:1.3.59"
-  conditions: os=win32 & cpu=x64
   languageName: node
   linkType: hard
 
@@ -1671,51 +1601,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@swc/core@npm:^1.3.56":
-  version: 1.3.59
-  resolution: "@swc/core@npm:1.3.59"
-  dependencies:
-    "@swc/core-darwin-arm64": 1.3.59
-    "@swc/core-darwin-x64": 1.3.59
-    "@swc/core-linux-arm-gnueabihf": 1.3.59
-    "@swc/core-linux-arm64-gnu": 1.3.59
-    "@swc/core-linux-arm64-musl": 1.3.59
-    "@swc/core-linux-x64-gnu": 1.3.59
-    "@swc/core-linux-x64-musl": 1.3.59
-    "@swc/core-win32-arm64-msvc": 1.3.59
-    "@swc/core-win32-ia32-msvc": 1.3.59
-    "@swc/core-win32-x64-msvc": 1.3.59
-  peerDependencies:
-    "@swc/helpers": ^0.5.0
-  dependenciesMeta:
-    "@swc/core-darwin-arm64":
-      optional: true
-    "@swc/core-darwin-x64":
-      optional: true
-    "@swc/core-linux-arm-gnueabihf":
-      optional: true
-    "@swc/core-linux-arm64-gnu":
-      optional: true
-    "@swc/core-linux-arm64-musl":
-      optional: true
-    "@swc/core-linux-x64-gnu":
-      optional: true
-    "@swc/core-linux-x64-musl":
-      optional: true
-    "@swc/core-win32-arm64-msvc":
-      optional: true
-    "@swc/core-win32-ia32-msvc":
-      optional: true
-    "@swc/core-win32-x64-msvc":
-      optional: true
-  peerDependenciesMeta:
-    "@swc/helpers":
-      optional: true
-  checksum: 0283f39cf49cd12a6dc7062ef9ea4fa93e1a4f622ce46903a09605219f4f47ed5ad03925c6146d09ffe6ee02a89bb14e3c82eb86b4c60ecce4985ea6e078ffcf
-  languageName: node
-  linkType: hard
-
-"@swc/core@npm:^1.3.60":
+"@swc/core@npm:^1.3.56, @swc/core@npm:^1.3.60":
   version: 1.3.60
   resolution: "@swc/core@npm:1.3.60"
   dependencies:
@@ -1807,15 +1693,15 @@ __metadata:
   linkType: hard
 
 "@types/babel__core@npm:^7.1.14":
-  version: 7.20.0
-  resolution: "@types/babel__core@npm:7.20.0"
+  version: 7.20.1
+  resolution: "@types/babel__core@npm:7.20.1"
   dependencies:
     "@babel/parser": ^7.20.7
     "@babel/types": ^7.20.7
     "@types/babel__generator": "*"
     "@types/babel__template": "*"
     "@types/babel__traverse": "*"
-  checksum: 49b601a0a7637f1f387442c8156bd086cfd10ff4b82b0e1994e73a6396643b5435366fb33d6b604eade8467cca594ef97adcbc412aede90bb112ebe88d0ad6df
+  checksum: 9fcd9691a33074802d9057ff70b0e3ff3778f52470475b68698a0f6714fbe2ccb36c16b43dc924eb978cd8a81c1f845e5ff4699e7a47606043b539eb8c6331a8
   languageName: node
   linkType: hard
 
@@ -1839,11 +1725,11 @@ __metadata:
   linkType: hard
 
 "@types/babel__traverse@npm:*, @types/babel__traverse@npm:^7.0.6":
-  version: 7.18.5
-  resolution: "@types/babel__traverse@npm:7.18.5"
+  version: 7.20.0
+  resolution: "@types/babel__traverse@npm:7.20.0"
   dependencies:
-    "@babel/types": ^7.3.0
-  checksum: b9e7f39eb84626cc8f83ebf75a621d47f04b53cb085a3ea738a9633d57cf65208e503b1830db91aa5e297bc2ba761681ac0b0cbfb7a3d56afcfb2296212668ef
+    "@babel/types": ^7.20.7
+  checksum: 030d647a61baa70aff5bc1193227694098191578e45e18720db3a14614f1827664d609630a668ad75cddffd7b80cd14a55455364239d1f14ea55f1f4d7d2c9ef
   languageName: node
   linkType: hard
 
@@ -1994,18 +1880,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:*":
-  version: 18.2.6
-  resolution: "@types/react@npm:18.2.6"
-  dependencies:
-    "@types/prop-types": "*"
-    "@types/scheduler": "*"
-    csstype: ^3.0.2
-  checksum: dea9d232d8df7ac357367a69dcb557711ab3d5501807ffa77cebeee73d49ee94d095f298e36853c63ed47cce097eee4c7eae2aaa8c02fac3f0171ec1b523a819
-  languageName: node
-  linkType: hard
-
-"@types/react@npm:^18.2.7":
+"@types/react@npm:*, @types/react@npm:^18.2.7":
   version: 18.2.7
   resolution: "@types/react@npm:18.2.7"
   dependencies:
@@ -2569,9 +2444,9 @@ __metadata:
   linkType: hard
 
 "axe-core@npm:^4.6.2":
-  version: 4.7.1
-  resolution: "axe-core@npm:4.7.1"
-  checksum: ff6fb92d6cadb749977af72b7d28009dec2b1842d4fdc4114a295ce973a39d0ac477e541be360eb9482a8d63f55840196813d7d892c0bd8437f52d9f7349c788
+  version: 4.7.2
+  resolution: "axe-core@npm:4.7.2"
+  checksum: 5d86fa0f45213b0e54cbb5d713ce885c4a8fe3a72b92dd915a47aa396d6fd149c4a87fec53aa978511f6d941402256cfeb26f2db35129e370f25a453c688655a
   languageName: node
   linkType: hard
 
@@ -3496,9 +3371,9 @@ __metadata:
   linkType: hard
 
 "electron-to-chromium@npm:^1.4.284":
-  version: 1.4.404
-  resolution: "electron-to-chromium@npm:1.4.404"
-  checksum: 40e9ce607877e5d2a0578e78a3bd461ca6574cefb738f2dd82c171fad124c833cb078844947d9d21d6e6cf13a7d9b75b500ef4522c8cc67e99ad47d6b36cf078
+  version: 1.4.408
+  resolution: "electron-to-chromium@npm:1.4.408"
+  checksum: 043da2c1d291106595635928c309b78cb8372f58e1bdd93803e34634b8fdfe6b93bfe7d4c4a37b315e274683b721e269a024fa437a6739618fe10547024fa5e2
   languageName: node
   linkType: hard
 
@@ -3555,19 +3430,19 @@ __metadata:
   linkType: hard
 
 "engine.io-parser@npm:~5.0.3":
-  version: 5.0.6
-  resolution: "engine.io-parser@npm:5.0.6"
-  checksum: e92255b5463593cafe6cdc90577f107b39056c9c9337a8ee3477cb274337da1fe4ff53e9b3ad59d0478878e1d55ab15e973e2a91d0334d25ea99d8d6f8032f26
+  version: 5.0.7
+  resolution: "engine.io-parser@npm:5.0.7"
+  checksum: 70ce4e22429ad4afbba187a0f71f87eb1448dbc2e4ff611857e46ca5ad09951408afa97f216e5fda993be4a944815b6f8eaebd6f70a9de522b54c7b8262fafb4
   languageName: node
   linkType: hard
 
 "enhanced-resolve@npm:^5.12.0":
-  version: 5.14.0
-  resolution: "enhanced-resolve@npm:5.14.0"
+  version: 5.14.1
+  resolution: "enhanced-resolve@npm:5.14.1"
   dependencies:
     graceful-fs: ^4.2.4
     tapable: ^2.2.0
-  checksum: fff1aaebbf376371e5df4502e111967f6247c37611ad3550e4e7fca657f6dcb29ef7ffe88bf14e5010b78997f1ddd984a8db97af87ee0a5477771398fd326f5b
+  checksum: ad2a31928b6649eed40d364838449587f731baa63863e83d2629bebaa8be1eabac18b90f89c1784bc805b0818363e99b22547159edd485d7e5ccf18cdc640642
   languageName: node
   linkType: hard
 
@@ -6600,9 +6475,9 @@ __metadata:
   linkType: hard
 
 "node-releases@npm:^2.0.8":
-  version: 2.0.11
-  resolution: "node-releases@npm:2.0.11"
-  checksum: ade1c8e19852aa7d7b45691c2708e6275703dd4994b16bc191cdbf66add29ccf87c595ecdb03a39db54a8aaba645f228bccd7d9477e4066f1d97a94f857dae9d
+  version: 2.0.12
+  resolution: "node-releases@npm:2.0.12"
+  checksum: b8c56db82c4642a0f443332b331a4396dae452a2ac5a65c8dbd93ef89ecb2fbb0da9d42ac5366d4764973febadca816cf7587dad492dce18d2a6b2af59cda260
   languageName: node
   linkType: hard
 
