@@ -40,9 +40,13 @@ const commitHistoryStateAtom = atom(new Promise<CommitEntry[]>(() => {}));
  */
 export const commitHistoryAtom = atom(
   (get) => get(commitHistoryStateAtom),
-  (_, set) => {
+  (get, set) => {
     const commitHistoryRequest = (async () => {
       const newCommitHistory = await requestData<CommitEntry[]>("api/commit-history");
+      if (newCommitHistory.length === 0) {
+        const databaseName = await get(databaseNameAtom);
+        throw new RangeError(`Database ${databaseName} has no commits.`);
+      }
       set(commitHistorySyncStateAtom, newCommitHistory);
       return newCommitHistory;
     })();

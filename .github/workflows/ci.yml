@@ -66,6 +66,10 @@ jobs:
   e2e:
     runs-on: ubuntu-latest
 
+    defaults:
+      run:
+        working-directory: frontend
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -77,16 +81,13 @@ jobs:
         uses: ./.github/actions/set-up-frontend
 
       - name: Build frontend
-        run: make frontend
+        run: yarn build
 
       - name: Start backend server
-        working-directory: frontend
         run: yarn backend start &
 
       - name: Start frontend server
-        working-directory: frontend
         run: yarn preview &
 
       - name: E2E tests
-        working-directory: frontend
         run: yarn test:e2e

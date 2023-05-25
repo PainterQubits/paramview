@@ -2,6 +2,7 @@
 
 from typing import Any
 import os
+from werkzeug.exceptions import NotFound
 from flask import Flask, Response, send_from_directory
 from flask.json.provider import DefaultJSONProvider
 from flask_socketio import SocketIO  # type: ignore
@@ -35,10 +36,23 @@ def create_app(db_path: str) -> tuple[Flask, SocketIO]:
     socketio = SocketIO(app)
 
     @app.route("/")
-    def index() -> Response:
+    def index() -> Response | str:
         """Serve index.html."""
         static_folder = app.static_folder
         assert static_folder is not None, "no static folder set"
-        return send_from_directory(static_folder, "index.html")
+        try:
+            return send_from_directory(static_folder, "index.html")
+        except NotFound:
+            index_html_path = os.path.join(static_folder, "index.html")
+            github_link = "https://github.com/PainterQubits/paramview"
+            return f"""
+<h1>Frontend is not compiled</h1>
+<p>File <code>{index_html_path}</code> was not found.</p>
+<p>
+  This page has a 200 code (OK) instead of a 404 code (Not Found) to make it easier to
+  check if the backend is running during end-to-end testing.
+</p>
+<p>See <a href="{github_link}">{github_link}</a> for more information.</p>
+"""
 
     return app, socketio
