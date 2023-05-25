@@ -77,7 +77,12 @@ export default function CommitDialog() {
 
   return (
     <>
-      <Button key="commit" variant="contained" onClick={open}>
+      <Button
+        data-testid="open-commit-button"
+        key="commit"
+        variant="contained"
+        onClick={open}
+      >
         Commit
       </Button>
       <Dialog fullWidth open={commitDialogOpen} onClose={close}>

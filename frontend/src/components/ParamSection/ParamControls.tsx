@@ -48,13 +48,23 @@ export default function ParamControls() {
       <Box sx={subControlsSx}>
         {editMode ? (
           <>
-            <Button key="cancel" variant="contained" onClick={setEditModeFunction(false)}>
+            <Button
+              data-testid="cancel-edit-button"
+              key="cancel"
+              variant="contained"
+              onClick={setEditModeFunction(false)}
+            >
               Cancel
             </Button>
             <CommitDialog key="commit" />
           </>
         ) : (
-          <Button key="edit" variant="contained" onClick={setEditModeFunction(true)}>
+          <Button
+            data-testid="edit-button"
+            key="edit"
+            variant="contained"
+            onClick={setEditModeFunction(true)}
+          >
             Edit
           </Button>
         )}

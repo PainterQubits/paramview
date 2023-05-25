@@ -21,19 +21,23 @@ describe("short commit history", () => {
     visitAndInterceptCommitHistory();
   });
 
-  it("displays the latest commit and latest is checked", () => {
+  it("displays the latest commit, latest is checked, and inputs are not disabled", () => {
     cy.get("@commitHistory").then((commitHistoryAlias: unknown) => {
       const commitHistory = commitHistoryAlias as CommitEntry[];
       const latestCommit = commitHistory[commitHistory.length - 1];
 
-      // Combobox contains latest commit
+      // Combobox contains latest commit and is not disabled
       cy.getByTestId("commit-select-combobox")
         .shouldContainDate(latestCommit.timestamp)
         .find("input")
-        .should("have.value", getFullMessage(latestCommit));
+        .should("have.value", getFullMessage(latestCommit))
+        .should("not.be.disabled");
 
-      // Latest checkbox is checked
-      cy.getByTestId("latest-checkbox").find("input").should("be.checked");
+      // Latest checkbox is checked and not disabled
+      cy.getByTestId("latest-checkbox")
+        .find("input")
+        .should("be.checked")
+        .should("not.be.disabled");
 
       // Displays parameter data for the latest commit
       cy.getByTestId("parameter-list-item-commit_id").should("contain", latestCommit.id);
@@ -93,13 +97,13 @@ describe("short commit history", () => {
 
       // Latest checkbox should be unchecked
       cy.getByTestId("latest-checkbox")
+        .as("latestCheckbox")
         .find("input")
-        .as("latestCheckboxInput")
         .should("not.be.checked");
 
       // Check the latest checkbox
-      cy.get("@latestCheckboxInput").check();
-      cy.get("@latestCheckboxInput").should("be.checked");
+      cy.get("@latestCheckbox").click();
+      cy.get("@latestCheckbox").find("input").should("be.checked");
 
       // Combobox contains latest commit
       cy.get("@commitSelectCombobox")
@@ -229,8 +233,8 @@ describe("update commit history", () => {
         .should("have.value", getFullMessage(originalLatestCommit));
 
       // Uncheck the latest checkbox
-      cy.getByTestId("latest-checkbox").find("input").as("latestCheckboxInput").uncheck();
-      cy.get("@latestCheckboxInput").should("not.be.checked");
+      cy.getByTestId("latest-checkbox").as("latestCheckbox").click();
+      cy.get("@latestCheckbox").find("input").should("not.be.checked");
 
       cy.intercept("/api/commit-history").as("commitHistoryUpdatedIntercept");
       cy.task("db:commit");
@@ -258,6 +262,55 @@ describe("update commit history", () => {
           originalLatestCommit.id,
         );
       });
+    });
+  });
+});
+
+describe("edit mode", () => {
+  beforeEach(() => {
+    cy.task("db:reset");
+    visitAndInterceptCommitHistory();
+  });
+
+  it("commit combobox is disabled and latest checkbox is disabled and unchecked", () => {
+    cy.get("@commitHistory").then((commitHistoryAlias: unknown) => {
+      const commitHistory = commitHistoryAlias as CommitEntry[];
+      const latestCommit = commitHistory[commitHistory.length - 1];
+
+      // Click the edit button to enter edit mode
+      cy.getByTestId("edit-button").click();
+
+      // Combobox contains latest commit and is disabled
+      cy.getByTestId("commit-select-combobox")
+        .as("commitSelectCombobox")
+        .shouldContainDate(latestCommit.timestamp)
+        .find("input")
+        .should("have.value", getFullMessage(latestCommit))
+        .should("be.disabled");
+
+      // Latest checkbox is unchecked and disabled
+      cy.getByTestId("latest-checkbox")
+        .find("input")
+        .as("latestCheckboxInput")
+        .should("not.be.checked")
+        .should("be.disabled");
+
+      // Click the cancel button to exit edit mode
+      cy.getByTestId("cancel-edit-button").click();
+
+      // Combobox contains latest commit and is not disabled
+      cy.get("@commitSelectCombobox")
+        .shouldContainDate(latestCommit.timestamp)
+        .find("input")
+        .should("have.value", getFullMessage(latestCommit))
+        .should("not.be.disabled");
+
+      // Latest checkbox is checked and not disabled
+      cy.getByTestId("latest-checkbox")
+        .find("input")
+        .as("latestCheckboxInput")
+        .should("be.checked")
+        .should("not.be.disabled");
     });
   });
 });
