@@ -1,5 +1,5 @@
 import { detailedDiff } from "deep-object-diff";
-import { useState, useEffect, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { atom, useAtom, useSetAtom } from "jotai";
 import { Save } from "@mui/icons-material";
 import {
@@ -52,33 +52,30 @@ export default function CommitDialog() {
 
   const [originalData] = useAtom(originalDataAtom);
   const [editedData] = useAtom(editedDataAtom);
-  const [commitId, setCommitId] = useAtom(commitIdAtom);
+  const [, setCommitId] = useAtom(commitIdAtom);
   const setEditMode = useSetAtom(editModeAtom);
 
   const [commitDialogOpen, setCommitDialogOpen] = useState(false);
   const [message, setMessage] = useState("");
 
-  const open = () => setCommitDialogOpen(true);
+  const open = () => {
+    setMessage("");
+    setCommitDialogOpen(true);
+  };
   const close = () => setCommitDialogOpen(commitLoading || false);
   const commit = () =>
     startCommitTransition(() => {
       setCommitId(requestData<number>("api/commit", { message, data: editedData }));
+      setCommitDialogOpen(false);
+      setEditMode(false);
     });
 
   const changes = detailedDiff({ root: originalData }, { root: editedData });
 
-  useEffect(() => {
-    if (commitId !== null) {
-      setCommitId(null);
-      setCommitDialogOpen(false);
-      setEditMode(false);
-    }
-  }, [commitId, setCommitId, setEditMode]);
-
   return (
     <>
       <Button
-        data-testid="open-commit-button"
+        data-testid="open-commit-dialog-button"
         key="commit"
         variant="contained"
         onClick={open}
@@ -101,6 +98,7 @@ export default function CommitDialog() {
             <Typography>{JSON.stringify(changes.updated)}</Typography>
           </Box>
           <TextField
+            data-testid="commit-message-text-field"
             fullWidth
             label="Message"
             disabled={commitLoading}
@@ -109,15 +107,22 @@ export default function CommitDialog() {
           />
         </DialogContent>
         <DialogActions sx={dialogActionsSx}>
-          <Button variant="outlined" disabled={commitLoading} onClick={close}>
+          <Button
+            data-testid="close-commit-dialog-button"
+            variant="outlined"
+            disabled={commitLoading || !open}
+            onClick={close}
+          >
             Close
           </Button>
           <LoadingButton
+            data-testid="make-commit-button"
             variant="outlined"
             sx={commitButtonSx}
             startIcon={<Save />}
             loadingPosition="start"
             loading={commitLoading}
+            disabled={commitLoading || !open}
             onClick={commit}
           >
             Commit
