@@ -6,8 +6,8 @@ const BACKEND_COMMAND = "python cypress/backend.py";
 const exec = promisify(exec_original);
 
 export default defineConfig({
-  screenshotOnRunFailure: false,
-  video: false,
+  // screenshotOnRunFailure: false,
+  // video: false,
   e2e: {
     baseUrl: "http://localhost:4173",
     setupNodeEvents(on) {
