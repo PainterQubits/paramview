@@ -28,8 +28,20 @@ const commitHistoryStateAtom = atom(new Promise<CommitEntry[]>(() => {}));
  */
 export const commitHistoryAtom = atom(
   (get) => get(commitHistoryStateAtom),
-  (_, set) =>
-    set(commitHistoryStateAtom, requestData<CommitEntry[]>("api/commit-history")),
+  (get, set) =>
+    set(
+      commitHistoryStateAtom,
+      (async () => {
+        const newCommitHistory = await requestData<CommitEntry[]>("api/commit-history");
+
+        if (newCommitHistory.length === 0) {
+          const databaseName = await get(databaseNameAtom);
+          throw new RangeError(`Database ${databaseName} has no commits.`);
+        }
+
+        return newCommitHistory;
+      })(),
+    ),
 );
 
 /** Original (i.e. unedited) data for the currently selected commit. */
