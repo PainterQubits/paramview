@@ -1,5 +1,5 @@
 import { detailedDiff } from "deep-object-diff";
-import { useState, useTransition } from "react";
+import { useState, useEffect, useTransition } from "react";
 import { atom, useAtom, useSetAtom } from "jotai";
 import { Save } from "@mui/icons-material";
 import {
@@ -43,11 +43,19 @@ const commitButtonSx = {
   },
 };
 
+type CommitDialogProps = {
+  commitDialogOpen: boolean;
+  setCommitDialogOpen: (newCommitDialogOpen: boolean) => void;
+};
+
 /**
  * Dialog displaying changes to the data, a text field for entering the commit message,
  * a commit button, and a close button.
  */
-export default function CommitDialog() {
+export default function CommitDialog({
+  commitDialogOpen,
+  setCommitDialogOpen,
+}: CommitDialogProps) {
   const [commitLoading, startCommitTransition] = useTransition();
 
   const [originalData] = useAtom(originalDataAtom);
@@ -55,13 +63,20 @@ export default function CommitDialog() {
   const [, setCommitId] = useAtom(commitIdAtom);
   const setEditMode = useSetAtom(editModeAtom);
 
-  const [commitDialogOpen, setCommitDialogOpen] = useState(false);
+  /**
+   * Having a separate state variable to determine whether the commit dialog is open
+   * allows us to perform actions before displaying the opened dialog (see the useEffect
+   * below).
+   */
+  const [open, setOpen] = useState(commitDialogOpen);
+
   const [message, setMessage] = useState("");
 
-  const open = () => {
-    setMessage("");
-    setCommitDialogOpen(true);
-  };
+  useEffect(() => {
+    if (commitDialogOpen) setMessage("");
+    setOpen(commitDialogOpen);
+  }, [commitDialogOpen]);
+
   const close = () => setCommitDialogOpen(commitLoading || false);
   const commit = () =>
     startCommitTransition(() => {
@@ -70,65 +85,58 @@ export default function CommitDialog() {
       setEditMode(false);
     });
 
+  /** Whether to disabled commit dialog inputs. */
+  const disabled = commitLoading || !open;
+
   const changes = detailedDiff({ root: originalData }, { root: editedData });
 
   return (
-    <>
-      <Button
-        data-testid="open-commit-dialog-button"
-        key="commit"
-        variant="contained"
-        onClick={open}
-      >
-        Commit
-      </Button>
-      <Dialog fullWidth open={commitDialogOpen} onClose={close}>
-        <DialogTitle>Commit</DialogTitle>
-        <DialogContent sx={dialogContentSx}>
-          <Box>
-            <Typography>Added</Typography>
-            <Typography>{JSON.stringify(changes.added)}</Typography>
-          </Box>
-          <Box>
-            <Typography>Deleted</Typography>
-            <Typography>{JSON.stringify(changes.deleted)}</Typography>
-          </Box>
-          <Box>
-            <Typography>Changed</Typography>
-            <Typography>{JSON.stringify(changes.updated)}</Typography>
-          </Box>
-          <TextField
-            data-testid="commit-message-text-field"
-            fullWidth
-            label="Message"
-            disabled={commitLoading}
-            value={message}
-            onChange={({ target: { value } }) => setMessage(value)}
-          />
-        </DialogContent>
-        <DialogActions sx={dialogActionsSx}>
-          <Button
-            data-testid="close-commit-dialog-button"
-            variant="outlined"
-            disabled={commitLoading || !open}
-            onClick={close}
-          >
-            Close
-          </Button>
-          <LoadingButton
-            data-testid="make-commit-button"
-            variant="outlined"
-            sx={commitButtonSx}
-            startIcon={<Save />}
-            loadingPosition="start"
-            loading={commitLoading}
-            disabled={commitLoading || !open}
-            onClick={commit}
-          >
-            Commit
-          </LoadingButton>
-        </DialogActions>
-      </Dialog>
-    </>
+    <Dialog fullWidth open={open} onClose={close}>
+      <DialogTitle>Commit</DialogTitle>
+      <DialogContent sx={dialogContentSx}>
+        <Box>
+          <Typography>Added</Typography>
+          <Typography>{JSON.stringify(changes.added)}</Typography>
+        </Box>
+        <Box>
+          <Typography>Deleted</Typography>
+          <Typography>{JSON.stringify(changes.deleted)}</Typography>
+        </Box>
+        <Box>
+          <Typography>Changed</Typography>
+          <Typography>{JSON.stringify(changes.updated)}</Typography>
+        </Box>
+        <TextField
+          data-testid="commit-message-text-field"
+          fullWidth
+          label="Message"
+          disabled={disabled}
+          value={message}
+          onChange={({ target: { value } }) => setMessage(value)}
+        />
+      </DialogContent>
+      <DialogActions sx={dialogActionsSx}>
+        <Button
+          data-testid="close-commit-dialog-button"
+          variant="outlined"
+          disabled={disabled}
+          onClick={close}
+        >
+          Close
+        </Button>
+        <LoadingButton
+          data-testid="make-commit-button"
+          variant="outlined"
+          sx={commitButtonSx}
+          startIcon={<Save />}
+          loadingPosition="start"
+          loading={commitLoading}
+          disabled={disabled}
+          onClick={commit}
+        >
+          Commit
+        </LoadingButton>
+      </DialogActions>
+    </Dialog>
   );
 }

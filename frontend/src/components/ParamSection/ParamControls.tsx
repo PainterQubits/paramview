@@ -1,4 +1,4 @@
-import { startTransition } from "react";
+import { startTransition, useState, useTransition, Suspense } from "react";
 import { useAtom, useSetAtom } from "jotai";
 import { Box, FormGroup, FormControlLabel, Switch, Button } from "@mui/material";
 import { roundAtom, collapseAtom, editModeAtom } from "@/atoms/paramList";
@@ -16,12 +16,21 @@ export default function ParamControls() {
   const collapseAll = useSetAtom(collapseAtom);
   const [editMode, setEditMode] = useAtom(editModeAtom);
 
-  /**
-   * Returns a function that sets edit mode to the given value within a React
-   * transition.
-   */
-  const setEditModeFunction = (newEditMode: boolean) => () =>
-    startTransition(() => setEditMode(newEditMode));
+  const [cancelingEditMode, startCancelTransition] = useTransition();
+
+  /** Whether the commit dialog is open. */
+  const [commitDialogOpen, setCommitDialogOpen] = useState(false);
+
+  const startEditMode = () => startTransition(() => setEditMode(true));
+
+  const cancelEditMode = () => startCancelTransition(() => setEditMode(false));
+
+  const openCommitDialog = () => {
+    if (!cancelingEditMode) {
+      // Only open if not in the process of canceling edit mode
+      setCommitDialogOpen(true);
+    }
+  };
 
   return (
     <>
@@ -52,23 +61,36 @@ export default function ParamControls() {
               data-testid="cancel-edit-button"
               key="cancel"
               variant="contained"
-              onClick={setEditModeFunction(false)}
+              onClick={cancelEditMode}
             >
               Cancel
             </Button>
-            <CommitDialog key="commit" />
+            <Button
+              data-testid="open-commit-dialog-button"
+              key="commit"
+              variant="contained"
+              onClick={openCommitDialog}
+            >
+              Commit
+            </Button>
           </>
         ) : (
           <Button
             data-testid="edit-button"
             key="edit"
             variant="contained"
-            onClick={setEditModeFunction(true)}
+            onClick={startEditMode}
           >
             Edit
           </Button>
         )}
       </Box>
+      <Suspense>
+        <CommitDialog
+          commitDialogOpen={commitDialogOpen}
+          setCommitDialogOpen={setCommitDialogOpen}
+        />
+      </Suspense>
     </>
   );
 }

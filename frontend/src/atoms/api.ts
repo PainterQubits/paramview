@@ -16,16 +16,6 @@ const databaseNameRequest = requestData<string>("api/database-name").then((name)
 /** Database name retrieved from the server. */
 export const databaseNameAtom = atom(() => databaseNameRequest);
 
-/** Primitive atom to store the value of commitHistorySyncAtom. */
-const commitHistorySyncStateAtom = atom<CommitEntry[] | null>(null);
-
-/**
- * Synchronous atom containing the commit history retrieved from the server, or null while
- * it is loading. The purpose of this atom is mainly so that selectedCommitIndexAtom can
- * be updated synchronously.
- */
-export const commitHistorySyncAtom = atom((get) => get(commitHistorySyncStateAtom));
-
 /**
  * Primitive atom to store the state of commitHistoryAtom. Initializing to an infinite
  * promise means the commit history will be loading until this atom is set.
@@ -33,31 +23,18 @@ export const commitHistorySyncAtom = atom((get) => get(commitHistorySyncStateAto
 const commitHistoryStateAtom = atom(new Promise<CommitEntry[]>(() => {}));
 
 /**
- * Commit history retrieved from the server.
- *
- * The set function requests the latest commit history, updates this atom to the
- * asynchronous request, and updates commitHistorySyncAtom once it is loaded.
+ * Commit history retrieved from the server, and a function that updates this atom to the
+ * latest latest commit history.
  */
 export const commitHistoryAtom = atom(
   (get) => get(commitHistoryStateAtom),
-  (get, set) => {
-    const commitHistoryRequest = (async () => {
-      const newCommitHistory = await requestData<CommitEntry[]>("api/commit-history");
-      if (newCommitHistory.length === 0) {
-        const databaseName = await get(databaseNameAtom);
-        throw new RangeError(`Database ${databaseName} has no commits.`);
-      }
-      set(commitHistorySyncStateAtom, newCommitHistory);
-      return newCommitHistory;
-    })();
-
-    set(commitHistoryStateAtom, commitHistoryRequest);
-  },
+  (_, set) =>
+    set(commitHistoryStateAtom, requestData<CommitEntry[]>("api/commit-history")),
 );
 
 /** Original (i.e. unedited) data for the currently selected commit. */
 export const originalDataAtom = atom(async (get) => {
   const commitHistory = await get(commitHistoryAtom);
-  const selectedCommitIndex = get(selectedCommitIndexAtom);
+  const selectedCommitIndex = await get(selectedCommitIndexAtom);
   return requestData<Data>(`api/data/${commitHistory[selectedCommitIndex].id}`);
 });

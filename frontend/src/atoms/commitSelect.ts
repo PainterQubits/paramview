@@ -1,5 +1,5 @@
 import { atom } from "jotai";
-import { commitHistorySyncAtom } from "@/atoms/api";
+import { commitHistoryAtom } from "@/atoms/api";
 import { editModeAtom } from "@/atoms/paramList";
 
 /** Primitive atom to store the current value of syncLatestAtom. */
@@ -17,7 +17,7 @@ export const syncLatestAtom = atom(
 type selectCommitIndexAction = { type: "sync" } | { type: "set"; value: number };
 
 /** Primitive atom to store the current value of selectedCommitIndexAtom. */
-const selectedCommitIndexStateAtom = atom(0);
+const selectedCommitIndexStateAtom = atom<number | Promise<number>>(0);
 
 /**
  * Index of the currently selected commit in the commit history, or the latest atom if
@@ -27,9 +27,9 @@ const selectedCommitIndexStateAtom = atom(0);
  * be the latest atom), or set the underlying state atom to a specific value.
  */
 export const selectedCommitIndexAtom = atom(
-  (get) => {
+  async (get) => {
     if (get(syncLatestAtom)) {
-      const commitHistory = get(commitHistorySyncAtom);
+      const commitHistory = await get(commitHistoryAtom);
       return commitHistory !== null ? commitHistory.length - 1 : 0;
     }
 
