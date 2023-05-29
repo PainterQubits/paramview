@@ -91,9 +91,3 @@ jobs:
 
       - name: E2E tests
         run: yarn test:e2e
-
-      - uses: actions/upload-artifact@v3
-        if: failure()
-        with:
-          name: cypress-videos
-          path: frontend/cypress/videos
