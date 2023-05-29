@@ -5,6 +5,7 @@ const notRunningMessage = "\n\nPlease check that paramview is running.";
  * a POST request will be sent with the body as JSON; otherwise, a GET request is sent.
  */
 export async function requestData<T>(url: string, body?: object) {
+  await new Promise((res) => setTimeout(res, 500));
   let response: Response;
 
   const requestInit =
