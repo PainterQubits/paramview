@@ -16,6 +16,11 @@ export const syncLatestAtom = atom(
 
 type selectCommitIndexAction = { type: "sync" } | { type: "set"; value: number };
 
+/** Index of the latest commit. */
+const latestCommitIndexAtom = atom<Promise<number>>(
+  async (get) => (await get(commitHistoryAtom)).length - 1,
+);
+
 /** Primitive atom to store the current value of selectedCommitIndexAtom. */
 const selectedCommitIndexStateAtom = atom<number | Promise<number>>(0);
 
@@ -23,21 +28,18 @@ const selectedCommitIndexStateAtom = atom<number | Promise<number>>(0);
  * Index of the currently selected commit in the commit history, or the latest atom if
  * syncLatestAtom is true.
  *
- * The set function can sync the underlying state atom with the current value (which might
- * be the latest atom), or set the underlying state atom to a specific value.
+ * The set function can sync the underlying state atom with the true current index (which
+ * might be the latest atom if syncLatest is true), or set the underlying state atom to a
+ * specific value.
  */
 export const selectedCommitIndexAtom = atom(
-  async (get) => {
-    if (get(syncLatestAtom)) {
-      const commitHistory = await get(commitHistoryAtom);
-      return commitHistory !== null ? commitHistory.length - 1 : 0;
-    }
-
-    return get(selectedCommitIndexStateAtom);
-  },
+  (get) =>
+    get(syncLatestAtom) ? get(latestCommitIndexAtom) : get(selectedCommitIndexStateAtom),
   (get, set, action: selectCommitIndexAction) => {
     if (action.type === "sync") {
-      set(selectedCommitIndexStateAtom, get(selectedCommitIndexAtom));
+      if (get(syncLatestAtom)) {
+        set(selectedCommitIndexStateAtom, get(latestCommitIndexAtom));
+      }
     } else {
       // Set action
       set(selectedCommitIndexStateAtom, action.value);

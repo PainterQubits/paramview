@@ -183,11 +183,7 @@ function CommitSelectContents() {
             label="Latest"
             labelPlacement="start"
             disabled={editMode}
-            onChange={() =>
-              startTransition(() => {
-                setSyncLatest(!syncLatest);
-              })
-            }
+            onChange={() => startTransition(() => setSyncLatest(!syncLatest))}
           />
         </FormGroup>
       </Box>
