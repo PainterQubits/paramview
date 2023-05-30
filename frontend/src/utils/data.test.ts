@@ -13,7 +13,7 @@ import {
   Struct,
   Param,
 } from "@/types";
-import { formatDate } from "@/utils/timestamp";
+import { formatDate, getLocalISOString } from "@/utils/timestamp";
 import {
   leafToString,
   getLeafType,
@@ -31,6 +31,7 @@ describe("leaf data", () => {
   date.setMilliseconds(0); // Parsing does not handle milliseconds
   const timestamp = date.getTime();
   const datetimeString = formatDate(timestamp);
+  const datetimeInput = getLocalISOString(timestamp);
   const datetime: Datetime = {
     __type: "datetime.datetime",
     isoformat: date.toISOString().replace("Z", "+00:00"),
@@ -52,31 +53,31 @@ describe("leaf data", () => {
   };
 
   describe.each`
-    leaf                              | unrounded          | rounded           | leafType             | input             | unitInput
-    ${1.234}                          | ${"1.234"}         | ${"1.234"}        | ${LeafType.Number}   | ${"1.234"}        | ${""}
-    ${1.2345}                         | ${"1.2345"}        | ${"1.234"}        | ${LeafType.Number}   | ${"1.2345"}       | ${""}
-    ${1.2355}                         | ${"1.2355"}        | ${"1.236"}        | ${LeafType.Number}   | ${"1.2355"}       | ${""}
-    ${-123}                           | ${"-123"}          | ${"-123"}         | ${LeafType.Number}   | ${"-123"}         | ${""}
-    ${1234}                           | ${"1234"}          | ${"1234"}         | ${LeafType.Number}   | ${"1234"}         | ${""}
-    ${12345}                          | ${"12345"}         | ${"1.235e+4"}     | ${LeafType.Number}   | ${"12345"}        | ${""}
-    ${1.2e9}                          | ${"1200000000"}    | ${"1.2e+9"}       | ${LeafType.Number}   | ${"1200000000"}   | ${""}
-    ${1200000001}                     | ${"1200000001"}    | ${"1.200e+9"}     | ${LeafType.Number}   | ${"1200000001"}   | ${""}
-    ${1.2e34}                         | ${"1.2e+34"}       | ${"1.2e+34"}      | ${LeafType.Number}   | ${"1.2e+34"}      | ${""}
-    ${true}                           | ${"True"}          | ${"True"}         | ${LeafType.Boolean}  | ${"True"}         | ${""}
-    ${false}                          | ${"False"}         | ${"False"}        | ${LeafType.Boolean}  | ${"False"}        | ${""}
-    ${"test"}                         | ${"test"}          | ${"test"}         | ${LeafType.String}   | ${"test"}         | ${""}
-    ${""}                             | ${""}              | ${""}             | ${LeafType.String}   | ${""}             | ${""}
-    ${null}                           | ${"None"}          | ${"None"}         | ${LeafType.Null}     | ${"None"}         | ${""}
-    ${datetime}                       | ${datetimeString}  | ${datetimeString} | ${LeafType.Datetime} | ${datetimeString} | ${""}
-    ${makeQuantity(1.234, "m")}       | ${"1.234 m"}       | ${"1.234 m"}      | ${LeafType.Quantity} | ${"1.234"}        | ${"m"}
-    ${makeQuantity(1.2345, "s")}      | ${"1.2345 s"}      | ${"1.234 s"}      | ${LeafType.Quantity} | ${"1.2345"}       | ${"s"}
-    ${makeQuantity(1.2355, "Hz")}     | ${"1.2355 Hz"}     | ${"1.236 Hz"}     | ${LeafType.Quantity} | ${"1.2355"}       | ${"Hz"}
-    ${makeQuantity(-123, "m / s")}    | ${"-123 m / s"}    | ${"-123 m / s"}   | ${LeafType.Quantity} | ${"-123"}         | ${"m / s"}
-    ${makeQuantity(1234, "km")}       | ${"1234 km"}       | ${"1234 km"}      | ${LeafType.Quantity} | ${"1234"}         | ${"km"}
-    ${makeQuantity(12345, "mV")}      | ${"12345 mV"}      | ${"1.235e+4 mV"}  | ${LeafType.Quantity} | ${"12345"}        | ${"mV"}
-    ${makeQuantity(1.2e9, "B")}       | ${"1200000000 B"}  | ${"1.2e+9 B"}     | ${LeafType.Quantity} | ${"1200000000"}   | ${"B"}
-    ${makeQuantity(1200000001, "mA")} | ${"1200000001 mA"} | ${"1.200e+9 mA"}  | ${LeafType.Quantity} | ${"1200000001"}   | ${"mA"}
-    ${makeQuantity(1.2e34, "K")}      | ${"1.2e+34 K"}     | ${"1.2e+34 K"}    | ${LeafType.Quantity} | ${"1.2e+34"}      | ${"K"}
+    leaf                              | unrounded          | rounded           | leafType             | input            | unitInput
+    ${1.234}                          | ${"1.234"}         | ${"1.234"}        | ${LeafType.Number}   | ${"1.234"}       | ${""}
+    ${1.2345}                         | ${"1.2345"}        | ${"1.234"}        | ${LeafType.Number}   | ${"1.2345"}      | ${""}
+    ${1.2355}                         | ${"1.2355"}        | ${"1.236"}        | ${LeafType.Number}   | ${"1.2355"}      | ${""}
+    ${-123}                           | ${"-123"}          | ${"-123"}         | ${LeafType.Number}   | ${"-123"}        | ${""}
+    ${1234}                           | ${"1234"}          | ${"1234"}         | ${LeafType.Number}   | ${"1234"}        | ${""}
+    ${12345}                          | ${"12345"}         | ${"1.235e+4"}     | ${LeafType.Number}   | ${"12345"}       | ${""}
+    ${1.2e9}                          | ${"1200000000"}    | ${"1.2e+9"}       | ${LeafType.Number}   | ${"1200000000"}  | ${""}
+    ${1200000001}                     | ${"1200000001"}    | ${"1.200e+9"}     | ${LeafType.Number}   | ${"1200000001"}  | ${""}
+    ${1.2e34}                         | ${"1.2e+34"}       | ${"1.2e+34"}      | ${LeafType.Number}   | ${"1.2e+34"}     | ${""}
+    ${true}                           | ${"True"}          | ${"True"}         | ${LeafType.Boolean}  | ${"True"}        | ${""}
+    ${false}                          | ${"False"}         | ${"False"}        | ${LeafType.Boolean}  | ${"False"}       | ${""}
+    ${"test"}                         | ${"test"}          | ${"test"}         | ${LeafType.String}   | ${"test"}        | ${""}
+    ${""}                             | ${""}              | ${""}             | ${LeafType.String}   | ${""}            | ${""}
+    ${null}                           | ${"None"}          | ${"None"}         | ${LeafType.Null}     | ${"None"}        | ${""}
+    ${datetime}                       | ${datetimeString}  | ${datetimeString} | ${LeafType.Datetime} | ${datetimeInput} | ${""}
+    ${makeQuantity(1.234, "m")}       | ${"1.234 m"}       | ${"1.234 m"}      | ${LeafType.Quantity} | ${"1.234"}       | ${"m"}
+    ${makeQuantity(1.2345, "s")}      | ${"1.2345 s"}      | ${"1.234 s"}      | ${LeafType.Quantity} | ${"1.2345"}      | ${"s"}
+    ${makeQuantity(1.2355, "Hz")}     | ${"1.2355 Hz"}     | ${"1.236 Hz"}     | ${LeafType.Quantity} | ${"1.2355"}      | ${"Hz"}
+    ${makeQuantity(-123, "m / s")}    | ${"-123 m / s"}    | ${"-123 m / s"}   | ${LeafType.Quantity} | ${"-123"}        | ${"m / s"}
+    ${makeQuantity(1234, "km")}       | ${"1234 km"}       | ${"1234 km"}      | ${LeafType.Quantity} | ${"1234"}        | ${"km"}
+    ${makeQuantity(12345, "mV")}      | ${"12345 mV"}      | ${"1.235e+4 mV"}  | ${LeafType.Quantity} | ${"12345"}       | ${"mV"}
+    ${makeQuantity(1.2e9, "B")}       | ${"1200000000 B"}  | ${"1.2e+9 B"}     | ${LeafType.Quantity} | ${"1200000000"}  | ${"B"}
+    ${makeQuantity(1200000001, "mA")} | ${"1200000001 mA"} | ${"1.200e+9 mA"}  | ${LeafType.Quantity} | ${"1200000001"}  | ${"mA"}
+    ${makeQuantity(1.2e34, "K")}      | ${"1.2e+34 K"}     | ${"1.2e+34 K"}    | ${LeafType.Quantity} | ${"1.2e+34"}     | ${"K"}
   `(
     "$leaf",
     ({ leaf, unrounded, rounded, leafType, input, unitInput }: leafTestParams) => {
@@ -210,7 +211,7 @@ describe("parseLeaf", () => {
   const date = new Date();
   date.setMilliseconds(0); // Parsing does not handle milliseconds
   const timestamp = date.getTime();
-  const datetimeString = formatDate(timestamp);
+  const datetimeInput = getLocalISOString(timestamp);
   const datetime: Datetime = {
     __type: "datetime.datetime",
     isoformat: date.toISOString().replace("Z", "+00:00"),
@@ -224,11 +225,11 @@ describe("parseLeaf", () => {
 
   // Non-Quantity types ignore unitInput, so they parse successfully with it
   describe.each`
-    leafType             | input             | leaf
-    ${LeafType.Number}   | ${"1234"}         | ${1234}
-    ${LeafType.Boolean}  | ${"False"}        | ${false}
-    ${LeafType.Null}     | ${"None"}         | ${null}
-    ${LeafType.Datetime} | ${datetimeString} | ${datetime}
+    leafType             | input            | leaf
+    ${LeafType.Number}   | ${"1234"}        | ${1234}
+    ${LeafType.Boolean}  | ${"False"}       | ${false}
+    ${LeafType.Null}     | ${"None"}        | ${null}
+    ${LeafType.Datetime} | ${datetimeInput} | ${datetime}
   `('with unitInput "m"', ({ leafType, input, leaf }: validInputWithUnitTestParams) => {
     it(`parses from leaf type ${LeafType[leafType]} and input "${input}"`, () =>
       expect(parseLeaf(leafType, input, "m")).toEqual(leaf));

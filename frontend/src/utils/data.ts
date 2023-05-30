@@ -11,7 +11,7 @@ import {
   isParam,
   isStruct,
 } from "@/utils/type";
-import { formatDate } from "@/utils/timestamp";
+import { formatDate, getLocalISOString } from "@/utils/timestamp";
 
 const precision = 4;
 
@@ -74,6 +74,10 @@ export function getLeafType(leaf: Leaf) {
 
 /** Convert the given leaf to an input string and a unit input string. */
 export function leafToInput(leaf: Leaf) {
+  if (isDatetime(leaf)) {
+    return { input: getLocalISOString(leaf.isoformat), unitInput: "" };
+  }
+
   if (isQuantity(leaf)) {
     return { input: String(leaf.value), unitInput: leaf.unit };
   }
