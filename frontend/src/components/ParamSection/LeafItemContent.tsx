@@ -105,6 +105,7 @@ function LeafItemEditMode({ editedLeaf, path }: LeafItemEditModeProps) {
   return (
     <Box sx={{ display: "flex", columnGap: 1 }}>
       <TextField
+        data-testid="leaf-value-input"
         variant="standard"
         sx={{
           ml: 1,
@@ -125,6 +126,7 @@ function LeafItemEditMode({ editedLeaf, path }: LeafItemEditModeProps) {
       </TextField>
       {leafType === LeafType.Quantity && (
         <TextField
+          data-testid="leaf-unit-input"
           variant="standard"
           sx={{ width: "6ch" }}
           inputProps={{ sx: [{ pt: "2.5px", pb: "2.5px" }] }}
@@ -136,6 +138,7 @@ function LeafItemEditMode({ editedLeaf, path }: LeafItemEditModeProps) {
         />
       )}
       <TextField
+        data-testid="leaf-type-input"
         select
         variant="standard"
         sx={{ width: "90px" }}
@@ -155,14 +158,27 @@ function LeafItemEditMode({ editedLeaf, path }: LeafItemEditModeProps) {
           setLeafType(newLeafType);
         }}
       >
-        <MenuItem value={LeafType.Number}>int/float</MenuItem>
-        <MenuItem value={LeafType.Boolean}>bool</MenuItem>
-        <MenuItem value={LeafType.String}>str</MenuItem>
-        <MenuItem value={LeafType.Null}>None</MenuItem>
-        <MenuItem value={LeafType.Quantity}>Quantity</MenuItem>
-        <MenuItem value={LeafType.Datetime}>datetime</MenuItem>
+        <MenuItem data-testid="leaf-type-input-option-int/float" value={LeafType.Number}>
+          int/float
+        </MenuItem>
+        <MenuItem data-testid="leaf-type-input-option-bool" value={LeafType.Boolean}>
+          bool
+        </MenuItem>
+        <MenuItem data-testid="leaf-type-input-option-str" value={LeafType.String}>
+          str
+        </MenuItem>
+        <MenuItem data-testid="leaf-type-input-option-none" value={LeafType.Null}>
+          None
+        </MenuItem>
+        <MenuItem data-testid="leaf-type-input-option-Quantity" value={LeafType.Quantity}>
+          Quantity
+        </MenuItem>
+        <MenuItem data-testid="leaf-type-input-option-datetime" value={LeafType.Datetime}>
+          datetime
+        </MenuItem>
       </TextField>
       <IconButton
+        data-testid="reset-leaf-button"
         sx={{ width: "1.75rem", height: "1.75rem" }}
         size="small"
         onClick={() => {

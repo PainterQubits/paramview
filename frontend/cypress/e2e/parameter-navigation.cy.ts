@@ -1,6 +1,6 @@
-const dateString = "2023-01-01T00:00:00.000Z";
-
 describe("parameter data for latest commit", () => {
+  const dateString = "2023-01-01T00:00:00.000Z";
+
   before(() => {
     cy.task("db:reset", { single: true });
   });

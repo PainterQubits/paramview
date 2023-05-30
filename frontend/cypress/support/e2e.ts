@@ -12,6 +12,7 @@ declare global {
         dataTestAttribute: string,
         options?: Parameters<cy["get"]>[1],
       ): Chainable<JQuery<HTMLElement>>;
+
       /**
        * Assert that the DOM element contains the date specified by the given timestamp or
        * string.
@@ -21,6 +22,7 @@ declare global {
       shouldContainDate(
         timestampOrString: number | string,
       ): Chainable<JQuery<HTMLElement>>;
+
       /**
        * Assert that the DOM element does not contain the date specified by the given
        * timestamp or string.
@@ -30,10 +32,35 @@ declare global {
       shouldNotContainDate(
         timestampOrString: number | string,
       ): Chainable<JQuery<HTMLElement>>;
+
+      /**
+       * Assert that the DOM element's value is equal to the date specified by the given
+       * timestamp or string in local datetime format.
+       *
+       * This is a custom Cypress command.
+       */
+      shouldHaveDateValue(
+        timestampOrString: number | string,
+      ): Chainable<JQuery<HTMLElement>>;
+
+      /**
+       * Assert that the input element is valid, based on its aria-invalid attribute.
+       *
+       * This is a custom Cypress command.
+       */
+      shouldBeValid(): Chainable<JQuery<HTMLElement>>;
+
+      /**
+       * Assert that the input element is invalid, based on its aria-invalid attribute.
+       *
+       * This is a custom Cypress command.
+       */
+      shouldBeInvalid(): Chainable<JQuery<HTMLElement>>;
     }
   }
 }
 
+/** See src/utils/timestamp.ts */
 function formatDate(timestampOrString: number | string) {
   return new Date(timestampOrString).toLocaleString(undefined, {
     year: "2-digit",
@@ -43,6 +70,13 @@ function formatDate(timestampOrString: number | string) {
     minute: "2-digit",
     second: "2-digit",
   });
+}
+
+/** See src/utils/timestamp.ts */
+function getLocalISOString(timestampOrString: number | string) {
+  const date = new Date(timestampOrString);
+  date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
+  return date.toISOString().split(".")[0].slice(0, -3);
 }
 
 Cypress.Commands.add("getByTestId", (selector, options) => {
@@ -61,6 +95,21 @@ Cypress.Commands.add(
   { prevSubject: true },
   (subject, timestampOrString) =>
     cy.wrap(subject).should("not.contain", formatDate(timestampOrString)),
+);
+
+Cypress.Commands.add(
+  "shouldHaveDateValue",
+  { prevSubject: true },
+  (subject, timestampOrString) =>
+    cy.wrap(subject).should("have.value", getLocalISOString(timestampOrString)),
+);
+
+Cypress.Commands.add("shouldBeValid", { prevSubject: true }, (subject) =>
+  cy.wrap(subject).should("have.attr", "aria-invalid", "false"),
+);
+
+Cypress.Commands.add("shouldBeInvalid", { prevSubject: true }, (subject) =>
+  cy.wrap(subject).should("have.attr", "aria-invalid", "true"),
 );
 
 export {};
