@@ -65,6 +65,7 @@ describe("leaf data", () => {
     ${true}                           | ${"True"}          | ${"True"}         | ${LeafType.Boolean}  | ${"True"}         | ${""}
     ${false}                          | ${"False"}         | ${"False"}        | ${LeafType.Boolean}  | ${"False"}        | ${""}
     ${"test"}                         | ${"test"}          | ${"test"}         | ${LeafType.String}   | ${"test"}         | ${""}
+    ${""}                             | ${""}              | ${""}             | ${LeafType.String}   | ${""}             | ${""}
     ${null}                           | ${"None"}          | ${"None"}         | ${LeafType.Null}     | ${"None"}         | ${""}
     ${datetime}                       | ${datetimeString}  | ${datetimeString} | ${LeafType.Datetime} | ${datetimeString} | ${""}
     ${makeQuantity(1.234, "m")}       | ${"1.234 m"}       | ${"1.234 m"}      | ${LeafType.Quantity} | ${"1.234"}        | ${"m"}
@@ -202,6 +203,78 @@ describe("group data", () => {
       });
     },
   );
+});
+
+// Additional parseLeaf tests
+describe("parseLeaf", () => {
+  const date = new Date();
+  date.setMilliseconds(0); // Parsing does not handle milliseconds
+  const timestamp = date.getTime();
+  const datetimeString = formatDate(timestamp);
+  const datetime: Datetime = {
+    __type: "datetime.datetime",
+    isoformat: date.toISOString().replace("Z", "+00:00"),
+  };
+
+  type validInputWithUnitTestParams = {
+    leafType: LeafType;
+    input: string;
+    leaf: Leaf;
+  };
+
+  // Non-Quantity types ignore unitInput, so they parse successfully with it
+  describe.each`
+    leafType             | input             | leaf
+    ${LeafType.Number}   | ${"1234"}         | ${1234}
+    ${LeafType.Boolean}  | ${"False"}        | ${false}
+    ${LeafType.Null}     | ${"None"}         | ${null}
+    ${LeafType.Datetime} | ${datetimeString} | ${datetime}
+  `('with unitInput "m"', ({ leafType, input, leaf }: validInputWithUnitTestParams) => {
+    it(`parses from leaf type ${LeafType[leafType]} and input "${input}"`, () =>
+      expect(parseLeaf(leafType, input, "m")).toEqual(leaf));
+  });
+
+  type invalidInputTestParams = {
+    leafType: LeafType;
+    input: string;
+    unitInput: string;
+  };
+
+  describe.each`
+    leafType             | input          | unitInput
+    ${LeafType.Number}   | ${"test"}      | ${""}
+    ${LeafType.Number}   | ${"123e"}      | ${""}
+    ${LeafType.Number}   | ${"123e"}      | ${"m"}
+    ${LeafType.Number}   | ${""}          | ${""}
+    ${LeafType.Number}   | ${"123e999"}   | ${""}
+    ${LeafType.Number}   | ${"Infinity"}  | ${""}
+    ${LeafType.Number}   | ${"-Infinity"} | ${""}
+    ${LeafType.Number}   | ${"NaN"}       | ${""}
+    ${LeafType.Number}   | ${"-NaN"}      | ${""}
+    ${LeafType.Boolean}  | ${"test"}      | ${""}
+    ${LeafType.Boolean}  | ${"test"}      | ${"m"}
+    ${LeafType.Boolean}  | ${""}          | ${""}
+    ${LeafType.Null}     | ${"test"}      | ${""}
+    ${LeafType.Null}     | ${"test"}      | ${"m"}
+    ${LeafType.Null}     | ${""}          | ${""}
+    ${LeafType.Datetime} | ${"test"}      | ${""}
+    ${LeafType.Datetime} | ${"test"}      | ${"m"}
+    ${LeafType.Datetime} | ${""}          | ${""}
+    ${LeafType.Quantity} | ${"test"}      | ${"m"}
+    ${LeafType.Quantity} | ${"123e"}      | ${"m"}
+    ${LeafType.Quantity} | ${"123e"}      | ${"m"}
+    ${LeafType.Quantity} | ${""}          | ${"m"}
+    ${LeafType.Quantity} | ${"123e999"}   | ${"m"}
+    ${LeafType.Quantity} | ${"Infinity"}  | ${"m"}
+    ${LeafType.Quantity} | ${"-Infinity"} | ${"m"}
+    ${LeafType.Quantity} | ${"NaN"}       | ${"m"}
+    ${LeafType.Quantity} | ${"-NaN"}      | ${"m"}
+    ${LeafType.Quantity} | ${"test"}      | ${""}
+    ${LeafType.Quantity} | ${"123"}       | ${""}
+  `("invalid input", ({ leafType, input, unitInput }: invalidInputTestParams) => {
+    it(`returns undefined for leaf type ${LeafType[leafType]}, input "${input}", and unit "${unitInput}"`, () =>
+      expect(parseLeaf(leafType, input, unitInput)).toBeUndefined());
+  });
 });
 
 // Additional getData tests
