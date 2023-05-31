@@ -19,11 +19,11 @@ describe("parameter data for latest commit", () => {
 
       cy.getByTestId("parameter-list-item-str").should("contain", "test");
 
-      cy.getByTestId("parameter-list-item-none").should("contain", "none");
+      cy.getByTestId("parameter-list-item-None").should("contain", "None");
 
-      cy.getByTestId("parameter-list-item-date").shouldContainDate(dateString);
+      cy.getByTestId("parameter-list-item-datetime").shouldContainDate(dateString);
 
-      cy.getByTestId("parameter-list-item-quantity").should("contain", "1.234 m"); // Rounded
+      cy.getByTestId("parameter-list-item-Quantity").should("contain", "1.234 m"); // Rounded
 
       cy.getByTestId("parameter-list-item-list")
         .should("contain", "list")
@@ -58,15 +58,15 @@ describe("parameter data for latest commit", () => {
       .as("roundSwitchInput")
       .should("be.checked");
     cy.getByTestId("parameter-list-item-float").as("float").should("contain", "1.234");
-    cy.getByTestId("parameter-list-item-quantity")
-      .as("quantity")
+    cy.getByTestId("parameter-list-item-Quantity")
+      .as("Quantity")
       .should("contain", "1.234 m");
 
     // Unrounded
     cy.get("@roundSwitchInput").uncheck();
     cy.get("@roundSwitchInput").should("not.be.checked");
     cy.get("@float").should("contain", "1.2345");
-    cy.get("@quantity").should("contain", "1.2345 m");
+    cy.get("@Quantity").should("contain", "1.2345 m");
   });
 
   it("expands and collapses nested items when clicked", () => {

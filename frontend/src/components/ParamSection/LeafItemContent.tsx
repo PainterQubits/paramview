@@ -121,10 +121,10 @@ function LeafItemEditMode({ editedLeaf, path }: LeafItemEditModeProps) {
         color={changedInput ? "success" : undefined}
         onChange={({ target: { value } }) => setInput(value)}
       >
-        <MenuItem data-testid="boolean-leaf-input-option-True" value="True">
+        <MenuItem data-testid="boolean-input-option-True" value="True">
           True
         </MenuItem>
-        <MenuItem data-testid="boolean-leaf-input-option-False" value="False">
+        <MenuItem data-testid="boolean-input-option-False" value="False">
           False
         </MenuItem>
       </TextField>
@@ -162,22 +162,22 @@ function LeafItemEditMode({ editedLeaf, path }: LeafItemEditModeProps) {
           setLeafType(newLeafType);
         }}
       >
-        <MenuItem data-testid="leaf-type-input-option-int/float" value={LeafType.Number}>
+        <MenuItem data-testid="leaf-type-option-int-float" value={LeafType.Number}>
           int/float
         </MenuItem>
-        <MenuItem data-testid="leaf-type-input-option-bool" value={LeafType.Boolean}>
+        <MenuItem data-testid="leaf-type-option-bool" value={LeafType.Boolean}>
           bool
         </MenuItem>
-        <MenuItem data-testid="leaf-type-input-option-str" value={LeafType.String}>
+        <MenuItem data-testid="leaf-type-option-str" value={LeafType.String}>
           str
         </MenuItem>
-        <MenuItem data-testid="leaf-type-input-option-none" value={LeafType.Null}>
+        <MenuItem data-testid="leaf-type-option-None" value={LeafType.Null}>
           None
         </MenuItem>
-        <MenuItem data-testid="leaf-type-input-option-Quantity" value={LeafType.Quantity}>
+        <MenuItem data-testid="leaf-type-option-Quantity" value={LeafType.Quantity}>
           Quantity
         </MenuItem>
-        <MenuItem data-testid="leaf-type-input-option-datetime" value={LeafType.Datetime}>
+        <MenuItem data-testid="leaf-type-option-datetime" value={LeafType.Datetime}>
           datetime
         </MenuItem>
       </TextField>
