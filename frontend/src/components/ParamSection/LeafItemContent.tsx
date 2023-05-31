@@ -105,7 +105,7 @@ function LeafItemEditMode({ editedLeaf, path }: LeafItemEditModeProps) {
   return (
     <Box sx={{ display: "flex", columnGap: 1 }}>
       <TextField
-        data-testid="leaf-value-input"
+        data-testid="leaf-input"
         variant="standard"
         sx={{
           ml: 1,
@@ -121,8 +121,12 @@ function LeafItemEditMode({ editedLeaf, path }: LeafItemEditModeProps) {
         color={changedInput ? "success" : undefined}
         onChange={({ target: { value } }) => setInput(value)}
       >
-        <MenuItem value="True">True</MenuItem>
-        <MenuItem value="False">False</MenuItem>
+        <MenuItem data-testid="boolean-leaf-input-option-True" value="True">
+          True
+        </MenuItem>
+        <MenuItem data-testid="boolean-leaf-input-option-False" value="False">
+          False
+        </MenuItem>
       </TextField>
       {leafType === LeafType.Quantity && (
         <TextField
