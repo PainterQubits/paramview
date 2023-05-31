@@ -168,7 +168,7 @@ describe("leaf input", () => {
 
       // datetime
       cy.getByTestId("parameter-list-item-datetime").within(() => {
-        const newDateValue = "2023-02-01T00:00";
+        const newDateValue = "2023-02-01T00:00:01";
 
         // Clear the datetime input
         cy.getByTestId("leaf-input").find("input").as("datetime-input").clear();

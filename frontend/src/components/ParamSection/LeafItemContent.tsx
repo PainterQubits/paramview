@@ -109,9 +109,10 @@ function LeafItemEditMode({ editedLeaf, path }: LeafItemEditModeProps) {
         variant="standard"
         sx={{
           ml: 1,
-          width: leafType === LeafType.Quantity ? "calc(14rem - 8px - 6ch)" : "14rem",
+          width: "min-content",
+          minWidth: leafType === LeafType.Quantity ? "calc(14rem - 8px - 6ch)" : "14rem",
         }}
-        inputProps={{ sx: [{ pt: "2.5px", pb: "2.5px" }] }}
+        inputProps={{ sx: [{ pt: "2.5px", pb: "2.5px" }], step: 1 }}
         select={leafType === LeafType.Boolean}
         disabled={leafType === LeafType.Null}
         type={leafType === LeafType.Datetime ? "datetime-local" : undefined}

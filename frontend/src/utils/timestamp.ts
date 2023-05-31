@@ -25,7 +25,9 @@ export function getLocalISOString(timestampOrString: number | string) {
   // UTC time (the default).
   date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
 
-  // Remove seconds and timezone for a valid datetime-local input value (see
-  // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/datetime-local).
-  return date.toISOString().split(".")[0].slice(0, -3);
+  // Remove timezone, milliseconds, and seconds if ":00"
+  const localISOStringWithSeconds = date.toISOString().split(".")[0];
+  return date.getSeconds() === 0
+    ? localISOStringWithSeconds.slice(0, -3)
+    : localISOStringWithSeconds;
 }

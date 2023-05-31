@@ -76,7 +76,10 @@ function formatDate(timestampOrString: number | string) {
 function getLocalISOString(timestampOrString: number | string) {
   const date = new Date(timestampOrString);
   date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
-  return date.toISOString().split(".")[0].slice(0, -3);
+  const localISOStringWithSeconds = date.toISOString().split(".")[0];
+  return date.getSeconds() === 0
+    ? localISOStringWithSeconds.slice(0, -3)
+    : localISOStringWithSeconds;
 }
 
 Cypress.Commands.add("getByTestId", (selector, options) => {

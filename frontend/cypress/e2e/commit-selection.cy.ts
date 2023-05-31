@@ -303,6 +303,7 @@ describe("edit mode", () => {
 
     // Click buttons to open commit dialog and make a commit
     cy.getByTestId("open-commit-dialog-button").click();
+    cy.getByTestId("commit-message-text-field").type("New commit");
     cy.getByTestId("make-commit-button").click();
 
     // Combobox and latest checkbox are not disabled
