@@ -60,3 +60,21 @@ export const editModeAtom = atom(
     set(editModeStateAtom, newEditMode);
   },
 );
+
+/** Primitive atom to store the current value of commitDialogOpenAtom. */
+export const commitDialogOpenStateAtom = atom(false);
+
+/** Whether the commit dialog is open. */
+export const commitDialogOpenAtom = atom(
+  (get) => get(commitDialogOpenStateAtom),
+  (_, set, newCommitDialogOpen: boolean) => {
+    if (newCommitDialogOpen) {
+      set(commitMessageAtom, "");
+    }
+
+    set(commitDialogOpenStateAtom, newCommitDialogOpen);
+  },
+);
+
+/** User-entered message to use for the next commit. */
+export const commitMessageAtom = atom("");

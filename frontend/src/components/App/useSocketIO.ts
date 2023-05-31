@@ -3,10 +3,7 @@ import { useSetAtom } from "jotai";
 import { startTransition, useEffect } from "react";
 import { commitHistoryAtom } from "@/atoms/api";
 
-/**
- * Set up SocketIO. This component does not render anything, but the SocketIO event
- * handlers need to be within a component in order to update atoms.
- */
+/** Set up SocketIO to sync database changes. */
 export default function SocketIO() {
   const updateCommitHistory = useSetAtom(commitHistoryAtom);
 
@@ -14,7 +11,9 @@ export default function SocketIO() {
     const socket = io();
 
     /** Actions to perform when the database may have been updated. */
-    const databaseUpdate = () => startTransition(updateCommitHistory);
+    const databaseUpdate = () => {
+      startTransition(updateCommitHistory);
+    };
 
     // Trigger an update when the WebSocket connection is established, when there is a
     // connection error, when disconnected, and when the database is updated.

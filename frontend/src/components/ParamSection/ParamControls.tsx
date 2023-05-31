@@ -1,7 +1,13 @@
-import { startTransition, useState, useTransition, Suspense } from "react";
+import deepEqual from "fast-deep-equal";
 import { useAtom, useSetAtom } from "jotai";
+import { startTransition, useTransition, Suspense } from "react";
 import { Box, FormGroup, FormControlLabel, Switch, Button } from "@mui/material";
-import { roundAtom, collapseAtom, editModeAtom } from "@/atoms/paramList";
+import {
+  roundAtom,
+  collapseAtom,
+  editModeAtom,
+  commitDialogOpenAtom,
+} from "@/atoms/paramList";
 import CommitDialog from "./CommitDialog";
 
 const subControlsSx = {
@@ -12,18 +18,18 @@ const subControlsSx = {
 
 /** Controls for the parameter section. */
 export default function ParamControls() {
-  const [round, toggleRound] = useAtom(roundAtom);
-  const collapseAll = useSetAtom(collapseAtom);
-  const [editMode, setEditMode] = useAtom(editModeAtom);
-
   const [cancelingEditMode, startCancelTransition] = useTransition();
 
-  /** Whether the commit dialog is open. */
-  const [commitDialogOpen, setCommitDialogOpen] = useState(false);
+  const [round, toggleRound] = useAtom(roundAtom);
+  const [editMode, setEditMode] = useAtom(editModeAtom);
+  const collapseAll = useSetAtom(collapseAtom);
+  const setCommitDialogOpen = useSetAtom(commitDialogOpenAtom);
 
   const startEditMode = () => startTransition(() => setEditMode(true));
 
-  const cancelEditMode = () => startCancelTransition(() => setEditMode(false));
+  const cancelEditMode = () => {
+    startCancelTransition(() => setEditMode(false));
+  };
 
   const openCommitDialog = () => {
     if (!cancelingEditMode) {
@@ -86,10 +92,7 @@ export default function ParamControls() {
         )}
       </Box>
       <Suspense>
-        <CommitDialog
-          commitDialogOpen={commitDialogOpen}
-          setCommitDialogOpen={setCommitDialogOpen}
-        />
+        <CommitDialog />
       </Suspense>
     </>
   );
