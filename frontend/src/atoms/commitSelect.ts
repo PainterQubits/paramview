@@ -1,26 +1,48 @@
 import { atom } from "jotai";
-import { databaseNameAtom, commitHistoryAtom } from "@/atoms/api";
+import { commitHistoryAtom } from "@/atoms/api";
+import { editModeAtom } from "@/atoms/paramList";
+
+/** Primitive atom to store the current value of syncLatestAtom. */
+const syncLatestStateAtom = atom(true);
 
 /** Whether to sync the current commit index with the latest commit. */
-export const syncLatestAtom = atom(true);
+export const syncLatestAtom = atom(
+  (get) => !get(editModeAtom) && get(syncLatestStateAtom),
+  (_, set, newSyncLatest: boolean) => {
+    set(selectedCommitIndexAtom, { type: "sync" });
+    set(syncLatestStateAtom, newSyncLatest);
+  },
+);
 
-/** Keeps track of the index of the selected commit to use when sync latest is false. */
-const selectedCommitIndexStateAtom = atom<number>(0);
+type selectCommitIndexAction = { type: "sync" } | { type: "set"; value: number };
+
+/** Index of the latest commit. */
+const latestCommitIndexAtom = atom<Promise<number>>(
+  async (get) => (await get(commitHistoryAtom)).length - 1,
+);
+
+/** Primitive atom to store the current value of selectedCommitIndexAtom. */
+const selectedCommitIndexStateAtom = atom<number | Promise<number>>(0);
 
 /**
- * Index of the currently selected commit in the commit history. This will be the latest
- * commit if syncLatestAtom is true, or the selected commit otherwise.
+ * Index of the currently selected commit in the commit history, or the latest atom if
+ * syncLatestAtom is true.
+ *
+ * The set function can sync the underlying state atom with the true current index (which
+ * might be the latest atom if syncLatest is true), or set the underlying state atom to a
+ * specific value.
  */
 export const selectedCommitIndexAtom = atom(
-  async (get) => {
-    const commitHistoryLength = (await get(commitHistoryAtom)).length;
-    if (commitHistoryLength === 0) {
-      throw new Error(`Database ${await get(databaseNameAtom)} has no commits.`);
+  (get) =>
+    get(syncLatestAtom) ? get(latestCommitIndexAtom) : get(selectedCommitIndexStateAtom),
+  (get, set, action: selectCommitIndexAction) => {
+    if (action.type === "sync") {
+      if (get(syncLatestAtom)) {
+        set(selectedCommitIndexStateAtom, get(latestCommitIndexAtom));
+      }
+    } else {
+      // Set action
+      set(selectedCommitIndexStateAtom, action.value);
     }
-    return get(syncLatestAtom)
-      ? commitHistoryLength - 1
-      : get(selectedCommitIndexStateAtom);
   },
-  (_, set, selectedCommitIndex: number) =>
-    set(selectedCommitIndexStateAtom, selectedCommitIndex),
 );

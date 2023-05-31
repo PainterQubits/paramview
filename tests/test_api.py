@@ -25,7 +25,7 @@ def test_commit_history(db: ParamDB[Any], client: FlaskClient) -> None:
 def test_data_nonexistent_fails(client: FlaskClient) -> None:
     """Fails to get data from a nonexistent commit."""
     response = client.get("/api/data/0")
-    assert response.status_code == 500  # Server error
+    assert response.status_code == 500  # Internal server error
     assert response.mimetype == "application/json"
     error_json = response.json
     assert isinstance(error_json, dict)
@@ -46,3 +46,78 @@ def test_data(db: ParamDB[Any], client: FlaskClient) -> None:
         if isinstance(response_data, dict):
             # Check that key order is the same (i.e. Flask does not sort the keys)
             assert list(response_data) == list(loaded_data)
+
+
+def test_commit_not_json_fails(client: FlaskClient) -> None:
+    """Fails to create a commit if the mimetype is not JSON."""
+    response = client.post("/api/commit", data="not JSON")
+    assert response.status_code == 415  # Unsupported media type
+    assert response.mimetype == "application/json"
+    error_json = response.json
+    assert isinstance(error_json, dict)
+    assert error_json["code"] == 415
+    assert error_json["name"] == "Unsupported Media Type"
+    assert "application/json" in error_json["description"]
+
+
+def test_commit_not_dict_fails(client: FlaskClient) -> None:
+    """Fails to create a commit if the response body is not a dictionary."""
+    response = client.post("/api/commit", json="not a dict")
+    assert response.status_code == 500  # Internal server error
+    assert response.mimetype == "application/json"
+    error_json = response.json
+    assert isinstance(error_json, dict)
+    assert error_json["code"] == 500
+    assert error_json["name"] == "Internal Server Error"
+    assert (
+        "TypeError: request body must be a dictionary, not 'str'"
+        in error_json["description"]
+    )
+
+
+def test_commit_missing_key_fails(client: FlaskClient) -> None:
+    """
+    Fails to create a commit if the response body is missing the "message" or "data"
+    key.
+    """
+    response = client.post("/api/commit", json={"message": "No data"})
+    assert response.status_code == 500  # Internal server error
+    assert response.mimetype == "application/json"
+    error_json = response.json
+    assert isinstance(error_json, dict)
+    assert error_json["code"] == 500
+    assert error_json["name"] == "Internal Server Error"
+    assert (
+        "ValueError: request body must contain the keys 'message' and 'data'"
+        in error_json["description"]
+    )
+
+
+def test_commit_message_not_str(client: FlaskClient) -> None:
+    """Fails to create a commit if the message is not a string."""
+    response = client.post("/api/commit", json={"message": {}, "data": {}})
+    assert response.status_code == 500  # Internal server error
+    assert response.mimetype == "application/json"
+    error_json = response.json
+    assert isinstance(error_json, dict)
+    assert error_json["code"] == 500
+    assert error_json["name"] == "Internal Server Error"
+    assert (
+        "TypeError: message must be a string, not 'dict'" in error_json["description"]
+    )
+
+
+def test_commit(db: ParamDB[Any], client: FlaskClient) -> None:
+    """Creates a new commit in the database."""
+    message = "Commit from API"
+    data = db.load(1, load_classes=False)
+    data["a"] += 100  # Make data different than for other commits
+    response = client.post("/api/commit", json={"message": message, "data": data})
+    assert response.status_code == 200  # Success
+    assert response.mimetype == "application/json"
+    commit_id = response.json
+    assert isinstance(commit_id, int)
+    loaded_message = db.commit_history()[-1].message
+    loaded_data = db.load(commit_id, load_classes=False)
+    assert loaded_message == message
+    assert loaded_data == data

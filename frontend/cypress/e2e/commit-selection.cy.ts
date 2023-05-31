@@ -21,19 +21,23 @@ describe("short commit history", () => {
     visitAndInterceptCommitHistory();
   });
 
-  it("displays the latest commit and latest is checked", () => {
+  it("displays the latest commit, latest is checked, and inputs are not disabled", () => {
     cy.get("@commitHistory").then((commitHistoryAlias: unknown) => {
       const commitHistory = commitHistoryAlias as CommitEntry[];
       const latestCommit = commitHistory[commitHistory.length - 1];
 
-      // Combobox contains latest commit
+      // Combobox contains latest commit and is not disabled
       cy.getByTestId("commit-select-combobox")
         .shouldContainDate(latestCommit.timestamp)
         .find("input")
-        .should("have.value", getFullMessage(latestCommit));
+        .should("have.value", getFullMessage(latestCommit))
+        .should("not.be.disabled");
 
-      // Latest checkbox is checked
-      cy.getByTestId("latest-checkbox").find("input").should("be.checked");
+      // Latest checkbox is checked and not disabled
+      cy.getByTestId("latest-checkbox")
+        .find("input")
+        .should("be.checked")
+        .should("not.be.disabled");
 
       // Displays parameter data for the latest commit
       cy.getByTestId("parameter-list-item-commit_id").should("contain", latestCommit.id);
@@ -93,13 +97,13 @@ describe("short commit history", () => {
 
       // Latest checkbox should be unchecked
       cy.getByTestId("latest-checkbox")
+        .as("latestCheckbox")
         .find("input")
-        .as("latestCheckboxInput")
         .should("not.be.checked");
 
       // Check the latest checkbox
-      cy.get("@latestCheckboxInput").check();
-      cy.get("@latestCheckboxInput").should("be.checked");
+      cy.get("@latestCheckbox").click();
+      cy.get("@latestCheckbox").find("input").should("be.checked");
 
       // Combobox contains latest commit
       cy.get("@commitSelectCombobox")
@@ -151,7 +155,6 @@ describe("long commit history", () => {
         .slice(commitHistory.length - oldCommitIndex, commitHistory.length - 1)
         .reverse()
         .forEach(({ id }) => {
-          console.log(id);
           cy.get("@commitSelectCombobox").type("{downArrow}");
           cy.getByTestId(`commit-select-option-${id}`).should("exist");
         });
@@ -189,6 +192,7 @@ describe("update commit history", () => {
         .find("input")
         .should("have.value", getFullMessage(originalLatestCommit));
 
+      // Make a commit
       cy.intercept("/api/commit-history").as("commitHistoryUpdatedIntercept");
       cy.task("db:commit");
       cy.wait("@commitHistoryUpdatedIntercept").then(({ response: { body } }) => {
@@ -230,8 +234,8 @@ describe("update commit history", () => {
         .should("have.value", getFullMessage(originalLatestCommit));
 
       // Uncheck the latest checkbox
-      cy.getByTestId("latest-checkbox").find("input").as("latestCheckboxInput").uncheck();
-      cy.get("@latestCheckboxInput").should("not.be.checked");
+      cy.getByTestId("latest-checkbox").as("latestCheckbox").click();
+      cy.get("@latestCheckbox").find("input").should("not.be.checked");
 
       cy.intercept("/api/commit-history").as("commitHistoryUpdatedIntercept");
       cy.task("db:commit");
@@ -261,4 +265,201 @@ describe("update commit history", () => {
       });
     });
   });
+});
+
+describe("edit mode", () => {
+  beforeEach(() => {
+    cy.task("db:reset");
+    visitAndInterceptCommitHistory();
+  });
+
+  it("commit combobox and latest checkbox are disabled", () => {
+    // Click the edit button to enter edit mode
+    cy.getByTestId("edit-button").click();
+
+    // Combobox and latest checkbox are disabled
+    cy.getByTestId("commit-select-combobox")
+      .find("input")
+      .as("commitSelectComboboxInput")
+      .should("be.disabled");
+    cy.getByTestId("latest-checkbox")
+      .find("input")
+      .as("latestCheckboxInput")
+      .should("be.disabled");
+
+    // Click the cancel button to exit edit mode
+    cy.getByTestId("cancel-edit-button").click();
+
+    // Combobox and latest checkbox are not disabled
+    cy.get("@commitSelectComboboxInput").should("not.be.disabled");
+    cy.get("@latestCheckboxInput").should("not.be.disabled");
+
+    // Click the edit button to enter edit mode
+    cy.getByTestId("edit-button").click();
+
+    // Combobox and latest checkbox are disabled
+    cy.get("@commitSelectComboboxInput").should("be.disabled");
+    cy.get("@latestCheckboxInput").should("be.disabled");
+
+    // Click buttons to open commit dialog and make a commit
+    cy.getByTestId("open-commit-dialog-button").click();
+    cy.getByTestId("commit-message-text-field").type("New commit");
+    cy.getByTestId("make-commit-button").click();
+
+    // Combobox and latest checkbox are not disabled
+    cy.get("@commitSelectComboboxInput").should("not.be.disabled");
+    cy.get("@latestCheckboxInput").should("not.be.disabled");
+  });
+
+  it(
+    "when latest is checked, it is unchecked in edit mode, making a commit in edit mode" +
+      " does not check latest or switch to the latest commit, and once exit mode ends" +
+      " latest is checked again and the new latest commit is selected",
+    () => {
+      cy.get("@commitHistory").then((commitHistoryAlias: unknown) => {
+        const commitHistory = commitHistoryAlias as CommitEntry[];
+        const originalLatestCommit = commitHistory[commitHistory.length - 1];
+        const originalFullMessage = getFullMessage(originalLatestCommit);
+
+        // Click the edit button to enter edit mode
+        cy.getByTestId("edit-button").click();
+
+        // Latest checkbox is not checked
+        cy.getByTestId("latest-checkbox")
+          .find("input")
+          .as("latestCheckboxInput")
+          .should("not.be.checked");
+
+        // Combobox contains latest commit
+        cy.getByTestId("commit-select-combobox")
+          .as("commitSelectCombobox")
+          .shouldContainDate(originalLatestCommit.timestamp)
+          .find("input")
+          .should("have.value", originalFullMessage);
+
+        // Make a commit
+        cy.intercept("/api/commit-history").as("commitHistoryUpdatedIntercept");
+        cy.task("db:commit");
+        cy.wait("@commitHistoryUpdatedIntercept").then(({ response: { body } }) => {
+          const updatedCommitHistory: CommitEntry[] = body;
+          const updatedLatestCommit =
+            updatedCommitHistory[updatedCommitHistory.length - 1];
+          const updatedFullMessage = getFullMessage(updatedLatestCommit);
+
+          // Latest commit has updated
+          cy.wrap(updatedLatestCommit).should("not.deep.equal", originalLatestCommit);
+
+          // Latest checkbox is not checked
+          cy.get("@latestCheckboxInput").should("not.be.checked");
+
+          // Combobox contains the original latest commit (since latest is unchecked)
+          cy.get("@commitSelectCombobox")
+            .shouldContainDate(originalLatestCommit.timestamp)
+            .find("input")
+            .should("have.value", originalFullMessage);
+
+          // Click the cancel button to exit edit mode
+          cy.getByTestId("cancel-edit-button").click();
+
+          // Latest checkbox is checked
+          cy.get("@latestCheckboxInput").should("be.checked");
+
+          // Combobox contains the updated latest commit
+          cy.getByTestId("commit-select-combobox")
+            .as("commitSelectCombobox")
+            .shouldContainDate(updatedLatestCommit.timestamp)
+            .find("input")
+            .should("have.value", updatedFullMessage);
+        });
+      });
+    },
+  );
+
+  it(
+    "when latest is unchecked, entering edit mode, making a commit, and exiting edit" +
+      " do not change the selected commit or check latest",
+    () => {
+      cy.get("@commitHistory").then((commitHistoryAlias: unknown) => {
+        const commitHistory = commitHistoryAlias as CommitEntry[];
+        const firstCommit = commitHistory[0];
+        const fullMessage = getFullMessage(firstCommit);
+
+        // Select the first commit
+        cy.getByTestId("commit-select-combobox")
+          .as("commitSelectCombobox")
+          .type(`${fullMessage.slice(0, 8)}{enter}`);
+
+        // Click the edit button to enter edit mode
+        cy.getByTestId("edit-button").click();
+
+        // Latest checkbox is unchecked
+        cy.getByTestId("latest-checkbox")
+          .find("input")
+          .as("latestCheckboxInput")
+          .should("not.be.checked");
+
+        // Combobox contains first commit
+        cy.get("@commitSelectCombobox")
+          .shouldContainDate(firstCommit.timestamp)
+          .find("input")
+          .should("have.value", fullMessage);
+
+        // Make a commit
+        cy.intercept("/api/commit-history").as("commitHistoryUpdatedIntercept");
+        cy.task("db:commit");
+        cy.wait("@commitHistoryUpdatedIntercept");
+
+        // Combobox still contains the first commit
+        cy.get("@commitSelectCombobox")
+          .shouldContainDate(firstCommit.timestamp)
+          .find("input")
+          .should("have.value", fullMessage);
+
+        // Click the cancel button to exit edit mode
+        cy.getByTestId("cancel-edit-button").click();
+
+        // Latest checkbox is still not checked
+        cy.get("@latestCheckboxInput").should("not.be.checked");
+
+        // Combobox contains the original latest commit
+        cy.get("@commitSelectCombobox")
+          .shouldContainDate(firstCommit.timestamp)
+          .find("input")
+          .should("have.value", fullMessage);
+      });
+    },
+  );
+
+  it(
+    "makes a new commit via the commit dialog and switches the new commit once it has" +
+      " been created",
+    () => {
+      // Click buttons to enter edit mode and open the commit dialog
+      cy.getByTestId("edit-button").click();
+      cy.getByTestId("open-commit-dialog-button").click();
+
+      // Type a commit message
+      const commitMessage = "Test commit";
+      cy.getByTestId("commit-message-text-field").type(commitMessage);
+
+      // Click the commit button to make a commit
+      cy.intercept("/api/commit-history").as("commitHistoryUpdatedIntercept");
+      cy.getByTestId("make-commit-button").click();
+
+      cy.wait("@commitHistoryUpdatedIntercept").then(({ response: { body } }) => {
+        const updatedCommitHistory: CommitEntry[] = body;
+        const updatedLatestCommit = updatedCommitHistory[updatedCommitHistory.length - 1];
+
+        // Commit message should equal what was typed
+        cy.wrap(updatedLatestCommit.message).should("equal", commitMessage);
+
+        // Combobox contains latest commit
+        cy.getByTestId("commit-select-combobox")
+          .as("commitSelectCombobox")
+          .shouldContainDate(updatedLatestCommit.timestamp)
+          .find("input")
+          .should("have.value", getFullMessage(updatedLatestCommit));
+      });
+    },
+  );
 });

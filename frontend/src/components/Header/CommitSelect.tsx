@@ -1,5 +1,5 @@
-import { startTransition, useState, useMemo, useCallback, Suspense } from "react";
 import { useAtom } from "jotai";
+import { startTransition, useState, useMemo, useCallback, Suspense } from "react";
 import {
   PaperProps,
   PopperProps,
@@ -21,6 +21,7 @@ import theme from "@/theme";
 import { formatDate } from "@/utils/timestamp";
 import { commitHistoryAtom } from "@/atoms/api";
 import { syncLatestAtom, selectedCommitIndexAtom } from "@/atoms/commitSelect";
+import { editModeAtom } from "@/atoms/paramList";
 import CommitSelectList, { CommitSelectListContext } from "./CommitSelectList";
 
 const commitSelectSx = {
@@ -75,9 +76,11 @@ function StyledPopper(props: PopperProps) {
 
 /** Component to display when CommitSelect is done loading. */
 function CommitSelectContents() {
+  const [commitHistory] = useAtom(commitHistoryAtom);
+
   const [selectedCommitIndex, setSelectedCommitIndex] = useAtom(selectedCommitIndexAtom);
   const [syncLatest, setSyncLatest] = useAtom(syncLatestAtom);
-  const [commitHistory] = useAtom(commitHistoryAtom);
+  const [editMode] = useAtom(editModeAtom);
 
   /** Index in the commit history of the currently highlighted commit. */
   const [highlightedCommitIndex, setHighlightedCommitIndex] = useState<number | null>(
@@ -133,12 +136,13 @@ function CommitSelectContents() {
           disablePortal
           disableListWrap
           autoHighlight
+          disabled={editMode}
           value={selectedCommitIndex}
           onChange={(_, commitIndex) => {
             if (commitIndex !== null) {
               startTransition(() => {
                 setSyncLatest(false);
-                setSelectedCommitIndex(commitIndex);
+                setSelectedCommitIndex({ type: "set", value: commitIndex });
               });
             }
           }}
@@ -178,12 +182,8 @@ function CommitSelectContents() {
             control={<Checkbox color="secondary" checked={syncLatest} />}
             label="Latest"
             labelPlacement="start"
-            onChange={() =>
-              startTransition(() => {
-                setSyncLatest(!syncLatest);
-                setSelectedCommitIndex(commitHistory.length - 1);
-              })
-            }
+            disabled={editMode}
+            onChange={() => startTransition(() => setSyncLatest(!syncLatest))}
           />
         </FormGroup>
       </Box>

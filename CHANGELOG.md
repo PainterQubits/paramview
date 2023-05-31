@@ -7,6 +7,10 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0).
 
 ## [Unreleased]
 
+### Added
+
+- Edit mode and ability to commit.
+
 ## [0.2.0] (May 4 2023)
 
 ### Added

@@ -14,7 +14,7 @@ flask = "^2.3.2"
 flask-socketio = "^5.3.4"
 eventlet = "^0.33.3"
 watchdog = "^3.0.0"
-paramdb = "^0.6.0"
+paramdb = "^0.7.0"
 
 [tool.poetry.group.dev.dependencies]
 sqlalchemy = "^2.0.13"

@@ -52,22 +52,24 @@ def reset(single: bool = False, long: bool = False) -> None:
         db.commit(
             "Initial commit",
             ParamDict(
-                commit_id=1,
-                int=123,
-                float=1.2345,
-                bool=True,
-                str="test",
-                none=None,
-                date=date,
-                quantity=1.2345 * u.m,
-                list=[123, "test"],
-                dict={"int": 123, "str": "test"},
-                paramList=ParamList([123, "test"]),
-                paramDict=ParamDict(int=123, str="test"),
-                struct=CustomStruct(
-                    int=123, str="test", param=CustomParam(int=123, str="test")
-                ),
-                param=CustomParam(int=123, str="test"),
+                {
+                    "commit_id": 1,
+                    "int": 123,
+                    "float": 1.2345,
+                    "bool": True,
+                    "str": "test",
+                    "None": None,
+                    "datetime": date,
+                    "Quantity": 1.2345 * u.m,
+                    "list": [123, "test"],
+                    "dict": {"int": 123, "str": "test"},
+                    "paramList": ParamList([123, "test"]),
+                    "paramDict": ParamDict(int=123, str="test"),
+                    "struct": CustomStruct(
+                        int=123, str="test", param=CustomParam(int=123, str="test")
+                    ),
+                    "param": CustomParam(int=123, str="test"),
+                }
             ),
         )
     for commit_id in range(2, num_commits + 1):

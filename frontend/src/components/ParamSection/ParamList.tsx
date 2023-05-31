@@ -1,10 +1,10 @@
 import { Suspense } from "react";
 import { useAtom } from "jotai";
 import { Box, List, ListItem } from "@mui/material";
-import { Data } from "@/types";
+import { Path } from "@/types";
 import { isLeaf } from "@/utils/type";
-import { getType, getTimestamp, getChildren } from "@/utils/data";
-import { dataAtom } from "@/atoms/api";
+import { getTypeString, getTimestamp, getData, getChildrenNames } from "@/utils/data";
+import { editedDataAtom } from "@/atoms/paramList";
 import LeafItemContent from "./LeafItemContent";
 import GroupItemContent from "./GroupItemContent";
 import CollapseItem from "./CollapseItem";
@@ -29,66 +29,62 @@ const listItemSx = {
   "&:last-child": { borderBottom: "none" },
 };
 
-type ParamSublistProps = {
-  /** List of names and Data to display in this sublist. */
-  items: [string, Data][];
-  /** Whether this is the root list. */
-  root?: boolean;
+type ParamListItemProps = {
+  /** Path to the data this item represents. */
+  path: Path;
 };
 
-/** Sublist in the parameter list. */
-function ParamSublist({ items, root = false }: ParamSublistProps) {
-  return (
-    <List
-      data-testid={root ? "parameter-list" : undefined}
-      disablePadding
-      sx={root ? rootListSx : sublistSx}
-    >
-      {items.map(([name, data]) => (
-        <ListItem
-          data-testid={`parameter-list-item-${name}`}
-          key={name}
-          sx={listItemSx}
-          disableGutters
-          disablePadding
-        >
-          {isLeaf(data) ? (
-            <LeafItemContent name={name} value={data} />
-          ) : (
-            <CollapseItem
-              defaultOpen={root}
-              itemContent={
-                <GroupItemContent
-                  name={name}
-                  type={getType(data)}
-                  timestamp={getTimestamp(data)}
-                />
-              }
-            >
-              {<ParamSublist items={getChildren(data)} />}
-            </CollapseItem>
-          )}
-        </ListItem>
-      ))}
-    </List>
-  );
-}
-
 /**
- * Contents of the parameter list, which must be wrapped by Suspense since it could be
- * loading.
+ * Item in the parameter list displaying the data at the given path. If the data is a
+ * group, then the item will contain a sublist.
  */
-function ParamListContents() {
-  const [data] = useAtom(dataAtom);
+function ParamListItem({ path }: ParamListItemProps) {
+  const [rootData] = useAtom(editedDataAtom);
 
-  return <ParamSublist items={[["root", data]]} root />;
+  const data = getData(rootData, path);
+
+  const name = path.length > 0 ? path[path.length - 1] : "root";
+
+  return (
+    <ListItem
+      data-testid={`parameter-list-item-${name}`}
+      sx={listItemSx}
+      disableGutters
+      disablePadding
+    >
+      {isLeaf(data) ? (
+        <LeafItemContent name={name} leaf={data} path={path} />
+      ) : (
+        <CollapseItem
+          defaultOpen={path.length === 0}
+          itemContent={
+            <GroupItemContent
+              name={name}
+              type={getTypeString(data)}
+              timestamp={getTimestamp(data)}
+            />
+          }
+        >
+          {
+            <List disablePadding sx={sublistSx}>
+              {getChildrenNames(data).map((childName) => (
+                <ParamListItem key={childName} path={[...path, childName]} />
+              ))}
+            </List>
+          }
+        </CollapseItem>
+      )}
+    </ListItem>
+  );
 }
 
 /** List of parameter data. */
 export default function ParamList() {
   return (
     <Suspense fallback={<Box data-testid="parameter-list-loading" />}>
-      <ParamListContents />
+      <List data-testid="parameter-list" disablePadding sx={rootListSx}>
+        <ParamListItem path={[]} />
+      </List>
     </Suspense>
   );
 }

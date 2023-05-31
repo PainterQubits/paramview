@@ -1,9 +1,11 @@
-import { formatDate } from "./timestamp";
+import { formatDate, getLocalISOString } from "./timestamp";
 
 const date = new Date();
 const timestamp = date.getTime();
 const isoString = date.toISOString();
 const utcString = date.toUTCString();
+
+date.setMilliseconds(0); // Timestamp utils do not handle milliseconds
 
 describe.each([timestamp, isoString, utcString])(
   "formatted date string from %p",
@@ -33,5 +35,8 @@ describe.each([timestamp, isoString, utcString])(
 
     it("contains seconds", () =>
       expect(formattedString).toContain(String(date.getSeconds())));
+
+    it("converts to a valid local ISO string", () =>
+      expect(new Date(getLocalISOString(timestampOrString))).toEqual(date));
   },
 );

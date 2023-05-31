@@ -5,6 +5,19 @@ export type CommitEntry = {
   timestamp: string;
 };
 
+/** Path to data from the root. */
+export type Path = string[];
+
+/** Enum of leaf types. */
+export enum LeafType {
+  Number,
+  Boolean,
+  String,
+  Null,
+  Datetime,
+  Quantity,
+}
+
 /** Data from the ParamDB database. */
 export type Data = Leaf | Group;
 

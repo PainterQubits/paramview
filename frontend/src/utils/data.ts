@@ -1,4 +1,6 @@
-import { Leaf, Group, Data } from "@/types";
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
+import { Path, LeafType, Data, Leaf, Group } from "@/types";
 import {
   isLeaf,
   isDatetime,
@@ -9,7 +11,7 @@ import {
   isParam,
   isStruct,
 } from "@/utils/type";
-import { formatDate } from "@/utils/timestamp";
+import { formatDate, getLocalISOString } from "@/utils/timestamp";
 
 const precision = 4;
 
@@ -38,22 +40,167 @@ function numberToString(num: number, round: boolean) {
 /**
  * Convert the given Leaf to a string, rounding it if it is a number and round is true.
  */
-export function leafToString(value: Leaf, round: boolean) {
-  if (isDatetime(value)) return formatDate(value.isoformat);
+export function leafToString(leaf: Leaf, round: boolean) {
+  if (isDatetime(leaf)) return formatDate(leaf.isoformat);
 
-  if (isQuantity(value)) return `${numberToString(value.value, round)} ${value.unit}`;
+  if (isQuantity(leaf)) return `${numberToString(leaf.value, round)} ${leaf.unit}`;
 
-  if (typeof value === "boolean") return value ? "True" : "False";
+  if (typeof leaf === "boolean") return leaf ? "True" : "False";
 
-  if (value === null) return "None";
+  if (leaf === null) return "None";
 
-  if (typeof value === "number") return numberToString(value, round);
+  if (typeof leaf === "number") return numberToString(leaf, round);
 
-  return value;
+  return leaf;
+}
+
+/** Get the type (as a LeafType enum value) of the given leaf. */
+export function getLeafType(leaf: Leaf) {
+  switch (typeof leaf) {
+    case "number":
+      return LeafType.Number;
+    case "boolean":
+      return LeafType.Boolean;
+    case "string":
+      return LeafType.String;
+  }
+
+  if (leaf === null) return LeafType.Null;
+
+  if (isDatetime(leaf)) return LeafType.Datetime;
+
+  return LeafType.Quantity;
+}
+
+/** Convert the given leaf to an input string and a unit input string. */
+export function leafToInput(leaf: Leaf) {
+  if (isDatetime(leaf)) {
+    return { input: getLocalISOString(leaf.isoformat), unitInput: "" };
+  }
+
+  if (isQuantity(leaf)) {
+    return { input: String(leaf.value), unitInput: leaf.unit };
+  }
+
+  return { input: leafToString(leaf, false), unitInput: "" };
+}
+
+/**
+ * Return a number for the given input string, or undefined if the input is not a valid
+ * number.
+ */
+function parseNumber(input: string) {
+  const numberInput = Number(input);
+
+  if (!Number.isNaN(Number.parseFloat(input)) && Number.isFinite(numberInput)) {
+    return numberInput;
+  }
+}
+
+/**
+ * Return a leaf for the given leaf type, input, and unit input, or undefined if
+ * the input is not valid for the given leaf type.
+ */
+export function parseLeaf(
+  leafType: LeafType,
+  input: string,
+  unitInput: string,
+): Leaf | undefined {
+  if (leafType === LeafType.String) {
+    return input;
+  }
+
+  if (leafType === LeafType.Number) {
+    return parseNumber(input);
+  }
+
+  if (leafType === LeafType.Quantity) {
+    const number = parseNumber(input);
+
+    if (number !== undefined && unitInput !== "") {
+      return {
+        __type: "astropy.units.quantity.Quantity",
+        value: number,
+        unit: unitInput,
+      };
+    }
+  }
+
+  if (leafType === LeafType.Datetime) {
+    const dateInput = new Date(input);
+
+    if (!Number.isNaN(dateInput.getTime())) {
+      // Z is replaced for compatibility with Python parsing
+      const isoformat = new Date(input).toISOString().replace("Z", "+00:00");
+      return { __type: "datetime.datetime", isoformat };
+    }
+  }
+
+  const lowerCaseInput = input.toLowerCase();
+
+  if (leafType === LeafType.Boolean) {
+    if (lowerCaseInput === "true") return true;
+    if (lowerCaseInput === "false") return false;
+  }
+
+  if (leafType === LeafType.Null) {
+    if (lowerCaseInput === "none") return null;
+  }
+}
+
+/** Return data at the given path within the given data. */
+export function getData(data: Data, path: Path): Data {
+  if (path.length === 0) return data;
+
+  if (isLeaf(data)) {
+    throw new TypeError(
+      `data '${leafToString(data, false)}' has no children` +
+        ` (trying to get path ${JSON.stringify(path)})`,
+    );
+  }
+
+  const [key, ...remainingPath] = path;
+
+  if (isParamList(data)) return getData(data.__items[Number(key)], remainingPath);
+
+  if (isList(data)) return getData(data[Number(key)], remainingPath);
+
+  // Dict, ParamDict, Struct, or Param
+  return getData(data[key], remainingPath);
+}
+
+/**
+ * Set the data at the given path to the given value. Note that this mutates the data
+ * object that is passed in. The path must not be empty (the root data must be reassigned
+ * separately).
+ */
+export function setData(data: Data, path: Path, value: Data) {
+  if (path.length === 0) {
+    throw new RangeError("path is empty (setData cannot set the root data)");
+  }
+
+  const parentData = getData(data, path.slice(0, -1));
+  const key = path[path.length - 1];
+
+  if (isLeaf(parentData)) {
+    throw new TypeError(
+      `data '${leafToString(parentData, false)}' has no children` +
+        ` (trying to set child "${key}")`,
+    );
+  }
+
+  if (isParamList(parentData)) {
+    parentData.__items[Number(key)] = value;
+  } else if (isList(parentData)) {
+    parentData[Number(key)] = value;
+  } else {
+    // Dict, ParamDict, Struct, or Param
+    parentData[key] = value;
+  }
 }
 
 /** Return a string representing the type of the given Group. */
-export function getType(group: Group) {
+export function getTypeString(group: Group) {
   if (isList(group)) return "list";
 
   if (isDict(group)) return "dict";
@@ -65,32 +212,37 @@ export function getType(group: Group) {
   return group.__type;
 }
 
-/** Get the last updated timestamp from the given Group. */
-export function getTimestamp(group: Group): number {
-  if (isParam(group)) return new Date(group.__last_updated.isoformat).getTime();
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const timestamps = getChildren(group).map(([_, data]) =>
-    isLeaf(data) ? -Infinity : getTimestamp(data),
-  );
-  return Math.max(...timestamps);
-}
-
-/** Return the Data values contained with the given Group. */
-export function getChildren(group: Group): [string, Data][] {
+/** Get the names of the child data within the given group. */
+export function getChildrenNames(group: Group) {
   let children: Data[] | { [key: string]: Data };
+
   if (isList(group) || isDict(group)) {
     children = group;
   } else if (isParamList(group)) {
     children = group.__items;
   } else if (isParam(group)) {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { __type, __last_updated, ...rest } = group;
     children = rest;
   } else {
-    // Struct, ParamDict, or unknown type
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    // ParamDict or Struct
     const { __type, ...rest } = group;
     children = rest;
   }
-  return Object.entries(children);
+
+  return Object.keys(children);
+}
+
+/**
+ * Get the last updated timestamp from the given Group, or -Infinity if there is no
+ * timestamp.
+ */
+export function getTimestamp(group: Group): number {
+  if (isParam(group)) return new Date(group.__last_updated.isoformat).getTime();
+
+  const timestamps = getChildrenNames(group).map((childName) => {
+    const childData = getData(group, [childName]);
+    return isLeaf(childData) ? -Infinity : getTimestamp(childData);
+  });
+
+  return Math.max(...timestamps);
 }
