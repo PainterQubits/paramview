@@ -17,15 +17,21 @@ const databaseNameRequest = requestData<string>("api/database-name").then((name)
 /** Database name retrieved from the server. */
 export const databaseNameAtom = atom(() => databaseNameRequest);
 
+/** Request the commit history. */
 const requestCommitHistory = async () => requestData<CommitEntry[]>("api/commit-history");
 
+/**
+ * The request for the initial commit history, used as the initial value for
+ * commitHistoryStateAtom. Initiating the request here starts the request earlier (before
+ * the atom is loaded), slightly improving page load time.
+ */
 const initialCommitHistory = requestCommitHistory();
 
 /**
  * Primitive atom to store the state of commitHistoryAtom. Initializing to an infinite
  * promise means the commit history will be loading until this atom is set.
  */
-const commitHistoryStateAtom = atom<Promise<CommitEntry[]>>(initialCommitHistory);
+const commitHistoryStateAtom = atom(initialCommitHistory);
 
 /**
  * Commit history retrieved from the server, and a function that updates this atom to the

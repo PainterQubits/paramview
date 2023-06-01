@@ -38,6 +38,9 @@ export default function ParamControls() {
       editedDataLoadable.state === "hasData" &&
       !deepEqual(originalDataLoadable.data, editedDataLoadable.data);
 
+    // If the data has been edited, prompt the user before exiting edit mode (and
+    // discarding their changes). See
+    // https://developer.mozilla.org/en-US/docs/Web/API/Window/confirm.
     if (
       !dataEdited ||
       confirm("You have unsaved changes. Do you want to discard them?")

@@ -9,7 +9,11 @@ export default function useSocketIO() {
 
   useEffect(() => {
     const socket = io({
-      closeOnBeforeunload: false, // Prevent SocketIO from disconnecting on beforeunload
+      // Prevent SocketIO from disconnecting on beforeunload. (If this was the default
+      // value of true, then if the user tries to leave the page with unsaved changes and
+      // chooses not to leave, database changes would no longer sync. See
+      // useBeforeUnload.ts for usage of the beforeunload event in this app.)
+      closeOnBeforeunload: false,
     });
 
     /** Actions to perform when the database may have been updated. */
