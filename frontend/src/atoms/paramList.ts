@@ -1,4 +1,5 @@
 import { atom } from "jotai";
+import { loadable } from "jotai/utils";
 import { Data } from "@/types";
 import { originalDataAtom } from "@/atoms/api";
 import { selectedCommitIndexAtom } from "@/atoms/commitSelect";
@@ -28,7 +29,7 @@ export const roundAtom = atom(
  * Primitive atom to store value of editedDataAtom. Initializing to an infinite promise
  * means the edited data will be loading until editedDataAtom is set.
  */
-const editedDataStateAtom = atom<Data | Promise<Data>>(new Promise<Data>(() => {}));
+const editedDataStateAtom = atom<Data | Promise<Data> | null>(null);
 
 /**
  * Current data that has been potentially edited by the user, and a function to update it.
@@ -38,6 +39,8 @@ export const editedDataAtom = atom(
   (_, set, newEditedData: Data | Promise<Data>) =>
     set(editedDataStateAtom, newEditedData),
 );
+
+export const editedDataLoadableAtom = loadable(editedDataStateAtom);
 
 /** Primitive atom to store the current value of editModeAtom. */
 const editModeStateAtom = atom(false);

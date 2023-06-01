@@ -77,7 +77,6 @@ function StyledPopper(props: PopperProps) {
 /** Component to display when CommitSelect is done loading. */
 function CommitSelectContents() {
   const [commitHistory] = useAtom(commitHistoryAtom);
-
   const [selectedCommitIndex, setSelectedCommitIndex] = useAtom(selectedCommitIndexAtom);
   const [syncLatest, setSyncLatest] = useAtom(syncLatestAtom);
   const [editMode] = useAtom(editModeAtom);
@@ -159,6 +158,7 @@ function CommitSelectContents() {
               {...params}
               label="Commit"
               color="secondary"
+              InputLabelProps={{ shrink: true }}
               InputProps={{
                 ...params.InputProps,
                 sx: inputSx,

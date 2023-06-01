@@ -1,11 +1,10 @@
 import deepEqual from "fast-deep-equal";
-import { useEffect, useMemo } from "react";
 import { useAtom } from "jotai";
-import { loadable } from "jotai/utils";
-import { originalDataAtom } from "@/atoms/api";
+import { useEffect } from "react";
+import { originalDataLoadableAtom } from "@/atoms/api";
 import {
   editModeAtom,
-  editedDataAtom,
+  editedDataLoadableAtom,
   commitMessageAtom,
   commitDialogOpenAtom,
 } from "@/atoms/paramList";
@@ -23,9 +22,6 @@ function preventUnload(e: BeforeUnloadEvent) {
  * information.
  */
 export default function useBeforeUnload() {
-  const originalDataLoadableAtom = useMemo(() => loadable(originalDataAtom), []);
-  const editedDataLoadableAtom = useMemo(() => loadable(editedDataAtom), []);
-
   const [editMode] = useAtom(editModeAtom);
   const [originalDataLoadable] = useAtom(originalDataLoadableAtom);
   const [editedDataLoadable] = useAtom(editedDataLoadableAtom);
@@ -42,14 +38,14 @@ export default function useBeforeUnload() {
         return preventUnload(e);
       }
 
-      // // If the data has been edited, warn before closing
-      // if (
-      //   originalDataLoadable.state === "hasData" &&
-      //   editedDataLoadable.state === "hasData" &&
-      //   !deepEqual(originalDataLoadable.data, editedDataLoadable.data)
-      // ) {
-      //   return preventUnload(e);
-      // }
+      // If the data has been edited, warn before closing
+      if (
+        originalDataLoadable.state === "hasData" &&
+        editedDataLoadable.state === "hasData" &&
+        !deepEqual(originalDataLoadable.data, editedDataLoadable.data)
+      ) {
+        return preventUnload(e);
+      }
     };
 
     window.addEventListener("beforeunload", beforeUnload);

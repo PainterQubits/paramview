@@ -1,4 +1,4 @@
-import { detailedDiff } from "deep-object-diff";
+import { diff } from "deep-object-diff";
 import { useTransition } from "react";
 import { atom, useAtom, useSetAtom } from "jotai";
 import { Save } from "@mui/icons-material";
@@ -74,9 +74,9 @@ export default function CommitDialog() {
   };
 
   /** Whether to disabled commit dialog inputs. */
-  const disabled = commitLoading || !open;
+  const disabled = commitLoading || !commitDialogOpen;
 
-  const changes = detailedDiff({ root: originalData }, { root: editedData });
+  const changes = diff({ root: originalData }, { root: editedData });
 
   return (
     <Dialog fullWidth open={commitDialogOpen} onClose={close}>
@@ -89,22 +89,10 @@ export default function CommitDialog() {
       >
         <DialogTitle>Commit</DialogTitle>
         <DialogContent sx={dialogContentSx}>
-          {/* <Box>
-          <Typography>Added</Typography>
-          <Typography data-testid="commit-dialog-added">
-            {JSON.stringify(changes.added)}
-          </Typography>
-        </Box>
-        <Box>
-          <Typography>Deleted</Typography>
-          <Typography data-testid="commit-dialog-deleted">
-            {JSON.stringify(changes.deleted)}
-          </Typography>
-        </Box> */}
           <Box>
             <Typography>Changed</Typography>
             <Typography data-testid="commit-dialog-changed">
-              {JSON.stringify(changes.updated)}
+              {JSON.stringify(changes)}
             </Typography>
           </Box>
           <TextField

@@ -2,10 +2,12 @@ import deepEqual from "fast-deep-equal";
 import { useAtom, useSetAtom } from "jotai";
 import { startTransition, useTransition, Suspense } from "react";
 import { Box, FormGroup, FormControlLabel, Switch, Button } from "@mui/material";
+import { originalDataLoadableAtom } from "@/atoms/api";
 import {
   roundAtom,
   collapseAtom,
   editModeAtom,
+  editedDataLoadableAtom,
   commitDialogOpenAtom,
 } from "@/atoms/paramList";
 import CommitDialog from "./CommitDialog";
@@ -22,13 +24,26 @@ export default function ParamControls() {
 
   const [round, toggleRound] = useAtom(roundAtom);
   const [editMode, setEditMode] = useAtom(editModeAtom);
+  const [originalDataLoadable] = useAtom(originalDataLoadableAtom);
+  const [editedDataLoadable] = useAtom(editedDataLoadableAtom);
+
   const collapseAll = useSetAtom(collapseAtom);
   const setCommitDialogOpen = useSetAtom(commitDialogOpenAtom);
 
   const startEditMode = () => startTransition(() => setEditMode(true));
 
   const cancelEditMode = () => {
-    startCancelTransition(() => setEditMode(false));
+    const dataEdited =
+      originalDataLoadable.state === "hasData" &&
+      editedDataLoadable.state === "hasData" &&
+      !deepEqual(originalDataLoadable.data, editedDataLoadable.data);
+
+    if (
+      !dataEdited ||
+      confirm("You have unsaved changes. Do you want to discard them?")
+    ) {
+      startCancelTransition(() => setEditMode(false));
+    }
   };
 
   const openCommitDialog = () => {

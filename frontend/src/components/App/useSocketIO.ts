@@ -4,11 +4,13 @@ import { startTransition, useEffect } from "react";
 import { commitHistoryAtom } from "@/atoms/api";
 
 /** Set up SocketIO to sync database changes. */
-export default function SocketIO() {
+export default function useSocketIO() {
   const updateCommitHistory = useSetAtom(commitHistoryAtom);
 
   useEffect(() => {
-    const socket = io();
+    const socket = io({
+      closeOnBeforeunload: false, // Prevent SocketIO from disconnecting on beforeunload
+    });
 
     /** Actions to perform when the database may have been updated. */
     const databaseUpdate = () => {
@@ -26,6 +28,4 @@ export default function SocketIO() {
       socket.disconnect();
     };
   }, [updateCommitHistory]);
-
-  return null;
 }
