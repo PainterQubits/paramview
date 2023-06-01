@@ -17,15 +17,7 @@ const databaseNameRequest = requestData<string>("api/database-name").then((name)
 /** Database name retrieved from the server. */
 export const databaseNameAtom = atom(() => databaseNameRequest);
 
-const requestCommitHistory = async () => {
-  const newCommitHistory = await requestData<CommitEntry[]>("api/commit-history");
-
-  if (newCommitHistory.length === 0) {
-    throw new RangeError(`Database has no commits.`);
-  }
-
-  return newCommitHistory;
-};
+const requestCommitHistory = async () => requestData<CommitEntry[]>("api/commit-history");
 
 const initialCommitHistory = requestCommitHistory();
 
@@ -40,7 +32,16 @@ const commitHistoryStateAtom = atom<Promise<CommitEntry[]>>(initialCommitHistory
  * latest latest commit history.
  */
 export const commitHistoryAtom = atom(
-  (get) => get(commitHistoryStateAtom),
+  async (get) => {
+    const commitHistory = await get(commitHistoryStateAtom);
+
+    if (commitHistory.length === 0) {
+      const databaseName = await get(databaseNameAtom);
+      throw new RangeError(`Database ${databaseName} has no commits.`);
+    }
+
+    return commitHistory;
+  },
   (_, set) => set(commitHistoryStateAtom, requestCommitHistory()),
 );
 

@@ -7,9 +7,11 @@ function getFullMessage({ id, message }: CommitEntry) {
 function visitAndInterceptCommitHistory() {
   cy.intercept("/api/commit-history").as("commitHistoryIntercept");
   cy.visit("/");
-  cy.wait("@commitHistoryIntercept").then(({ response: { body } }) => {
-    cy.wrap(body).as("commitHistory");
-  });
+  cy.wait("@commitHistoryIntercept") // Initial request
+    .wait("@commitHistoryIntercept") // Request when SocketIO connection is established
+    .then(({ response: { body } }) => {
+      cy.wrap(body).as("commitHistory");
+    });
 }
 
 describe("short commit history", () => {
@@ -193,9 +195,8 @@ describe("update commit history", () => {
         .should("have.value", getFullMessage(originalLatestCommit));
 
       // Make a commit
-      cy.intercept("/api/commit-history").as("commitHistoryUpdatedIntercept");
       cy.task("db:commit");
-      cy.wait("@commitHistoryUpdatedIntercept").then(({ response: { body } }) => {
+      cy.wait("@commitHistoryIntercept").then(({ response: { body } }) => {
         const updatedCommitHistory: CommitEntry[] = body;
         const updatedLatestCommit = updatedCommitHistory[updatedCommitHistory.length - 1];
         const updatedFullMessage = getFullMessage(updatedLatestCommit);
@@ -237,9 +238,8 @@ describe("update commit history", () => {
       cy.getByTestId("latest-checkbox").as("latestCheckbox").click();
       cy.get("@latestCheckbox").find("input").should("not.be.checked");
 
-      cy.intercept("/api/commit-history").as("commitHistoryUpdatedIntercept");
       cy.task("db:commit");
-      cy.wait("@commitHistoryUpdatedIntercept").then(({ response: { body } }) => {
+      cy.wait("@commitHistoryIntercept").then(({ response: { body } }) => {
         const updatedCommitHistory: CommitEntry[] = body;
         const updatedLatestCommit = updatedCommitHistory[updatedCommitHistory.length - 1];
         const updatedFullMessage = getFullMessage(updatedLatestCommit);
@@ -338,9 +338,8 @@ describe("edit mode", () => {
           .should("have.value", originalFullMessage);
 
         // Make a commit
-        cy.intercept("/api/commit-history").as("commitHistoryUpdatedIntercept");
         cy.task("db:commit");
-        cy.wait("@commitHistoryUpdatedIntercept").then(({ response: { body } }) => {
+        cy.wait("@commitHistoryIntercept").then(({ response: { body } }) => {
           const updatedCommitHistory: CommitEntry[] = body;
           const updatedLatestCommit =
             updatedCommitHistory[updatedCommitHistory.length - 1];
@@ -405,9 +404,8 @@ describe("edit mode", () => {
           .should("have.value", fullMessage);
 
         // Make a commit
-        cy.intercept("/api/commit-history").as("commitHistoryUpdatedIntercept");
         cy.task("db:commit");
-        cy.wait("@commitHistoryUpdatedIntercept");
+        cy.wait("@commitHistoryIntercept");
 
         // Combobox still contains the first commit
         cy.get("@commitSelectCombobox")
@@ -443,10 +441,9 @@ describe("edit mode", () => {
       cy.getByTestId("commit-message-text-field").type(commitMessage);
 
       // Click the commit button to make a commit
-      cy.intercept("/api/commit-history").as("commitHistoryUpdatedIntercept");
       cy.getByTestId("make-commit-button").click();
 
-      cy.wait("@commitHistoryUpdatedIntercept").then(({ response: { body } }) => {
+      cy.wait("@commitHistoryIntercept").then(({ response: { body } }) => {
         const updatedCommitHistory: CommitEntry[] = body;
         const updatedLatestCommit = updatedCommitHistory[updatedCommitHistory.length - 1];
 
