@@ -1,5 +1,5 @@
-import { detailedDiff } from "deep-object-diff";
-import { useState, useEffect, useTransition } from "react";
+import { diff } from "deep-object-diff";
+import { useTransition } from "react";
 import { atom, useAtom, useSetAtom } from "jotai";
 import { Save } from "@mui/icons-material";
 import {
@@ -15,7 +15,12 @@ import {
 import { LoadingButton } from "@mui/lab";
 import { requestData } from "@/utils/api";
 import { originalDataAtom } from "@/atoms/api";
-import { editModeAtom, editedDataAtom } from "@/atoms/paramList";
+import {
+  editModeAtom,
+  editedDataAtom,
+  commitDialogOpenAtom,
+  commitMessageAtom,
+} from "@/atoms/paramList";
 
 /**
  * The commit ID from the most recent unhandled commit request, or null if there is no
@@ -43,56 +48,38 @@ const commitButtonSx = {
   },
 };
 
-type CommitDialogProps = {
-  commitDialogOpen: boolean;
-  setCommitDialogOpen: (newCommitDialogOpen: boolean) => void;
-};
-
 /**
  * Dialog displaying changes to the data, a text field for entering the commit message,
  * a commit button, and a close button.
  */
-export default function CommitDialog({
-  commitDialogOpen,
-  setCommitDialogOpen,
-}: CommitDialogProps) {
+export default function CommitDialog() {
   const [commitLoading, startCommitTransition] = useTransition();
 
   const [originalData] = useAtom(originalDataAtom);
   const [editedData] = useAtom(editedDataAtom);
   const [, setCommitId] = useAtom(commitIdAtom);
   const setEditMode = useSetAtom(editModeAtom);
-
-  /**
-   * Having a separate state variable to determine whether the commit dialog is open
-   * allows us to perform actions before displaying the opened dialog (see the useEffect
-   * below).
-   */
-  const [open, setOpen] = useState(commitDialogOpen);
-
-  const [message, setMessage] = useState("");
-
-  useEffect(() => {
-    if (commitDialogOpen) setMessage("");
-    setOpen(commitDialogOpen);
-  }, [commitDialogOpen]);
+  const [commitDialogOpen, setCommitDialogOpen] = useAtom(commitDialogOpenAtom);
+  const [commitMessage, setCommitMessage] = useAtom(commitMessageAtom);
 
   const close = () => setCommitDialogOpen(commitLoading || false);
-  const commit = () =>
+  const commit = () => {
     startCommitTransition(() => {
-      setCommitId(requestData<number>("api/commit", { message, data: editedData }));
+      setCommitId(
+        requestData<number>("api/commit", { message: commitMessage, data: editedData }),
+      );
       setCommitDialogOpen(false);
-      setOpen(false); // We sync open here to avoid a render where disabled is false
       setEditMode(false);
     });
+  };
 
   /** Whether to disabled commit dialog inputs. */
-  const disabled = commitLoading || !open;
+  const disabled = commitLoading || !commitDialogOpen;
 
-  const changes = detailedDiff({ root: originalData }, { root: editedData });
+  const changes = diff({ root: originalData }, { root: editedData });
 
   return (
-    <Dialog fullWidth open={open} onClose={close}>
+    <Dialog fullWidth open={commitDialogOpen} onClose={close}>
       <form
         autoComplete="off"
         onSubmit={(e) => {
@@ -102,22 +89,10 @@ export default function CommitDialog({
       >
         <DialogTitle>Commit</DialogTitle>
         <DialogContent sx={dialogContentSx}>
-          {/* <Box>
-          <Typography>Added</Typography>
-          <Typography data-testid="commit-dialog-added">
-            {JSON.stringify(changes.added)}
-          </Typography>
-        </Box>
-        <Box>
-          <Typography>Deleted</Typography>
-          <Typography data-testid="commit-dialog-deleted">
-            {JSON.stringify(changes.deleted)}
-          </Typography>
-        </Box> */}
           <Box>
             <Typography>Changed</Typography>
             <Typography data-testid="commit-dialog-changed">
-              {JSON.stringify(changes.updated)}
+              {JSON.stringify(changes)}
             </Typography>
           </Box>
           <TextField
@@ -126,8 +101,8 @@ export default function CommitDialog({
             label="Message"
             required
             disabled={disabled}
-            value={message}
-            onChange={({ target: { value } }) => setMessage(value)}
+            value={commitMessage}
+            onChange={({ target: { value } }) => setCommitMessage(value)}
           />
         </DialogContent>
         <DialogActions sx={dialogActionsSx}>

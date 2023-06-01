@@ -2,7 +2,8 @@ import { ErrorBoundary } from "react-error-boundary";
 import { Box } from "@mui/material";
 import { Header, ParamSection } from "@/components";
 import ErrorAlert from "./ErrorAlert";
-import SocketIO from "./SocketIO";
+import useBeforeUnload from "./useBeforeUnload";
+import useSocketIO from "./useSocketIO";
 
 const appSx = {
   display: "flex",
@@ -17,11 +18,22 @@ const contentSx = {
   overflow: "hidden",
 };
 
+/**
+ * Global hooks to use. This component does not render anything. The hooks are used in a
+ * separate component so they are within the error boundary.
+ */
+function GlobalHooks() {
+  useBeforeUnload();
+  useSocketIO();
+
+  return null;
+}
+
 /** Root component for the entire app. */
 export default function App() {
   return (
     <ErrorBoundary FallbackComponent={ErrorAlert}>
-      <SocketIO />
+      <GlobalHooks />
       <Box sx={appSx}>
         <Header />
         <Box sx={contentSx}>

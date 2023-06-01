@@ -91,3 +91,10 @@ jobs:
 
       - name: E2E tests
         run: yarn test:e2e
+
+      - name: Upload failure screenshots
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: e2e-failure-screenshots
+          path: frontend/cypress/screenshots

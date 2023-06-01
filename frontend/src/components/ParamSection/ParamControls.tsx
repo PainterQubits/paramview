@@ -1,7 +1,15 @@
-import { startTransition, useState, useTransition, Suspense } from "react";
+import deepEqual from "fast-deep-equal";
 import { useAtom, useSetAtom } from "jotai";
+import { startTransition, useTransition, Suspense } from "react";
 import { Box, FormGroup, FormControlLabel, Switch, Button } from "@mui/material";
-import { roundAtom, collapseAtom, editModeAtom } from "@/atoms/paramList";
+import { originalDataLoadableAtom } from "@/atoms/api";
+import {
+  roundAtom,
+  collapseAtom,
+  editModeAtom,
+  editedDataLoadableAtom,
+  commitDialogOpenAtom,
+} from "@/atoms/paramList";
 import CommitDialog from "./CommitDialog";
 
 const subControlsSx = {
@@ -12,18 +20,34 @@ const subControlsSx = {
 
 /** Controls for the parameter section. */
 export default function ParamControls() {
-  const [round, toggleRound] = useAtom(roundAtom);
-  const collapseAll = useSetAtom(collapseAtom);
-  const [editMode, setEditMode] = useAtom(editModeAtom);
-
   const [cancelingEditMode, startCancelTransition] = useTransition();
 
-  /** Whether the commit dialog is open. */
-  const [commitDialogOpen, setCommitDialogOpen] = useState(false);
+  const [round, toggleRound] = useAtom(roundAtom);
+  const [editMode, setEditMode] = useAtom(editModeAtom);
+  const [originalDataLoadable] = useAtom(originalDataLoadableAtom);
+  const [editedDataLoadable] = useAtom(editedDataLoadableAtom);
+
+  const collapseAll = useSetAtom(collapseAtom);
+  const setCommitDialogOpen = useSetAtom(commitDialogOpenAtom);
 
   const startEditMode = () => startTransition(() => setEditMode(true));
 
-  const cancelEditMode = () => startCancelTransition(() => setEditMode(false));
+  const cancelEditMode = () => {
+    const dataEdited =
+      originalDataLoadable.state === "hasData" &&
+      editedDataLoadable.state === "hasData" &&
+      !deepEqual(originalDataLoadable.data, editedDataLoadable.data);
+
+    // If the data has been edited, prompt the user before exiting edit mode (and
+    // discarding their changes). See
+    // https://developer.mozilla.org/en-US/docs/Web/API/Window/confirm.
+    if (
+      !dataEdited ||
+      confirm("You have unsaved changes. Do you want to discard them?")
+    ) {
+      startCancelTransition(() => setEditMode(false));
+    }
+  };
 
   const openCommitDialog = () => {
     if (!cancelingEditMode) {
@@ -86,10 +110,7 @@ export default function ParamControls() {
         )}
       </Box>
       <Suspense>
-        <CommitDialog
-          commitDialogOpen={commitDialogOpen}
-          setCommitDialogOpen={setCommitDialogOpen}
-        />
+        <CommitDialog />
       </Suspense>
     </>
   );
