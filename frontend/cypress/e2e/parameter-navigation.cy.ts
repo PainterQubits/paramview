@@ -110,14 +110,18 @@ describe("parameter data for latest commit", () => {
         cy.getByTestId("parameter-list-item-int").should("not.exist");
       });
 
-    // Click dict and paramDict items
+    // Click dict item
     cy.get("@dict").find('[role="button"]').click();
-    cy.get("@paramDict").find('[role="button"]').click();
 
     // Children are visible (expended)
     cy.get("@dict").within(() => {
       cy.getByTestId("parameter-list-item-int").should("be.visible");
     });
+
+    // Click paramDict item
+    cy.get("@paramDict").find('[role="button"]').click();
+
+    // Children are visible (expended)
     cy.get("@paramDict").within(() => {
       cy.getByTestId("parameter-list-item-int").should("be.visible");
     });
