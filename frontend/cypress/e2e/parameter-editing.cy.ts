@@ -300,3 +300,111 @@ describe("leaf input", () => {
     });
   });
 });
+
+describe("exiting edit mode by clicking the cancel button", () => {
+  before(() => {
+    cy.task("db:reset");
+  });
+
+  beforeEach(() => {
+    cy.visit("/");
+  });
+
+  it("can exit edit mode by pressing the cancel button when there are no changes", () => {
+    // Click edit to enter edit mode
+    cy.getByTestId("edit-button").click();
+
+    // Click cancel to exit edit mode
+    cy.getByTestId("cancel-edit-button").click();
+
+    // Edit button exists, meaning we exited edit mode
+    cy.getByTestId("edit-button").should("exist");
+  });
+
+  it("can exit edit mode by pressing the cancel button when there are invalid changes", () => {
+    // Click edit to enter edit mode
+    cy.getByTestId("edit-button").click();
+
+    cy.getByTestId("parameter-list-item-b").within(() => {
+      // Type "a" into the (int/float) input. Since this input is not valid, it does not
+      // count as a change.
+      cy.getByTestId("leaf-input").find("input").type("a");
+    });
+
+    // Click cancel to exit edit mode
+    cy.getByTestId("cancel-edit-button").click();
+
+    // Click edit to enter edit mode again
+    cy.getByTestId("edit-button").click();
+
+    // Input has the original value, meaning changes were discarded
+    cy.getByTestId("parameter-list-item-b").within(() => {
+      cy.getByTestId("leaf-input").find("input").should("have.value", "2");
+    });
+  });
+
+  it(
+    "prompts the user to confirm they want to discard changes and does not exit if they" +
+      ' respond "Cancel"',
+    () => {
+      // Respond "Cancel" to future confirm prompts
+      cy.on("window:confirm", cy.stub().as("onConfirm").returns(false));
+
+      // Click edit to enter edit mode
+      cy.getByTestId("edit-button").click();
+
+      // Type "123" into the (int/float) input. Since this input is valid, it counts as
+      // a change.
+      cy.getByTestId("parameter-list-item-b").within(() => {
+        cy.getByTestId("leaf-input").find("input").as("b-input").type("{selectAll}123");
+      });
+
+      // Click cancel to exit edit mode
+      cy.getByTestId("cancel-edit-button").click();
+
+      // Confirm was called
+      cy.get("@onConfirm").should(
+        "be.calledOnceWith",
+        "You have unsaved changes. Do you want to discard them?",
+      );
+
+      // Input still has the updated value
+      cy.get("@b-input").should("have.value", "123");
+    },
+  );
+
+  it(
+    "prompts the user to confirm they want to discard changes and exits and discards" +
+      '  changes if they respond "OK"',
+    () => {
+      // Respond "OK" to future confirm prompts
+      cy.on("window:confirm", cy.stub().as("onConfirm").returns(true));
+
+      // Click edit to enter edit mode
+      cy.getByTestId("edit-button").click();
+
+      // Type "123" into the (int/float) input. Since this input is valid, it counts as
+      // a change.
+      cy.getByTestId("parameter-list-item-b").within(() => {
+        cy.getByTestId("leaf-input").find("input").type("{selectAll}123");
+      });
+
+      // Click cancel to exit edit mode
+      cy.getByTestId("cancel-edit-button").click();
+
+      // Confirm was called
+      cy.get("@onConfirm").should(
+        "be.calledOnceWith",
+        "You have unsaved changes. Do you want to discard them?",
+      );
+
+      // Click edit to enter edit mode
+      cy.getByTestId("edit-button").click();
+
+      // Input has the original value, so the changes were discarded
+      cy.getByTestId("parameter-list-item-b").within(() => {
+        cy.getByTestId("leaf-input").find("input").should("have.value", "2");
+      });
+    },
+  );
+});
