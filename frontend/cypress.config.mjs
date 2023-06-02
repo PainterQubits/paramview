@@ -19,6 +19,7 @@ export default defineConfig({
           ),
         "db:clear": () => exec(`${BACKEND_COMMAND} clear`),
         "db:commit": () => exec(`${BACKEND_COMMAND} commit`),
+        "db:load_classes": () => exec(`${BACKEND_COMMAND} load_classes`),
       });
     },
   },

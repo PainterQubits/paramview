@@ -77,4 +77,39 @@ describe("commit making", () => {
     cy.get("@listItemB").should("contain", "456");
     cy.get("@listItemC").should("contain", "test");
   });
+
+  it(
+    "commits data in the correct format for datetime and Quantity objects (that is, the" +
+      " format that allows them to be read into Python classes)",
+    () => {
+      // Click the edit button to enter edit mode
+      cy.getByTestId("edit-button").click();
+
+      // Enter a datetime value into input "b"
+      cy.getByTestId("parameter-list-item-b").within(() => {
+        cy.getByTestId("leaf-type-input").click();
+        cy.document().within(() => cy.getByTestId("leaf-type-option-datetime").click());
+        cy.getByTestId("leaf-input").find("input").type("2023-01-01T00:00:01");
+      });
+
+      // Enter a Quantity value into input "c"
+      cy.getByTestId("parameter-list-item-c").within(() => {
+        cy.getByTestId("leaf-type-input").click();
+        cy.document().within(() => cy.getByTestId("leaf-type-option-Quantity").click());
+        cy.getByTestId("leaf-input").find("input").type("{selectAll}1");
+        cy.getByTestId("leaf-unit-input").find("input").type("{selectAll}m");
+      });
+
+      // Make a new commit with these updated values
+      cy.getByTestId("open-commit-dialog-button").click();
+      cy.getByTestId("commit-message-text-field").type("New commit{enter}");
+
+      // This will load the most recent commit into Python classes, and throw an error if
+      // creating the datetime and Quantity objects are not successful. (For example,
+      // JavaScript is fine with dates being in ISO format with "Z" as the timezone,
+      // whereas Python requires them to have "+00:00" for UTC time. This is the only test
+      // that would catch that particular error.)
+      cy.task("db:load_classes");
+    },
+  );
 });

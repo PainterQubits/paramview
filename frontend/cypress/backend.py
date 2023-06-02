@@ -92,6 +92,14 @@ def commit() -> None:
         db.commit(f"Commit {commit_id}", ParamDict(commit_id=commit_id, b=2, c=3))
 
 
+def load_classes() -> None:
+    """
+    Load the last commit as Python classes. This helps to test that objects are
+    formatted properly, in particular datetime and Quantity objects.
+    """
+    db.load()
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(title="commands", required=True)
@@ -121,5 +129,10 @@ if __name__ == "__main__":
         help="make a commit with the given message",
     )
     parser_commit.set_defaults(func=lambda args: commit())
+    parser_commit = subparsers.add_parser(
+        "load_classes",
+        help="load the last commit using Python classes",
+    )
+    parser_commit.set_defaults(func=lambda args: load_classes())
     args = parser.parse_args()
     args.func(args)
