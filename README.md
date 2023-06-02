@@ -1,5 +1,7 @@
 # ParamView
 
+[![CI](https://github.com/PainterQubits/paramview/actions/workflows/ci.yml/badge.svg)](https://github.com/PainterQubits/paramview/actions/workflows/ci.yml)
+
 GUI for viewing the contents of a ParamDB database.
 
 ## Installation
