@@ -1,10 +1,7 @@
-import { diff } from "deep-object-diff";
 import { useTransition } from "react";
 import { atom, useAtom, useSetAtom } from "jotai";
 import { Save } from "@mui/icons-material";
 import {
-  Box,
-  Typography,
   TextField,
   Button,
   Dialog,
@@ -14,13 +11,13 @@ import {
 } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import { requestData } from "@/utils/api";
-import { originalDataAtom } from "@/atoms/api";
 import {
   editModeAtom,
   editedDataAtom,
   commitDialogOpenAtom,
   commitMessageAtom,
 } from "@/atoms/paramList";
+import CommitComparisonList from "./CommitComparisonList";
 
 /**
  * The commit ID from the most recent unhandled commit request, or null if there is no
@@ -55,12 +52,15 @@ const commitButtonSx = {
 export default function CommitDialog() {
   const [commitLoading, startCommitTransition] = useTransition();
 
-  const [originalData] = useAtom(originalDataAtom);
   const [editedData] = useAtom(editedDataAtom);
-  const [, setCommitId] = useAtom(commitIdAtom);
-  const setEditMode = useSetAtom(editModeAtom);
   const [commitDialogOpen, setCommitDialogOpen] = useAtom(commitDialogOpenAtom);
   const [commitMessage, setCommitMessage] = useAtom(commitMessageAtom);
+
+  // We load this using useAtom, not useSetAtom, so this component updates setCommitId is
+  // called.
+  const [, setCommitId] = useAtom(commitIdAtom);
+
+  const setEditMode = useSetAtom(editModeAtom);
 
   const close = () => setCommitDialogOpen(commitLoading || false);
   const commit = () => {
@@ -76,8 +76,6 @@ export default function CommitDialog() {
   /** Whether to disabled commit dialog inputs. */
   const disabled = commitLoading || !commitDialogOpen;
 
-  const changes = diff({ root: originalData }, { root: editedData });
-
   return (
     <Dialog fullWidth open={commitDialogOpen} onClose={close}>
       <form
@@ -89,12 +87,7 @@ export default function CommitDialog() {
       >
         <DialogTitle>Commit</DialogTitle>
         <DialogContent sx={dialogContentSx}>
-          <Box>
-            <Typography>Changed</Typography>
-            <Typography data-testid="commit-dialog-changed">
-              {JSON.stringify(changes)}
-            </Typography>
-          </Box>
+          <CommitComparisonList shouldUpdate={!disabled} />
           <TextField
             data-testid="commit-message-text-field"
             fullWidth

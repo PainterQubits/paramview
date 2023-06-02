@@ -63,3 +63,9 @@ export const originalDataAtom = atom(async (get) => {
  * for testing against the edited data to synchronously check if it has changed.
  */
 export const originalDataLoadableAtom = loadable(originalDataAtom);
+
+/** Data for the latest commit. */
+export const latestDataAtom = atom(async (get) => {
+  const commitHistory = await get(commitHistoryAtom);
+  return requestData<Data>(`api/data/${commitHistory[commitHistory.length - 1].id}`);
+});
