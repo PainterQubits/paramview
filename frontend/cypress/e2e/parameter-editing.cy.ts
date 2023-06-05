@@ -375,7 +375,7 @@ describe("exiting edit mode by clicking the cancel button", () => {
 
   it(
     "prompts the user to confirm they want to discard changes and exits and discards" +
-      '  changes if they respond "OK"',
+      ' changes if they respond "OK"',
     () => {
       // Respond "OK" to future confirm prompts
       cy.on("window:confirm", cy.stub().as("onConfirm").returns(true));
