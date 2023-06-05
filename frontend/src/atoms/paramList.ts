@@ -35,7 +35,7 @@ const editedDataStateAtom = atom<Data | Promise<Data> | null>(null);
  * Current data that has been potentially edited by the user, and a function to update it.
  */
 export const editedDataAtom = atom(
-  (get) => (get(editModeAtom) ? get(editedDataStateAtom) : get(originalDataAtom)),
+  (get) => get(editedDataStateAtom),
   (_, set, newEditedData: Data | Promise<Data>) =>
     set(editedDataStateAtom, newEditedData),
 );

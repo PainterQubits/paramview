@@ -1,13 +1,18 @@
 import { Suspense } from "react";
-import { useAtom } from "jotai";
+import { atom, useAtom } from "jotai";
 import { Box, List, ListItem } from "@mui/material";
 import { Path } from "@/types";
 import { isLeaf } from "@/utils/type";
 import { getTypeString, getTimestamp, getData, getChildrenNames } from "@/utils/data";
-import { editedDataAtom } from "@/atoms/paramList";
+import { originalDataAtom } from "@/atoms/api";
+import { editModeAtom, editedDataAtom } from "@/atoms/paramList";
 import LeafItemContent from "./LeafItemContent";
 import GroupItemContent from "./GroupItemContent";
 import CollapseItem from "./CollapseItem";
+
+const rootDataAtom = atom((get) =>
+  get(editModeAtom) ? get(editedDataAtom) : get(originalDataAtom),
+);
 
 const rootListSx = {
   borderBottom: 1,
@@ -39,7 +44,7 @@ type ParamListItemProps = {
  * group, then the item will contain a sublist.
  */
 function ParamListItem({ path }: ParamListItemProps) {
-  const [rootData] = useAtom(editedDataAtom);
+  const [rootData] = useAtom(rootDataAtom);
 
   const data = getData(rootData, path);
 
