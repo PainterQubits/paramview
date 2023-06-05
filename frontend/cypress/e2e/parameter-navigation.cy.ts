@@ -70,8 +70,6 @@ describe("parameter data for latest commit", () => {
   });
 
   it("expands and collapses nested items when clicked", () => {
-    cy.screenshot();
-
     // Children do not exist (collapsed)
     cy.getByTestId("parameter-list-item-dict")
       .as("dict")
@@ -80,12 +78,8 @@ describe("parameter data for latest commit", () => {
         cy.getByTestId("parameter-list-item-str").should("not.exist");
       });
 
-    cy.screenshot();
-
     // Click dict item
     cy.get("@dict").find('[role="button"]').click();
-
-    cy.screenshot();
 
     // Children are visible (expended)
     cy.get("@dict").within(() => {
@@ -93,20 +87,14 @@ describe("parameter data for latest commit", () => {
       cy.getByTestId("parameter-list-item-str").should("be.visible");
     });
 
-    cy.screenshot();
-
     // Click dict item
     cy.get("@dict").find('[role="button"]').click();
-
-    cy.screenshot();
 
     // Children do not exist (collapsed)
     cy.get("@dict").within(() => {
       cy.getByTestId("parameter-list-item-int").should("not.exist");
       cy.getByTestId("parameter-list-item-str").should("not.exist");
     });
-
-    cy.screenshot();
   });
 
   it("collapses all items when the collapse all button is clicked", () => {
