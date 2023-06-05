@@ -377,11 +377,17 @@ describe("exiting edit mode by clicking the cancel button", () => {
     "prompts the user to confirm they want to discard changes and exits and discards" +
       ' changes if they respond "OK"',
     () => {
+      cy.screenshot();
+
       // Respond "OK" to future confirm prompts
       cy.on("window:confirm", cy.stub().as("onConfirm").returns(true));
 
+      cy.screenshot();
+
       // Click edit to enter edit mode
       cy.getByTestId("edit-button").click();
+
+      cy.screenshot();
 
       // Type "123" into the (int/float) input. Since this input is valid, it counts as
       // a change.
@@ -389,8 +395,12 @@ describe("exiting edit mode by clicking the cancel button", () => {
         cy.getByTestId("leaf-input").find("input").type("{selectAll}123");
       });
 
+      cy.screenshot();
+
       // Click cancel to exit edit mode
       cy.getByTestId("cancel-edit-button").click();
+
+      cy.screenshot();
 
       // Confirm was called
       cy.get("@onConfirm").should(
@@ -398,13 +408,19 @@ describe("exiting edit mode by clicking the cancel button", () => {
         "You have unsaved changes. Do you want to discard them?",
       );
 
+      cy.screenshot();
+
       // Click edit to enter edit mode
       cy.getByTestId("edit-button").click();
+
+      cy.screenshot();
 
       // Input has the original value, so the changes were discarded
       cy.getByTestId("parameter-list-item-b").within(() => {
         cy.getByTestId("leaf-input").find("input").should("have.value", "2");
       });
+
+      cy.screenshot();
     },
   );
 });

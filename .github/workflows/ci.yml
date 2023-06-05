@@ -98,3 +98,9 @@ jobs:
         with:
           name: e2e-failure-screenshots
           path: frontend/cypress/screenshots
+
+      - name: Upload all screenshots
+        uses: actions/upload-artifact@v3
+        with:
+          name: e2e-screenshots
+          path: frontend/cypress/screenshots
