@@ -93,14 +93,23 @@ function LeafItemEditMode({ editedLeaf, path }: LeafItemEditModeProps) {
     [editedRootData, path, setEditedRootData],
   );
 
-  useEffect(() => {
-    const parsedLeaf = parseLeaf(leafType, input, unitInput);
-    setEditedData(parsedLeaf !== undefined ? parsedLeaf : originalLeaf);
-  }, [leafType, input, unitInput, originalLeaf, setEditedData]);
-
   const changedInput = input !== originalInput;
   const changedUnitInput = unitInput !== originalUnitInput;
   const changedLeafType = leafType !== originalLeafType;
+  const changed = changedInput || changedUnitInput || changedLeafType;
+
+  useEffect(() => {
+    const parsedLeaf = parseLeaf(leafType, input, unitInput);
+
+    // Edited data is only updated if it is valid and has actually been changed. The
+    // changed check is needed to avoid asking the user to confirm they want to discard
+    // changes when they haven't input anything.
+    //
+    // For example, parseLeaf can use a different timezone for the ISO string than the
+    // backend. If this check wasn't there, edited and original data would register as
+    // being not deeply equal even though they refer to the same underlying values.
+    setEditedData(parsedLeaf !== undefined && changed ? parsedLeaf : originalLeaf);
+  }, [leafType, input, unitInput, originalLeaf, changed, setEditedData]);
 
   return (
     <Box sx={{ display: "flex", columnGap: 1 }}>

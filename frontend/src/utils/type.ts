@@ -12,8 +12,10 @@ import {
 } from "@/types";
 
 /** Whether the given Data's "__type" property is the given type. */
-function checkType(data: Data, type: string) {
-  return data instanceof Object && "__type" in data && data.__type === type;
+function checkType<T>(data: Data<T>, type: string) {
+  return (
+    typeof data === "object" && data !== null && "__type" in data && data.__type === type
+  );
 }
 
 /** Whether the given Data is a Datetime. */
@@ -28,33 +30,38 @@ export function isQuantity(data: Data): data is Quantity {
 
 /** Whether the given Data is a Leaf. */
 export function isLeaf(data: Data): data is Leaf {
-  return !(data instanceof Object) || isDatetime(data) || isQuantity(data);
+  return (
+    typeof data !== "object" || data === null || isDatetime(data) || isQuantity(data)
+  );
 }
 
 /** Whether the given Data is a List. */
-export function isList(data: Data): data is List {
+export function isList<T>(data: Data<T>): data is List<T> {
   return data instanceof Array;
 }
 
 /** Whether the given Data is a Dict. */
-export function isDict(data: Data): data is Dict {
-  return data instanceof Object && !("__type" in data) && !isList(data);
+export function isDict<T>(data: Data<T>): data is Dict<T> {
+  return (
+    typeof data === "object" && data !== null && !("__type" in data) && !isList(data)
+  );
 }
 
 /** Whether the given Data is a ParamList. */
-export function isParamList(data: Data): data is ParamList {
+export function isParamList<T>(data: Data<T>): data is ParamList<T> {
   return checkType(data, "ParamList");
 }
 
 /** Whether the given Data is a ParamDict. */
-export function isParamDict(data: Data): data is ParamDict {
+export function isParamDict<T>(data: Data<T>): data is ParamDict<T> {
   return checkType(data, "ParamDict");
 }
 
 /** Whether the given Data is a Struct. */
-export function isStruct(data: Data): data is Struct {
+export function isStruct<T>(data: Data<T>): data is Struct<T> {
   return (
-    data instanceof Object &&
+    typeof data === "object" &&
+    data !== null &&
     "__type" in data &&
     !("__last_updated" in data) &&
     data.__type !== "datetime.datetime" &&
@@ -65,6 +72,6 @@ export function isStruct(data: Data): data is Struct {
 }
 
 /** Whether the given Data is a Param. */
-export function isParam(data: Data): data is Param {
-  return data instanceof Object && "__last_updated" in data;
+export function isParam<T>(data: Data<T>): data is Param<T> {
+  return typeof data === "object" && data !== null && "__last_updated" in data;
 }

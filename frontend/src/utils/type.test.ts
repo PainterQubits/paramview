@@ -59,6 +59,7 @@ const dataValues: {
   number: { data: 123, predicates: [isLeaf] },
   boolean: { data: true, predicates: [isLeaf] },
   string: { data: "test", predicates: [isLeaf] },
+  null: { data: null, predicates: [isLeaf] },
   Datetime: { data: datetime, predicates: [isLeaf, isDatetime] },
   Quantity: { data: quantity, predicates: [isLeaf, isQuantity] },
   List: { data: list, predicates: [isList] },

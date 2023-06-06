@@ -17,7 +17,7 @@ import {
   commitDialogOpenAtom,
   commitMessageAtom,
 } from "@/atoms/paramList";
-import CommitComparisonList from "./CommitComparisonList";
+import ComparisonList from "./ComparisonList";
 
 /**
  * The commit ID from the most recent unhandled commit request, or null if there is no
@@ -87,7 +87,7 @@ export default function CommitDialog() {
       >
         <DialogTitle>Commit</DialogTitle>
         <DialogContent sx={dialogContentSx}>
-          <CommitComparisonList shouldUpdate={!disabled} />
+          <ComparisonList shouldUpdate={!disabled} />
           <TextField
             data-testid="commit-message-text-field"
             fullWidth

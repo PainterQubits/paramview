@@ -18,14 +18,23 @@ export enum LeafType {
   Quantity,
 }
 
+/** Dictionary of Data, which is used in several Group types. */
+export type DataDict<T> = { [key: string]: Data<T> };
+
 /** Data from the ParamDB database. */
-export type Data = Leaf | Group;
+export type Data<T = Leaf> = T | Group<T>;
 
 /** Data that does not contain other Data. */
 export type Leaf = number | boolean | string | null | Datetime | Quantity;
 
 /** Data that can contain other Data. */
-export type Group = List | Dict | ParamList | ParamDict | Struct | Param;
+export type Group<T = Leaf> =
+  | List<T>
+  | Dict<T>
+  | ParamList<T>
+  | ParamDict<T>
+  | Struct<T>
+  | Param<T>;
 
 /** Datetime object. */
 export type Datetime = {
@@ -41,36 +50,32 @@ export type Quantity = {
 };
 
 /** Ordinary list. */
-export type List = Data[];
+export type List<T = Leaf> = Data<T>[];
 
 /** Ordinary dictionary. */
-export type Dict = {
+export type Dict<T = Leaf> = {
   __dict: never; // Fake key so TypeScript can distinguish from ParamDict and Struct
-  [key: string]: Data;
-};
+} & DataDict<T>;
 
 /** ParamDB ParamList object. */
-export type ParamList = {
+export type ParamList<T = Leaf> = {
   __type: "ParamList";
-  __items: List;
+  __items: List<T>;
 };
 
 /** ParamDB ParamDict object. */
-export type ParamDict = {
+export type ParamDict<T = Leaf> = {
   __type: "ParamDict";
-  [key: string]: Data;
-};
+} & DataDict<T>;
 
 /** Object that is a ParamDB Struct. */
-export type Struct = {
+export type Struct<T = Leaf> = {
   __struct: never; // Fake key so TypeScript can distinguish from Dict and ParamDict
   __type: string;
-  [key: string]: Data;
-};
+} & DataDict<T>;
 
 /** Object that is a ParamDB Param. */
-export type Param = {
+export type Param<T = Leaf> = {
   __type: string;
   __last_updated: Datetime;
-  [key: string]: Data;
-};
+} & DataDict<T>;

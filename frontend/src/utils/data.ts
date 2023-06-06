@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
-import { Path, LeafType, Data, Leaf, Group } from "@/types";
+import { Path, LeafType, DataDict, Data, Leaf, Group } from "@/types";
 import {
   isLeaf,
   isDatetime,
@@ -200,7 +200,7 @@ export function setData(data: Data, path: Path, value: Data) {
 }
 
 /** Return a string representing the type of the given Group. */
-export function getTypeString(group: Group) {
+export function getTypeString<T>(group: Group<T>) {
   if (isList(group)) return "list";
 
   if (isDict(group)) return "dict";
@@ -213,8 +213,8 @@ export function getTypeString(group: Group) {
 }
 
 /** Get the names of the child data within the given group. */
-export function getChildrenNames(group: Group) {
-  let children: Data[] | { [key: string]: Data };
+export function getChildrenNames<T>(group: Group<T>) {
+  let children: Data<T>[] | DataDict<T>;
 
   if (isList(group) || isDict(group)) {
     children = group;
