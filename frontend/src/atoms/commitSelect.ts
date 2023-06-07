@@ -8,10 +8,7 @@ const syncLatestStateAtom = atom(true);
 /** Whether to sync the current commit index with the latest commit. */
 export const syncLatestAtom = atom(
   (get) => !get(editModeAtom) && get(syncLatestStateAtom),
-  (_, set, newSyncLatest: boolean) => {
-    set(selectedCommitIndexAtom, { type: "sync" });
-    set(syncLatestStateAtom, newSyncLatest);
-  },
+  (_, set, newSyncLatest: boolean) => set(syncLatestStateAtom, newSyncLatest),
 );
 
 type selectCommitIndexAction = { type: "sync" } | { type: "set"; value: number };
@@ -33,8 +30,9 @@ const selectedCommitIndexStateAtom = atom<number | Promise<number>>(0);
  * specific value.
  */
 export const selectedCommitIndexAtom = atom(
-  (get) =>
+  async (get) =>
     get(syncLatestAtom) ? get(latestCommitIndexAtom) : get(selectedCommitIndexStateAtom),
+
   (get, set, action: selectCommitIndexAction) => {
     if (action.type === "sync") {
       if (get(syncLatestAtom)) {

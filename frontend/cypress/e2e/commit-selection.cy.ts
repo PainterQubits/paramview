@@ -77,6 +77,13 @@ describe("short commit history", () => {
       // Listbox closes
       cy.getByTestId("commit-select-listbox").should("not.exist");
 
+      // Unfocus the commit select box
+      cy.get("@commitSelectCombobox").find("input").blur();
+
+      // Wait 10 ms to allow the commit select box to become fully unfocused
+      // eslint-disable-next-line cypress/no-unnecessary-waiting
+      cy.wait(10);
+
       // Combobox contains full message and timestamp
       cy.get("@commitSelectCombobox").find("input").should("have.value", fullMessage);
       cy.get("@commitSelectCombobox").shouldContainDate(firstCommit.timestamp);
@@ -267,9 +274,12 @@ describe("update commit history", () => {
   });
 });
 
-describe("edit mode", () => {
-  beforeEach(() => {
+describe("edit mode (no committing)", () => {
+  before(() => {
     cy.task("db:reset");
+  });
+
+  beforeEach(() => {
     visitAndInterceptCommitHistory();
   });
 
@@ -309,6 +319,42 @@ describe("edit mode", () => {
     // Combobox and latest checkbox are not disabled
     cy.get("@commitSelectComboboxInput").should("not.be.disabled");
     cy.get("@latestCheckboxInput").should("not.be.disabled");
+  });
+
+  it("can change commit after entering and exiting edit mode (previous bug)", () => {
+    // Click the edit button to enter edit mode
+    cy.getByTestId("edit-button").click();
+
+    // Click the cancel button to exit edit mode
+    cy.getByTestId("cancel-edit-button").click();
+
+    cy.get("@commitHistory").then((commitHistoryAlias: unknown) => {
+      const commitHistory = commitHistoryAlias as CommitEntry[];
+      const firstCommit = commitHistory[0];
+      const fullMessage = getFullMessage(firstCommit);
+
+      // Select the first commit
+      cy.getByTestId("commit-select-combobox")
+        .as("commitSelectCombobox")
+        .type(`${fullMessage.slice(0, 8)}{enter}`);
+
+      // Unfocus the commit select box
+      cy.get("@commitSelectCombobox").find("input").blur();
+
+      // Wait 10 ms to allow the commit select box to become fully unfocused
+      // eslint-disable-next-line cypress/no-unnecessary-waiting
+      cy.wait(10);
+
+      // Commit select should contain the first commit
+      cy.get("@commitSelectCombobox").find("input").should("have.value", fullMessage);
+    });
+  });
+});
+
+describe("edit mode (with committing)", () => {
+  beforeEach(() => {
+    cy.task("db:reset");
+    visitAndInterceptCommitHistory();
   });
 
   it(

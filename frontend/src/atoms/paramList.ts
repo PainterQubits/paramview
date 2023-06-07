@@ -2,7 +2,6 @@ import { atom } from "jotai";
 import { loadable } from "jotai/utils";
 import { Data } from "@/types";
 import { originalDataAtom } from "@/atoms/api";
-import { selectedCommitIndexAtom } from "@/atoms/commitSelect";
 
 /** Primitive atom to store the current value of collapseAtom. */
 const collapseStateAtom = atom(Symbol());
@@ -59,7 +58,6 @@ export const editModeAtom = atom(
       );
     }
 
-    set(selectedCommitIndexAtom, { type: "sync" });
     set(editModeStateAtom, newEditMode);
   },
 );

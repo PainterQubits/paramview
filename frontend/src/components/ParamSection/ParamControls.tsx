@@ -3,6 +3,7 @@ import { useAtom, useSetAtom } from "jotai";
 import { startTransition, useTransition, Suspense } from "react";
 import { Box, FormGroup, FormControlLabel, Switch, Button } from "@mui/material";
 import { originalDataLoadableAtom } from "@/atoms/api";
+import { selectedCommitIndexAtom } from "@/atoms/commitSelect";
 import {
   roundAtom,
   collapseAtom,
@@ -27,10 +28,17 @@ export default function ParamControls() {
   const [originalDataLoadable] = useAtom(originalDataLoadableAtom);
   const [editedDataLoadable] = useAtom(editedDataLoadableAtom);
 
+  const setSelectedCommitIndex = useSetAtom(selectedCommitIndexAtom);
   const collapseAll = useSetAtom(collapseAtom);
   const setCommitDialogOpen = useSetAtom(commitDialogOpenAtom);
 
-  const startEditMode = () => startTransition(() => setEditMode(true));
+  const startEditMode = () =>
+    startTransition(() => {
+      // Sync the underlying selected commit index with the latest index if sync latest is
+      // true.
+      setSelectedCommitIndex({ type: "sync" });
+      setEditMode(true);
+    });
 
   const cancelEditMode = () => {
     const dataEdited =
