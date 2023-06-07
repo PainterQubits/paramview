@@ -30,7 +30,7 @@ const selectedCommitIndexStateAtom = atom<number | Promise<number>>(0);
  * specific value.
  */
 export const selectedCommitIndexAtom = atom(
-  async (get) =>
+  (get) =>
     get(syncLatestAtom) ? get(latestCommitIndexAtom) : get(selectedCommitIndexStateAtom),
 
   (get, set, action: selectCommitIndexAction) => {
