@@ -18,6 +18,24 @@ export enum LeafType {
   Quantity,
 }
 
+/**
+ * Difference between two Data objects.
+ *
+ * Either a DataChange object, a Group containing further DataDiff objects.
+ */
+export type DataDiff = DataChange | GroupDiff;
+
+/** Difference between two Group objects. */
+export type GroupDiff = Group<DataChange>;
+
+/**
+ * Changed piece of Data, containing the old and new values.
+ *
+ * If __old is undefined, the data is new. If __new is undefined, the data was deleted. If
+ * neither is undefined, the data has been updated.
+ */
+export type DataChange = { __old: Data | undefined; __new: Data | undefined };
+
 /** Dictionary of Data, which is used in several Group types. */
 export type DataDict<T> = { [key: string]: Data<T> };
 

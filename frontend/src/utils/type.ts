@@ -1,4 +1,6 @@
 import {
+  DataDiff,
+  DataChange,
   Data,
   Leaf,
   Datetime,
@@ -43,7 +45,11 @@ export function isList<T>(data: Data<T>): data is List<T> {
 /** Whether the given Data is a Dict. */
 export function isDict<T>(data: Data<T>): data is Dict<T> {
   return (
-    typeof data === "object" && data !== null && !("__type" in data) && !isList(data)
+    typeof data === "object" &&
+    data !== null &&
+    !("__type" in data) &&
+    !isList(data) &&
+    !isDataChange(data as DataDiff)
   );
 }
 
@@ -74,4 +80,15 @@ export function isStruct<T>(data: Data<T>): data is Struct<T> {
 /** Whether the given Data is a Param. */
 export function isParam<T>(data: Data<T>): data is Param<T> {
   return typeof data === "object" && data !== null && "__last_updated" in data;
+}
+
+/** Whether the given DataDiff is a DataChange. */
+export function isDataChange(data: DataDiff): data is DataChange {
+  return (
+    typeof data === "object" &&
+    data !== null &&
+    Object.keys(data).length === 2 &&
+    "__old" in data &&
+    "__new" in data
+  );
 }

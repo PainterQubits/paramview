@@ -1,12 +1,11 @@
 import { useState, useEffect } from "react";
 import { useAtom } from "jotai";
-import { Collapse, ListItemButton, ListItemIcon } from "@mui/material";
+import { Box, Collapse, ListItemButton, ListItemIcon } from "@mui/material";
 import { ChevronRight, ExpandMore } from "@mui/icons-material";
 import { collapseAtom } from "@/atoms/paramList";
 
 const listItemButtonSx = {
   py: 0,
-  background: "white",
 };
 
 const iconSx = {
@@ -25,6 +24,8 @@ type ParamCollapseProps = {
   itemContent: JSX.Element;
   /** Children that are shown below when this component is open. */
   children: React.ReactNode;
+  /** Background color of the button. */
+  backgroundColor?: string;
 };
 
 /**
@@ -35,6 +36,7 @@ export default function ParamCollapseItem({
   defaultOpen,
   itemContent,
   children,
+  backgroundColor = "white",
 }: ParamCollapseProps) {
   const [collapse] = useAtom(collapseAtom);
   const [open, setOpen] = useState(defaultOpen);
@@ -43,12 +45,18 @@ export default function ParamCollapseItem({
 
   return (
     <>
-      <ListItemButton disableGutters sx={listItemButtonSx} onClick={() => setOpen(!open)}>
-        <ListItemIcon sx={iconSx}>
-          {open ? <ExpandMore /> : <ChevronRight />}
-        </ListItemIcon>
-        {itemContent}
-      </ListItemButton>
+      <Box sx={{ backgroundColor }}>
+        <ListItemButton
+          disableGutters
+          sx={{ ...listItemButtonSx }}
+          onClick={() => setOpen(!open)}
+        >
+          <ListItemIcon sx={iconSx}>
+            {open ? <ExpandMore /> : <ChevronRight />}
+          </ListItemIcon>
+          {itemContent}
+        </ListItemButton>
+      </Box>
       <Collapse sx={collapseSx} in={open} timeout="auto" unmountOnExit>
         {children}
       </Collapse>

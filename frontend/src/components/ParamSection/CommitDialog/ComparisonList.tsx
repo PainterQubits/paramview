@@ -1,25 +1,20 @@
 import { atom, useAtom } from "jotai";
 import { useState, useCallback, useEffect } from "react";
 import { Box, Typography, List, ListItem } from "@mui/material";
-import { Data } from "@/types";
-import { isLeaf } from "@/utils/type";
-import {
-  leafToString,
-  getTypeString,
-  getTimestamp,
-  getData,
-  getChildrenNames,
-} from "@/utils/data";
+import { DataDiff, Data } from "@/types";
+import { isLeaf, isDataChange } from "@/utils/type";
+import { getTypeString, getData, getChildrenNames } from "@/utils/data";
 import { getDataDiff } from "@/utils/dataDiff";
 import { commitHistoryAtom, latestDataAtom } from "@/atoms/api";
 import { editedDataAtom } from "@/atoms/paramList";
+import LeafItemContent from "./LeafItemContent";
 import GroupItemContent from "../GroupItemContent";
 import CollapseItem from "../CollapseItem";
 
 const latestCommitDescriptionAtom = atom(async (get) => {
   const commitHistory = await get(commitHistoryAtom);
   const { id, message } = commitHistory[commitHistory.length - 1];
-  return `commit ${id} (${message})`;
+  return `latest commit (${id}: ${message})`;
 });
 
 const comparisonListContainerSx = {
@@ -48,52 +43,72 @@ const listItemSx = {
   "&:last-child": { borderBottom: "none" },
 };
 
-const leafItemContentSx = {
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "space-between",
-  flex: 1,
-  pl: "24px",
-  pr: 2,
-  minHeight: "28px",
-  background: "white",
+type DataListItemProps = {
+  name: string;
+  data: Data;
+  status: "old" | "new";
 };
 
-type ComparisonListItem = {
+function DataListItem({ name, data, status }: DataListItemProps) {
+  const backgroundColor = status === "old" ? "removed.main" : "added.main";
+
+  return (
+    <ListItem sx={{ ...listItemSx, backgroundColor }} disableGutters disablePadding>
+      {isLeaf(data) ? (
+        <LeafItemContent name={name} leaf={data} />
+      ) : (
+        <CollapseItem
+          backgroundColor={backgroundColor}
+          defaultOpen={true}
+          itemContent={<GroupItemContent name={name} type={getTypeString(data)} />}
+        >
+          <List disablePadding sx={sublistSx}>
+            {getChildrenNames(data).map((childName) => (
+              <DataListItem
+                key={childName}
+                name={childName}
+                data={getData(data, [childName])}
+                status={status}
+              />
+            ))}
+          </List>
+        </CollapseItem>
+      )}
+    </ListItem>
+  );
+}
+
+type DataDiffListItemProps = {
   name?: string;
-  dataDiff: Data | undefined;
+  dataDiff: DataDiff;
 };
 
-function ComparisonListItem({ name: nameOrUndefined, dataDiff }: ComparisonListItem) {
+function DataDiffListItem({ name: nameOrUndefined, dataDiff }: DataDiffListItemProps) {
   const root = nameOrUndefined === undefined;
   const name = root ? "root" : nameOrUndefined;
 
   return (
     <ListItem sx={listItemSx} disableGutters disablePadding>
-      {dataDiff === undefined || isLeaf(dataDiff) ? (
-        <Box sx={leafItemContentSx}>
-          <Typography>{name}</Typography>
-          <Typography align="right">
-            {dataDiff === undefined ? "<deleted>" : leafToString(dataDiff, false)}
-          </Typography>
-        </Box>
+      {isDataChange(dataDiff) ? (
+        <>
+          {dataDiff.__old !== undefined && (
+            <DataListItem name={name} data={dataDiff.__old} status="old" />
+          )}
+          {dataDiff.__new !== undefined && (
+            <DataListItem name={name} data={dataDiff.__new} status="new" />
+          )}
+        </>
       ) : (
         <CollapseItem
           defaultOpen={true}
-          itemContent={
-            <GroupItemContent
-              name={name}
-              type={getTypeString(dataDiff)}
-              timestamp={getTimestamp(dataDiff)}
-            />
-          }
+          itemContent={<GroupItemContent name={name} type={getTypeString(dataDiff)} />}
         >
           <List disablePadding sx={sublistSx}>
             {getChildrenNames(dataDiff).map((childName) => (
-              <ComparisonListItem
+              <DataDiffListItem
                 key={childName}
                 name={childName}
-                dataDiff={getData(dataDiff, [childName])}
+                dataDiff={getData(dataDiff as Data, [childName]) as DataDiff}
               />
             ))}
           </List>
@@ -123,18 +138,22 @@ export default function ComparisonList({ shouldUpdate }: ComparisonListProps) {
   useEffect(() => {
     if (shouldUpdate) {
       const newDataDiff = calcDataDiff();
-      console.log(newDataDiff);
       setDataDiff(newDataDiff);
     }
   }, [shouldUpdate, calcDataDiff, latestData, editedData]);
 
   return (
     <Box sx={comparisonListContainerSx}>
-      <Typography>{`Changes from ${latestCommitDescription}`}</Typography>
-      <Typography>{JSON.stringify(dataDiff)}</Typography>
-      {/* <List disablePadding sx={rootListSx}>
-        <ComparisonListItem dataDiff={dataDiff} />
-      </List> */}
+      {dataDiff === null ? (
+        <Typography>{`No changes from ${latestCommitDescription}`}</Typography>
+      ) : (
+        <>
+          <Typography>{`Changes from ${latestCommitDescription}`}</Typography>
+          <List disablePadding sx={rootListSx}>
+            <DataDiffListItem dataDiff={dataDiff} />
+          </List>
+        </>
+      )}
     </Box>
   );
 }
