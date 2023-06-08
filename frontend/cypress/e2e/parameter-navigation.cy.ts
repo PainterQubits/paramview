@@ -73,6 +73,7 @@ describe("parameter data for latest commit", () => {
     // Children do not exist (collapsed)
     cy.getByTestId("parameter-list-item-dict")
       .as("dict")
+      .should("exist")
       .within(() => {
         cy.getByTestId("parameter-list-item-int").should("not.exist");
         cy.getByTestId("parameter-list-item-str").should("not.exist");
@@ -101,11 +102,13 @@ describe("parameter data for latest commit", () => {
     // Children do not exist (collapsed)
     cy.getByTestId("parameter-list-item-dict")
       .as("dict")
+      .should("exist")
       .within(() => {
         cy.getByTestId("parameter-list-item-int").should("not.exist");
       });
     cy.getByTestId("parameter-list-item-paramDict")
       .as("paramDict")
+      .should("exist")
       .within(() => {
         cy.getByTestId("parameter-list-item-int").should("not.exist");
       });
