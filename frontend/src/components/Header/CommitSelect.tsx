@@ -183,7 +183,14 @@ function CommitSelectContents() {
             label="Latest"
             labelPlacement="start"
             disabled={editMode}
-            onChange={() => startTransition(() => setSyncLatest(!syncLatest))}
+            onChange={() =>
+              startTransition(() => {
+                // Sync the underlying selected commit index with the latest index if sync
+                // latest is true.
+                setSelectedCommitIndex({ type: "sync" });
+                setSyncLatest(!syncLatest);
+              })
+            }
           />
         </FormGroup>
       </Box>
