@@ -79,6 +79,11 @@ describe("parameter data for latest commit", () => {
         cy.getByTestId("parameter-list-item-str").should("not.exist");
       });
 
+    // Wait briefly to allow for other processes to finish (this test fails
+    // intermittently, so this is an attempt to fix it).
+    // eslint-disable-next-line cypress/no-unnecessary-waiting
+    cy.wait(10);
+
     // Click dict item
     cy.get("@dict").find('[role="button"]').click();
 
@@ -87,6 +92,11 @@ describe("parameter data for latest commit", () => {
       cy.getByTestId("parameter-list-item-int").should("be.visible");
       cy.getByTestId("parameter-list-item-str").should("be.visible");
     });
+
+    // Wait briefly to allow for other processes to finish (this test fails
+    // intermittently, so this is an attempt to fix it).
+    // eslint-disable-next-line cypress/no-unnecessary-waiting
+    cy.wait(10);
 
     // Click dict item
     cy.get("@dict").find('[role="button"]').click();
@@ -113,6 +123,11 @@ describe("parameter data for latest commit", () => {
         cy.getByTestId("parameter-list-item-int").should("not.exist");
       });
 
+    // Wait briefly to allow for other processes to finish (this test fails
+    // intermittently, so this is an attempt to fix it).
+    // eslint-disable-next-line cypress/no-unnecessary-waiting
+    cy.wait(10);
+
     // Click dict item
     cy.get("@dict").find('[role="button"]').click();
 
@@ -121,6 +136,11 @@ describe("parameter data for latest commit", () => {
       cy.getByTestId("parameter-list-item-int").should("be.visible");
     });
 
+    // Wait briefly to allow for other processes to finish (this test fails
+    // intermittently, so this is an attempt to fix it).
+    // eslint-disable-next-line cypress/no-unnecessary-waiting
+    cy.wait(10);
+
     // Click paramDict item
     cy.get("@paramDict").find('[role="button"]').click();
 
@@ -128,6 +148,11 @@ describe("parameter data for latest commit", () => {
     cy.get("@paramDict").within(() => {
       cy.getByTestId("parameter-list-item-int").should("be.visible");
     });
+
+    // Wait briefly to allow for other processes to finish (this test fails
+    // intermittently, so this is an attempt to fix it).
+    // eslint-disable-next-line cypress/no-unnecessary-waiting
+    cy.wait(10);
 
     // Click collapse all button
     cy.getByTestId("collapse-all-button").click();
@@ -149,6 +174,11 @@ describe("parameter data for latest commit", () => {
         cy.getByTestId("parameter-list-item-int").should("be.visible");
       });
 
+    // Wait briefly to allow for other processes to finish (this test fails
+    // intermittently, so this is an attempt to fix it).
+    // eslint-disable-next-line cypress/no-unnecessary-waiting
+    cy.wait(10);
+
     // Click root item
     cy.get("@root").find('[role="button"]').first().click();
 
@@ -156,6 +186,11 @@ describe("parameter data for latest commit", () => {
     cy.get("@root").within(() => {
       cy.getByTestId("parameter-list-item-int").should("not.exist");
     });
+
+    // Wait briefly to allow for other processes to finish (this test fails
+    // intermittently, so this is an attempt to fix it).
+    // eslint-disable-next-line cypress/no-unnecessary-waiting
+    cy.wait(10);
 
     // Click collapse all button
     cy.getByTestId("collapse-all-button").click();
