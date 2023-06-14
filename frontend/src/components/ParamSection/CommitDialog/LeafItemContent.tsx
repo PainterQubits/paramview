@@ -15,11 +15,16 @@ const leafItemContentSx = {
 type LeafItemContentProps = {
   name: string;
   leaf: Leaf;
+  backgroundColor: string;
 };
 
-export default function LeafItemContent({ name, leaf }: LeafItemContentProps) {
+export default function LeafItemContent({
+  name,
+  leaf,
+  backgroundColor,
+}: LeafItemContentProps) {
   return (
-    <Box sx={leafItemContentSx}>
+    <Box sx={{ ...leafItemContentSx, backgroundColor }}>
       <Typography>{name}</Typography>
       <Typography align="right">{leafToString(leaf, false)}</Typography>
     </Box>

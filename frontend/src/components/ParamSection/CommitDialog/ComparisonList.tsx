@@ -53,9 +53,9 @@ function DataListItem({ name, data, status }: DataListItemProps) {
   const backgroundColor = status === "old" ? "removed.main" : "added.main";
 
   return (
-    <ListItem sx={{ ...listItemSx, backgroundColor }} disableGutters disablePadding>
+    <ListItem sx={listItemSx} disableGutters disablePadding>
       {isLeaf(data) ? (
-        <LeafItemContent name={name} leaf={data} />
+        <LeafItemContent name={name} leaf={data} backgroundColor={backgroundColor} />
       ) : (
         <CollapseItem
           backgroundColor={backgroundColor}
@@ -88,7 +88,7 @@ function DataDiffListItem({ name: nameOrUndefined, dataDiff }: DataDiffListItemP
   const name = root ? "root" : nameOrUndefined;
 
   return (
-    <ListItem sx={listItemSx} disableGutters disablePadding>
+    <>
       {isDataChange(dataDiff) ? (
         <>
           {dataDiff.__old !== undefined && (
@@ -99,22 +99,24 @@ function DataDiffListItem({ name: nameOrUndefined, dataDiff }: DataDiffListItemP
           )}
         </>
       ) : (
-        <CollapseItem
-          defaultOpen={true}
-          itemContent={<GroupItemContent name={name} type={getTypeString(dataDiff)} />}
-        >
-          <List disablePadding sx={sublistSx}>
-            {getChildrenNames(dataDiff).map((childName) => (
-              <DataDiffListItem
-                key={childName}
-                name={childName}
-                dataDiff={getData(dataDiff as Data, [childName]) as DataDiff}
-              />
-            ))}
-          </List>
-        </CollapseItem>
+        <ListItem sx={listItemSx} disableGutters disablePadding>
+          <CollapseItem
+            defaultOpen={true}
+            itemContent={<GroupItemContent name={name} type={getTypeString(dataDiff)} />}
+          >
+            <List disablePadding sx={sublistSx}>
+              {getChildrenNames(dataDiff).map((childName) => (
+                <DataDiffListItem
+                  key={childName}
+                  name={childName}
+                  dataDiff={getData(dataDiff as Data, [childName]) as DataDiff}
+                />
+              ))}
+            </List>
+          </CollapseItem>
+        </ListItem>
       )}
-    </ListItem>
+    </>
   );
 }
 

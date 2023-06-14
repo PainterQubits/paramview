@@ -56,7 +56,5 @@ export default function theme(mode: PaletteMode = "light") {
     },
   });
 
-  console.log(theme);
-
   return theme;
 }
