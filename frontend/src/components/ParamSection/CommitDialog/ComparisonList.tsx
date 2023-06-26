@@ -44,11 +44,20 @@ const listItemSx = {
 };
 
 type DataListItemProps = {
+  /** Name of the data. */
   name: string;
+  /** The data object. */
   data: Data;
+  /** Diff status, either "old" or "new". */
   status: "old" | "new";
 };
 
+/**
+ * List item displaying Data.
+ *
+ * If status is "old", it will use a red background color, and if status is "new", it will
+ * display a green background color.
+ */
 function DataListItem({ name, data, status }: DataListItemProps) {
   const backgroundColor = status === "old" ? "removed.main" : "added.main";
 
@@ -79,10 +88,19 @@ function DataListItem({ name, data, status }: DataListItemProps) {
 }
 
 type DataDiffListItemProps = {
+  /** Name of the data the DataDiff represents, or undefined if this is the root. */
   name?: string;
+  /** The data diff object to represent. */
   dataDiff: DataDiff;
 };
 
+/**
+ * List item displaying a DataDiff.
+ *
+ * If the DataDiff is a Group, it will render a sub-list. Otherwise, It will render an
+ * item in red displaying the old data, if present, and an item in green displaying the
+ * new data, if present.
+ */
 function DataDiffListItem({ name: nameOrUndefined, dataDiff }: DataDiffListItemProps) {
   const root = nameOrUndefined === undefined;
   const name = root ? "root" : nameOrUndefined;
@@ -121,10 +139,14 @@ function DataDiffListItem({ name: nameOrUndefined, dataDiff }: DataDiffListItemP
 }
 
 type ComparisonListProps = {
-  /** Whether this component should update changes. */
+  /**
+   * Whether this component should update in response to database changes. Intended to be
+   * true in general, but false when the commit is already in progress.
+   */
   shouldUpdate: boolean;
 };
 
+/** List displaying the difference between the current edited data and the latest data. */
 export default function ComparisonList({ shouldUpdate }: ComparisonListProps) {
   const [latestData] = useAtom(latestDataAtom);
   const [editedData] = useAtom(editedDataAtom);
