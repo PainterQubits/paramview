@@ -333,10 +333,14 @@ describe("edit mode (no committing)", () => {
       const firstCommit = commitHistory[0];
       const fullMessage = getFullMessage(firstCommit);
 
-      // Select the first commit
+      // Make sure commit select box is fully loaded
       cy.getByTestId("commit-select-combobox")
         .as("commitSelectCombobox")
-        .type(`${fullMessage.slice(0, 8)}{enter}`);
+        .find("input")
+        .should("not.be.disabled");
+
+      // Select the first commit
+      cy.get("@commitSelectCombobox").type(`${fullMessage.slice(0, 8)}{enter}`);
 
       // Unfocus the commit select box
       cy.get("@commitSelectCombobox").find("input").blur();
