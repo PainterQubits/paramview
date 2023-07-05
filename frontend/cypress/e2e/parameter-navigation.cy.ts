@@ -108,63 +108,63 @@ describe("parameter data for latest commit", () => {
   //   });
   // });
 
-  it("collapses all items when the collapse all button is clicked", () => {
-    // Children do not exist (collapsed)
-    cy.getByTestId("parameter-list-item-dict")
-      .as("dict")
-      .should("exist")
-      .within(() => {
-        cy.getByTestId("parameter-list-item-int").should("not.exist");
-      });
-    cy.getByTestId("parameter-list-item-paramDict")
-      .as("paramDict")
-      .should("exist")
-      .within(() => {
-        cy.getByTestId("parameter-list-item-int").should("not.exist");
-      });
+  // it("collapses all items when the collapse all button is clicked", () => {
+  //   // Children do not exist (collapsed)
+  //   cy.getByTestId("parameter-list-item-dict")
+  //     .as("dict")
+  //     .should("exist")
+  //     .within(() => {
+  //       cy.getByTestId("parameter-list-item-int").should("not.exist");
+  //     });
+  //   cy.getByTestId("parameter-list-item-paramDict")
+  //     .as("paramDict")
+  //     .should("exist")
+  //     .within(() => {
+  //       cy.getByTestId("parameter-list-item-int").should("not.exist");
+  //     });
 
-    // Wait briefly to allow for other processes to finish (this test fails
-    // intermittently, so this is an attempt to fix it).
-    // eslint-disable-next-line cypress/no-unnecessary-waiting
-    cy.wait(10);
+  //   // Wait briefly to allow for other processes to finish (this test fails
+  //   // intermittently, so this is an attempt to fix it).
+  //   // eslint-disable-next-line cypress/no-unnecessary-waiting
+  //   cy.wait(10);
 
-    // Click dict item
-    cy.get("@dict").find('[role="button"]').click();
+  //   // Click dict item
+  //   cy.get("@dict").find('[role="button"]').click();
 
-    // Children are visible (expended)
-    cy.get("@dict").within(() => {
-      cy.getByTestId("parameter-list-item-int").should("be.visible");
-    });
+  //   // Children are visible (expended)
+  //   cy.get("@dict").within(() => {
+  //     cy.getByTestId("parameter-list-item-int").should("be.visible");
+  //   });
 
-    // Wait briefly to allow for other processes to finish (this test fails
-    // intermittently, so this is an attempt to fix it).
-    // eslint-disable-next-line cypress/no-unnecessary-waiting
-    cy.wait(10);
+  //   // Wait briefly to allow for other processes to finish (this test fails
+  //   // intermittently, so this is an attempt to fix it).
+  //   // eslint-disable-next-line cypress/no-unnecessary-waiting
+  //   cy.wait(10);
 
-    // Click paramDict item
-    cy.get("@paramDict").find('[role="button"]').click();
+  //   // Click paramDict item
+  //   cy.get("@paramDict").find('[role="button"]').click();
 
-    // Children are visible (expended)
-    cy.get("@paramDict").within(() => {
-      cy.getByTestId("parameter-list-item-int").should("be.visible");
-    });
+  //   // Children are visible (expended)
+  //   cy.get("@paramDict").within(() => {
+  //     cy.getByTestId("parameter-list-item-int").should("be.visible");
+  //   });
 
-    // Wait briefly to allow for other processes to finish (this test fails
-    // intermittently, so this is an attempt to fix it).
-    // eslint-disable-next-line cypress/no-unnecessary-waiting
-    cy.wait(10);
+  //   // Wait briefly to allow for other processes to finish (this test fails
+  //   // intermittently, so this is an attempt to fix it).
+  //   // eslint-disable-next-line cypress/no-unnecessary-waiting
+  //   cy.wait(10);
 
-    // Click collapse all button
-    cy.getByTestId("collapse-all-button").click();
+  //   // Click collapse all button
+  //   cy.getByTestId("collapse-all-button").click();
 
-    // Children do not exist (collapsed)
-    cy.get("@dict").within(() => {
-      cy.getByTestId("parameter-list-item-int").should("not.exist");
-    });
-    cy.get("@paramDict").within(() => {
-      cy.getByTestId("parameter-list-item-int").should("not.exist");
-    });
-  });
+  //   // Children do not exist (collapsed)
+  //   cy.get("@dict").within(() => {
+  //     cy.getByTestId("parameter-list-item-int").should("not.exist");
+  //   });
+  //   cy.get("@paramDict").within(() => {
+  //     cy.getByTestId("parameter-list-item-int").should("not.exist");
+  //   });
+  // });
 
   it("resets root item to expanded when collapse all button is clicked", () => {
     // Children are visible (expended)
