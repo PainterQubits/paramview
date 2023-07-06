@@ -3,7 +3,7 @@ import { useState, useCallback, useEffect } from "react";
 import { Box, Typography, List, ListItem } from "@mui/material";
 import { DataDiff, Data } from "@/types";
 import { isLeaf, isDataChange } from "@/utils/type";
-import { getTypeString, getData, getChildrenNames } from "@/utils/data";
+import { getTypeString, getTimestamp, getData, getChildrenNames } from "@/utils/data";
 import { getDataDiff } from "@/utils/dataDiff";
 import { commitHistoryAtom, latestDataAtom } from "@/atoms/api";
 import { editedDataAtom } from "@/atoms/paramList";
@@ -11,6 +11,7 @@ import LeafItemContent from "./LeafItemContent";
 import GroupItemContent from "../GroupItemContent";
 import CollapseItem from "../CollapseItem";
 
+/** Description for the latest commit. */
 const latestCommitDescriptionAtom = atom(async (get) => {
   const commitHistory = await get(commitHistoryAtom);
   const { id, message } = commitHistory[commitHistory.length - 1];
@@ -69,7 +70,13 @@ function DataListItem({ name, data, status }: DataListItemProps) {
         <CollapseItem
           backgroundColor={backgroundColor}
           defaultOpen={true}
-          itemContent={<GroupItemContent name={name} type={getTypeString(data)} />}
+          itemContent={
+            <GroupItemContent
+              name={name}
+              type={getTypeString(data)}
+              timestamp={getTimestamp(data)}
+            />
+          }
         >
           <List disablePadding sx={sublistSx}>
             {getChildrenNames(data).map((childName) => (
@@ -120,7 +127,13 @@ function DataDiffListItem({ name: nameOrUndefined, dataDiff }: DataDiffListItemP
         <ListItem sx={listItemSx} disableGutters disablePadding>
           <CollapseItem
             defaultOpen={true}
-            itemContent={<GroupItemContent name={name} type={getTypeString(dataDiff)} />}
+            itemContent={
+              <GroupItemContent
+                name={name}
+                type={getTypeString(dataDiff)}
+                timestamp={getTimestamp(dataDiff)}
+              />
+            }
           >
             <List disablePadding sx={sublistSx}>
               {getChildrenNames(dataDiff).map((childName) => (

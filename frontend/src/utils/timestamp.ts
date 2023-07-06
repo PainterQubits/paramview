@@ -11,6 +11,14 @@ export function formatDate(timestampOrString: number | string) {
 }
 
 /**
+ * Convert the given  Unix timestamp or datetime string to an ISO string in UTC time, with
+ * Python-compatible timezone information (using "+00:00" instead of "Z").
+ */
+export function getISOString(timestampOrString: number | string) {
+  return new Date(timestampOrString).toISOString().replace("Z", "+00:00");
+}
+
+/**
  * Convert the given Unix timestamp or datetime string to an ISO string in the local
  * timezone with no timezone information. This is intended to be used to get a valid input
  * value for datetime-local input (see

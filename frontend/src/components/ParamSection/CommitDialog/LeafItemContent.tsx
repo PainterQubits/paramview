@@ -13,11 +13,15 @@ const leafItemContentSx = {
 };
 
 type LeafItemContentProps = {
+  /** Name to display. */
   name: string;
+  /** Leaf value to display. */
   leaf: Leaf;
+  /** Background color (any valid color CSS). */
   backgroundColor: string;
 };
 
+/** Item content for a leaf in the ComparisonList component. */
 export default function LeafItemContent({
   name,
   leaf,

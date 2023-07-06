@@ -26,7 +26,7 @@ type ParamItemContentProps = {
   /** Type to display. */
   type: string;
   /** Timestamp to display. */
-  timestamp?: number;
+  timestamp: number;
 };
 
 /** Item content for a Group. */
@@ -43,7 +43,7 @@ export default function GroupItemContent({
           {type}
         </Typography>
       </Box>
-      {timestamp !== undefined && Number.isFinite(timestamp) && (
+      {Number.isFinite(timestamp) && (
         <Typography variant="body2" color="text.secondary" align="right" sx={timestampSx}>
           {formatDate(timestamp)}
         </Typography>

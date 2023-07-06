@@ -11,7 +11,7 @@ import {
   getData,
   setData,
 } from "@/utils/data";
-import { isLeaf } from "@/utils/type";
+import { isLeaf, isParam } from "@/utils/type";
 import { originalDataAtom } from "@/atoms/api";
 import { roundAtom, editModeAtom, editedDataAtom } from "@/atoms/paramList";
 
@@ -49,6 +49,22 @@ type LeafItemEditModeContentProps = {
 function LeafItemEditModeContent({ editedLeaf, path }: LeafItemEditModeContentProps) {
   const [originalRootData] = useAtom(originalDataAtom);
   const [editedRootData, setEditedRootData] = useAtom(editedDataAtom);
+
+  /** Original parent if that parent is a Param; otherwise, null. */
+  const originalParentParam = useMemo(() => {
+    if (path.length === 0) return null;
+
+    const originalParentData = getData(originalRootData, path.slice(0, -1));
+    return isParam(originalParentData) ? originalParentData : null;
+  }, [originalRootData, path]);
+
+  /** Edited parent if that parent is a Param; otherwise, null. */
+  const editedParentParam = useMemo(() => {
+    if (path.length === 0) return null;
+
+    const editedParentData = getData(editedRootData, path.slice(0, -1));
+    return isParam(editedParentData) ? editedParentData : null;
+  }, [editedRootData, path]);
 
   const originalLeaf = useMemo(() => {
     const originalData = getData(originalRootData, path);
@@ -88,6 +104,14 @@ function LeafItemEditModeContent({ editedLeaf, path }: LeafItemEditModeContentPr
 
   const setEditedData = useCallback(
     (leaf: Leaf) => {
+      if (editedParentParam !== null) {
+        if (originalParentParam !== null) {
+
+        } else {
+          editedParentParam.__last_updated =
+        }
+      }
+
       if (path.length === 0) {
         setEditedRootData(leaf);
       } else {
