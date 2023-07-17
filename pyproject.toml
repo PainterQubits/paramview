@@ -24,7 +24,7 @@ pytest = "^7.4.0"
 mypy = "^1.4.1"
 flake8 = "^6.0.0"
 pylint = "^2.17.4"
-black = "^23.3.0"
+black = "^23.7.0"
 
 [tool.poetry.scripts]
 paramview = "paramview._cli:main"
