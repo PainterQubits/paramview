@@ -20,7 +20,7 @@ sqlalchemy = "^2.0.19"
 [tool.poetry.group.dev.dependencies]
 sqlalchemy = "^2.0.18"
 freezegun = "^1.2.2"
-astropy = "^5.3.1"
+astropy = "^5.3.2"
 pytest = "^7.4.0"
 mypy = "^1.4.1"
 flake8 = "^6.1.0"
