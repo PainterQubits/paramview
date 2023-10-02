@@ -9,23 +9,22 @@ repository = "https://github.com/PainterQubits/paramview"
 include = ["paramview/static/**/*"]
 
 [tool.poetry.dependencies]
-python = "^3.10"
-flask = "^2.3.2"
-flask-socketio = "^5.3.5"
+python = ">=3.9,<3.13"
+flask = "^3.0.0"
+flask-socketio = "^5.3.6"
 eventlet = "^0.33.3"
 watchdog = "^3.0.0"
-paramdb = "^0.9.0"
-sqlalchemy = "^2.0.19"
+paramdb = "^0.10.0"
 
 [tool.poetry.group.dev.dependencies]
-sqlalchemy = "^2.0.18"
+sqlalchemy = "^2.0.21"
 freezegun = "^1.2.2"
-astropy = "^5.3.1"
-pytest = "^7.4.0"
-mypy = "^1.4.1"
+astropy = "^5.3.3"
+pytest = "^7.4.2"
 flake8 = "^6.1.0"
-pylint = "^2.17.5"
-black = "^23.7.0"
+pylint = "^3.0.0"
+mypy = "^1.5.1"
+black = "^23.9.1"
 
 [tool.poetry.scripts]
 paramview = "paramview._cli:main"

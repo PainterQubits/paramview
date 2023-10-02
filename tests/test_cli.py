@@ -1,5 +1,6 @@
 """Tests for the CLI."""
 
+from __future__ import annotations
 from importlib.metadata import distribution
 import pytest
 from pytest import CaptureFixture
@@ -14,7 +15,6 @@ positional arguments:
   <database path>       path to the ParamDB database file
 """
 OPTIONAL_ARGS_MSG = """
-options:
   -h, --help            show this help message and exit
   -V, --version         show program's version number and exit
   -p PORT, --port PORT  port to use (default is 5050)
@@ -66,9 +66,9 @@ def test_help(help_arg: str, capsys: CaptureFixture[str]) -> None:
     with pytest.raises(SystemExit) as exc_info:
         _parse_args(help_arg)
     assert exc_info.value.code == 0
-    assert _sw(capsys.readouterr().out) == _sw(
-        USAGE_MSG, POSITIONAL_ARGS_MSG, OPTIONAL_ARGS_MSG
-    )
+    help_message = _sw(capsys.readouterr().out)
+    assert _sw(USAGE_MSG, POSITIONAL_ARGS_MSG) in help_message
+    assert _sw(OPTIONAL_ARGS_MSG) in help_message
 
 
 def test_no_args(capsys: CaptureFixture[str]) -> None:
