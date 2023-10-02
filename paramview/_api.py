@@ -1,5 +1,6 @@
 """Flask blueprint for the backend API."""
 
+from __future__ import annotations
 import os
 import traceback
 from typing import Any, cast

@@ -1,5 +1,6 @@
 """Tests for the WSGI app that serves the frontend."""
 
+from __future__ import annotations
 import os
 from pathlib import Path
 from flask.testing import FlaskClient

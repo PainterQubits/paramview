@@ -1,5 +1,6 @@
 """Function to watch the database and emit a SocketIO event when it is updated."""
 
+from __future__ import annotations
 from typing import Callable
 import os
 from threading import Event, Condition

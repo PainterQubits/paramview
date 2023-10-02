@@ -1,5 +1,6 @@
 """Command-line interface to start ParamView."""
 
+from __future__ import annotations
 from argparse import ArgumentParser, Namespace
 from importlib.metadata import distribution
 from paramview._server import start_server

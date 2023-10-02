@@ -1,5 +1,6 @@
 """Tests for the backend API."""
 
+from __future__ import annotations
 from typing import Any
 from flask import json
 from flask.testing import FlaskClient

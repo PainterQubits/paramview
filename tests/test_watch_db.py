@@ -1,5 +1,6 @@
 """Tests for paramview._watch_db."""
 
+from __future__ import annotations
 from typing import Any
 import time
 from eventlet import sleep  # type: ignore

@@ -14,11 +14,12 @@ __pycache__/
 .mypy_cache/
 .coverage
 
+# Typescript
+*.tsbuildinfo
+
 # Yarn
 node_modules/
 .yarn/
-.pnp.*
-.yarnrc.yml
 
 # SWC
 .swc/
