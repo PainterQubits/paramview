@@ -10,7 +10,7 @@ include = ["paramview/static/**/*"]
 
 [tool.poetry.dependencies]
 python = "^3.10"
-flask = "^2.3.2"
+flask = "^3.0.0"
 flask-socketio = "^5.3.5"
 eventlet = "^0.33.3"
 watchdog = "^3.0.0"
