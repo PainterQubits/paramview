@@ -19,7 +19,7 @@ paramdb = "^0.10.0"
 [tool.poetry.group.dev.dependencies]
 sqlalchemy = "^2.0.21"
 freezegun = "^1.2.2"
-astropy = "^5.3.3"
+astropy = "^5.3.4"
 pytest = "^7.4.2"
 flake8 = "^6.1.0"
 pylint = "^3.0.0"
