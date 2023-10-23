@@ -22,7 +22,7 @@ freezegun = "^1.2.2"
 astropy = "^5.3.3"
 pytest = "^7.4.2"
 flake8 = "^6.1.0"
-pylint = "^3.0.0"
+pylint = "^3.0.2"
 mypy = "^1.5.1"
 black = "^23.9.1"
 
