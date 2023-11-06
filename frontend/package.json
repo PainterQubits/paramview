@@ -18,7 +18,7 @@
     "@emotion/styled": "^11.11.0",
     "@fontsource/roboto": "^5.0.8",
     "@mui/icons-material": "^5.14.11",
-    "@mui/lab": "^5.0.0-alpha.146",
+    "@mui/lab": "^5.0.0-alpha.151",
     "@mui/material": "^5.14.11",
     "deep-object-diff": "^1.1.9",
     "fast-deep-equal": "^3.1.3",
