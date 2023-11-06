@@ -17,7 +17,7 @@ watchdog = "^3.0.0"
 paramdb = "^0.10.0"
 
 [tool.poetry.group.dev.dependencies]
-sqlalchemy = "^2.0.21"
+sqlalchemy = "^2.0.23"
 freezegun = "^1.2.2"
 astropy = "^5.3.3"
 pytest = "^7.4.2"
