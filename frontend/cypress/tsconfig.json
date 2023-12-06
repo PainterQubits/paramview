@@ -4,7 +4,7 @@
     "target": "es5",
     "lib": ["es5", "dom"],
     "types": ["cypress", "node"],
-    "emitDeclarationOnly": true
+    "noEmit": true
   },
-  "include": ["."]
+  "include": ["e2e/**/*", "support/**/*"]
 }

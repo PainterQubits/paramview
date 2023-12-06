@@ -11,16 +11,12 @@
     "plugin:jsx-a11y/recommended",
     "prettier"
   ],
-  "parser": "@typescript-eslint/parser",
-  "plugins": ["@typescript-eslint", "import", "react", "react-hooks", "jsx-a11y"],
   "rules": {
     "@typescript-eslint/no-empty-function": "off",
     "react/self-closing-comp": "error"
   },
   "settings": {
-    "import/resolver": {
-      "typescript": { "project": "frontend/tsconfig.json" }
-    },
+    "import/resolver": "typescript",
     "react": {
       "version": "detect"
     }
@@ -36,5 +32,6 @@
       "extends": ["plugin:cypress/recommended"],
       "plugins": ["cypress"]
     }
-  ]
+  ],
+  "ignorePatterns": ["dist/"]
 }
