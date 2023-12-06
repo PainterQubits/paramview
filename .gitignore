@@ -14,9 +14,6 @@ __pycache__/
 .mypy_cache/
 .coverage
 
-# Typescript
-*.tsbuildinfo
-
 # Yarn
 node_modules/
 .yarn/
@@ -28,8 +25,8 @@ node_modules/
 coverage/
 
 # Cypress
-**/cypress/videos/
-**/cypress/screenshots/
+cypress/videos/
+cypress/screenshots/
 
 # Data files
 *.db

@@ -4,10 +4,14 @@ on:
   push:
     branches:
       - main
-
   pull_request:
     branches:
       - main
+
+env:
+  POETRY_VERSION: "1.7.1"
+  PYTHON_VERSION: "3.9"
+  PACKAGE_NAME: "paramview"
 
 jobs:
   backend:
@@ -17,28 +21,37 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up backend
-        uses: ./.github/actions/set-up-backend
+      - name: Install Poetry
+        run: pipx install poetry==${{ env.POETRY_VERSION }}
+
+      - name: Set up Python with Poetry cache
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: poetry
+
+      - name: Install Python dependencies
+        run: poetry install
 
       - name: Check Formatting (Black)
-        run: poetry run black paramview tests --check
+        run: poetry run black ${{ env.PACKAGE_NAME }} tests --check
 
       - name: Lint (Flake8)
-        run: poetry run flake8 paramview tests
+        run: poetry run flake8 ${{ env.PACKAGE_NAME }} tests
 
       - name: Lint (Pylint)
-        run: poetry run pylint paramview tests
+        run: poetry run pylint ${{ env.PACKAGE_NAME }} tests
 
       - name: Mypy cache
         uses: actions/cache@v3
         with:
           path: .mypy_cache
-          key: mypy-${{ runner.os }}-${{ github.sha }}
+          key: mypy-${{ runner.os }}-python-${{ env.PYTHON_VERSION }}-${{ github.sha }}
           restore-keys: |
-            mypy-${{ runner.os }}-
+            mypy-${{ runner.os }}-python-${{ env.PYTHON_VERSION }}-
 
       - name: Type Check (Mypy)
-        run: poetry run mypy paramview tests
+        run: poetry run mypy ${{ env.PACKAGE_NAME }} tests
 
       - name: Test (Pytest)
         run: poetry run pytest
@@ -46,16 +59,35 @@ jobs:
   frontend:
     runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        working-directory: frontend
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up frontend
-        uses: ./.github/actions/set-up-frontend
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Enable Yarn
+        run: corepack enable
+
+      - name: Get Cypress version
+        id: cypress-version
+        run: echo VERSION=$(yarn info cypress --json | jq ".children.Version" -r) >> $GITHUB_OUTPUT
+
+      - name: Cypress cache
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/Cypress
+          key: cypress-${{ runner.os }}-${{ steps.cypress-version.outputs.VERSION }}
+          restore-keys: |
+            cypress-${{ runner.os }}-
+
+      - name: Install Node.js dependencies
+        run: yarn
+
+      - name: Prune Cypress cache
+        run: yarn cypress cache prune
 
       - name: Lint
         run: yarn lint
@@ -66,19 +98,47 @@ jobs:
   e2e:
     runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        working-directory: frontend
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up backend
-        uses: ./.github/actions/set-up-backend
+      - name: Install Poetry
+        run: pipx install poetry==${{ env.POETRY_VERSION }}
 
-      - name: Set up frontend
-        uses: ./.github/actions/set-up-frontend
+      - name: Set up Python with Poetry cache
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: poetry
+
+      - name: Install Python dependencies
+        run: poetry install
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Enable Yarn
+        run: corepack enable
+
+      - name: Get Cypress version
+        id: cypress-version
+        run: echo VERSION=$(yarn info cypress --json | jq ".children.Version" -r) >> $GITHUB_OUTPUT
+
+      - name: Cypress cache
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/Cypress
+          key: cypress-${{ runner.os }}-${{ steps.cypress-version.outputs.VERSION }}
+          restore-keys: |
+            cypress-${{ runner.os }}-
+
+      - name: Install Node.js dependencies
+        run: yarn
+
+      - name: Prune Cypress cache
+        run: yarn cypress cache prune
 
       - name: Build frontend
         run: yarn build
@@ -97,4 +157,4 @@ jobs:
         if: failure()
         with:
           name: e2e-failure-screenshots
-          path: frontend/cypress/screenshots
+          path: cypress/screenshots

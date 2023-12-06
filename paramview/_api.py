@@ -12,6 +12,7 @@ api = Blueprint("api", __name__, url_prefix="/api")
 """Flask blueprint for the backend API."""
 
 
+# pylint: disable-next=too-few-public-methods
 class _CurrentDB:
     """Wrapper to get properties from the database for the current Flask app."""
 

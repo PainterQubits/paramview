@@ -1,47 +1,41 @@
+[build-system]
+requires = ["poetry-core>=1.8.1"]
+build-backend = "poetry.core.masonry.api"
+
 [tool.poetry]
 name = "paramview"
 version = "0.2.0"
 description = "GUI for viewing the contents of a ParamDB database."
-authors = ["Alex Hadley <alexhad6@gmail.com>"]
+authors = ["Alex Hadley <contact@alexhadley.net>"]
 license = "BSD-3-Clause"
 readme = "README.md"
 repository = "https://github.com/PainterQubits/paramview"
 include = ["paramview/static/**/*"]
 
 [tool.poetry.dependencies]
-python = ">=3.9,<3.13"
+python = "^3.9"
 flask = "^3.0.0"
 flask-socketio = "^5.3.6"
 eventlet = "^0.33.3"
 watchdog = "^3.0.0"
-paramdb = "^0.10.0"
+paramdb = "^0.10.2"
 
 [tool.poetry.group.dev.dependencies]
-sqlalchemy = "^2.0.21"
-freezegun = "^1.2.2"
-astropy = "^5.3.3"
-pytest = "^7.4.2"
+mypy = "^1.7.1"
 flake8 = "^6.1.0"
-pylint = "^3.0.0"
-mypy = "^1.5.1"
-black = "^23.9.1"
+pylint = "^3.0.2"
+black = "^23.11.0"
+pytest = "^7.4.3"
+freezegun = "^1.3.1"
+sqlalchemy = "^2.0.23"
+astropy = "^6.0.0"
 
 [tool.poetry.scripts]
 paramview = "paramview._cli:main"
 
-[tool.pytest.ini_options]
-addopts = ["--import-mode=importlib"]
-filterwarnings = ["ignore::DeprecationWarning:eventlet.support.greenlets"]
-
-[tool.pylint.basic]
-good-names-rgxs = ["^[a-z][a-z0-9]?$"]
-
-[tool.pylint.messages_control]
-disable = ["too-few-public-methods"]
-
 [tool.mypy]
 strict = true
 
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+[tool.pytest.ini_options]
+addopts = ["--import-mode=importlib"]
+filterwarnings = ["ignore::DeprecationWarning:eventlet.support.greenlets"]

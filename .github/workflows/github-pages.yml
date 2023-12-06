@@ -3,7 +3,10 @@ name: Deploy to GitHub Pages
 on: workflow_dispatch
 
 env:
-  PARAMVIEW_VERSION: "0.2.0"
+  POETRY_VERSION: "1.7.1"
+  PYTHON_VERSION: "3.9"
+  PACKAGE_NAME: "paramview"
+  PACKAGE_VERSION: "0.2.0"
 
 jobs:
   build:
@@ -13,11 +16,43 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up backend
-        uses: ./.github/actions/set-up-backend
+      - name: Install Poetry
+        run: pipx install poetry==${{ env.POETRY_VERSION }}
 
-      - name: Set up frontend
-        uses: ./.github/actions/set-up-frontend
+      - name: Set up Python with Poetry cache
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: poetry
+
+      - name: Install Python dependencies
+        run: poetry install
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Enable Yarn
+        run: corepack enable
+
+      - name: Get Cypress version
+        id: cypress-version
+        run: echo VERSION=$(yarn info cypress --json | jq ".children.Version" -r) >> $GITHUB_OUTPUT
+
+      - name: Cypress cache
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/Cypress
+          key: cypress-${{ runner.os }}-${{ steps.cypress-version.outputs.VERSION }}
+          restore-keys: |
+            cypress-${{ runner.os }}-
+
+      - name: Install Node.js dependencies
+        run: yarn
+
+      - name: Prune Cypress cache
+        run: yarn cypress cache prune
 
       - name: Build package
         run: make
@@ -29,25 +64,28 @@ jobs:
           echo '<!DOCTYPE html>
           <html>
             <body>
-              <a href="paramview/">paramview</a>
+              <a href="${{ env.PACKAGE_NAME }}/">${{ env.PACKAGE_NAME }}</a>
             </body>
           </html>' > _site/releases/index.html
 
-      - name: Create _site/releases/paramview/index.html
+      - name: Create _site/releases/<package-name>/index.html
         run: |
-          mkdir _site/releases/paramview
+          mkdir _site/releases/${{ env.PACKAGE_NAME }}
           echo '<!DOCTYPE html>
           <html>
             <body>
-              <a href="paramview-${{ env.PARAMVIEW_VERSION }}-py3-none-any.whl">
-                paramview-${{ env.PARAMVIEW_VERSION }}-py3-none-any.whl
+              <a href="${{ env.PACKAGE_NAME }}-${{ env.PACKAGE_VERSION }}-py3-none-any.whl">
+                ${{ env.PACKAGE_NAME }}-${{ env.PACKAGE_VERSION }}-py3-none-any.whl
               </a>
-              <a href="paramview-${{ env.PARAMVIEW_VERSION }}.tar.gz">paramview-${{ env.PARAMVIEW_VERSION }}.tar.gz</a>
+              <a href="${{ env.PACKAGE_NAME }}-${{ env.PACKAGE_VERSION }}.tar.gz">${{ env.PACKAGE_NAME }}-${{ env.PACKAGE_VERSION }}.tar.gz</a>
             </body>
-          </html>' > _site/releases/paramview/index.html
+          </html>' > _site/releases/${{ env.PACKAGE_NAME }}/index.html
 
-      - name: Move package files into _site/releases/paramview
-        run: mv dist/* _site/releases/paramview
+      - name: Create _site/latest.tar.gz
+        run: cp dist/*.tar.gz _site/latest.tar.gz
+
+      - name: Move package files into _site/releases/<package-name>
+        run: mv dist/* _site/releases/${{ env.PACKAGE_NAME }}
 
       - name: Upload site artifact
         uses: actions/upload-pages-artifact@v2
@@ -68,4 +106,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v2
+        uses: actions/deploy-pages@v3
