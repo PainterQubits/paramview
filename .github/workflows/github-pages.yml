@@ -20,7 +20,7 @@ jobs:
         run: pipx install poetry==${{ env.POETRY_VERSION }}
 
       - name: Set up Python with Poetry cache
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: poetry
@@ -48,11 +48,11 @@ jobs:
           restore-keys: |
             cypress-${{ runner.os }}-
 
-      - name: Prune Cypress cache
-        run: yarn cypress cache prune
-
       - name: Install Node.js dependencies
         run: yarn
+
+      - name: Prune Cypress cache
+        run: yarn cypress cache prune
 
       - name: Build package
         run: make
@@ -106,4 +106,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v2
+        uses: actions/deploy-pages@v3
