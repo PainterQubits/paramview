@@ -1,7 +1,6 @@
 {
   "compilerOptions": {
     "target": "ESNext",
-    "useDefineForClassFields": true,
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
     "allowJs": false,
     "skipLibCheck": true,
@@ -15,8 +14,7 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
-    "paths": { "@/*": ["./src/*"], "test-utils": ["./test-utils"] },
-    "outDir": "./ts-cache"
+    "paths": { "@/*": ["./src/*"], "test-utils": ["./test-utils"] }
   },
   "include": ["src/**/*", "vite.config.ts", "jest.config.ts"]
 }

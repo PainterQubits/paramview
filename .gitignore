@@ -25,8 +25,8 @@ node_modules/
 coverage/
 
 # Cypress
-**/cypress/videos/
-**/cypress/screenshots/
+cypress/videos/
+cypress/screenshots/
 
 # Data files
 *.db

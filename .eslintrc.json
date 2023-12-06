@@ -33,5 +33,5 @@
       "plugins": ["cypress"]
     }
   ],
-  "ignorePatterns": ["dist/"]
+  "ignorePatterns": ["paramview/static/"]
 }

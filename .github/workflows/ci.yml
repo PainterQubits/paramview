@@ -59,10 +59,6 @@ jobs:
   frontend:
     runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        working-directory: frontend
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -70,7 +66,7 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v3
         with:
-          node-version-file: frontend/.nvmrc
+          node-version-file: .nvmrc
 
       - name: Enable Yarn
         run: corepack enable
@@ -102,10 +98,6 @@ jobs:
   e2e:
     runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        working-directory: frontend
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -125,7 +117,7 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v3
         with:
-          node-version-file: frontend/.nvmrc
+          node-version-file: .nvmrc
 
       - name: Enable Yarn
         run: corepack enable
@@ -165,4 +157,4 @@ jobs:
         if: failure()
         with:
           name: e2e-failure-screenshots
-          path: frontend/cypress/screenshots
+          path: cypress/screenshots
