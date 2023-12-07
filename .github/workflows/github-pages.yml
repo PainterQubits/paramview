@@ -54,8 +54,11 @@ jobs:
       - name: Prune Cypress cache
         run: yarn cypress cache prune
 
+      - name: Build frontend
+        run: yarn build
+
       - name: Build package
-        run: make
+        run: poetry build
 
       - name: Create _site/releases/index.html
         run: |
