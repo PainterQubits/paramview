@@ -7,9 +7,9 @@ import { getTypeString, getTimestamp, getData, getChildrenNames } from "@/utils/
 import { getDataDiff } from "@/utils/dataDiff";
 import { commitHistoryAtom, latestDataAtom } from "@/atoms/api";
 import { editedDataAtom } from "@/atoms/paramList";
-import LeafItemContent from "./LeafItemContent";
 import GroupItemContent from "../GroupItemContent";
 import CollapseItem from "../CollapseItem";
+import LeafItemContent from "./LeafItemContent";
 
 /** Description for the latest commit. */
 const latestCommitDescriptionAtom = atom(async (get) => {
@@ -177,7 +177,7 @@ export default function ComparisonList({ shouldUpdate }: ComparisonListProps) {
       const newDataDiff = calcDataDiff();
       setDataDiff(newDataDiff);
     }
-  }, [shouldUpdate, calcDataDiff, latestData, editedData]);
+  }, [shouldUpdate, calcDataDiff]);
 
   return (
     <Box sx={comparisonListContainerSx}>

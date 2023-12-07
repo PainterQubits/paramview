@@ -30,8 +30,9 @@ export function getDataDiff(oldData: Data, newData: Data): DataDiff | null {
   // Otherwise, return a Group object containing DataDiffs for its children. Children that
   // have not been changed are not included.
 
-  // Start with copy of old Data
-  const groupDiff: GroupDiff = JSON.parse(JSON.stringify(oldData));
+  // Start with copy of new Data. It is important to use the new Data so that non-child
+  // properties, such as the last updated time for Params, are shown.
+  const groupDiff: GroupDiff = JSON.parse(JSON.stringify(newData));
 
   // Compare each child of old Data to the corresponding child in new Data. If they are
   // the same, delete from groupDiff. Otherwise, set that child to the difference.

@@ -10,8 +10,10 @@ import {
   parseLeaf,
   getData,
   setData,
+  getChildrenNames,
 } from "@/utils/data";
 import { isLeaf, isParam } from "@/utils/type";
+import { getISOString } from "@/utils/timestamp";
 import { originalDataAtom } from "@/atoms/api";
 import { roundAtom, editModeAtom, editedDataAtom } from "@/atoms/paramList";
 
@@ -102,29 +104,38 @@ function LeafItemEditModeContent({ editedLeaf, path }: LeafItemEditModeContentPr
   const [input, setInput] = useState(editedInput);
   const [unitInput, setUnitInput] = useState(editedUnitInput);
 
+  const changedInput = input !== originalInput;
+  const changedUnitInput = unitInput !== originalUnitInput;
+  const changedLeafType = leafType !== originalLeafType;
+  const changed = changedInput || changedUnitInput || changedLeafType;
+
   const setEditedData = useCallback(
     (leaf: Leaf) => {
-      if (editedParentParam !== null) {
-        if (originalParentParam !== null) {
-
-        } else {
-          editedParentParam.__last_updated =
-        }
-      }
-
+      // Update the corresponding leaf in the edited data object.
       if (path.length === 0) {
         setEditedRootData(leaf);
       } else {
         setData(editedRootData, path, leaf);
       }
-    },
-    [editedRootData, path, setEditedRootData],
-  );
 
-  const changedInput = input !== originalInput;
-  const changedUnitInput = unitInput !== originalUnitInput;
-  const changedLeafType = leafType !== originalLeafType;
-  const changed = changedInput || changedUnitInput || changedLeafType;
+      // Update the last updated time of the leaf's parent if it is a Param and any of
+      // its children have changed. Otherwise, reset the Param's last updated timestamp,
+      // since none of its values have changed.
+      if (editedParentParam !== null) {
+        const childrenChanged =
+          originalParentParam === null ||
+          getChildrenNames(editedParentParam).some(
+            (childName) =>
+              editedParentParam[childName] !== originalParentParam[childName],
+          );
+
+        editedParentParam.__last_updated.isoformat = childrenChanged
+          ? getISOString(Date.now())
+          : originalParentParam.__last_updated.isoformat;
+      }
+    },
+    [editedRootData, originalParentParam, editedParentParam, path, setEditedRootData],
+  );
 
   useEffect(() => {
     const parsedLeaf = parseLeaf(leafType, input, unitInput);
