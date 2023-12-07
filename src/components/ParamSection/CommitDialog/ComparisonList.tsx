@@ -136,13 +136,19 @@ function DataDiffListItem({ name: nameOrUndefined, dataDiff }: DataDiffListItemP
             }
           >
             <List disablePadding sx={sublistSx}>
-              {getChildrenNames(dataDiff).map((childName) => (
-                <DataDiffListItem
-                  key={childName}
-                  name={childName}
-                  dataDiff={getData(dataDiff as Data, [childName]) as DataDiff}
-                />
-              ))}
+              {getChildrenNames(dataDiff).map((childName) => {
+                const childDataDiff = getData(dataDiff as Data, [childName]) as
+                  | DataDiff
+                  | undefined;
+
+                return childDataDiff === undefined ? null : (
+                  <DataDiffListItem
+                    key={childName}
+                    name={childName}
+                    dataDiff={childDataDiff}
+                  />
+                );
+              })}
             </List>
           </CollapseItem>
         </ListItem>

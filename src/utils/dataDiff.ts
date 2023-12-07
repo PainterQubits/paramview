@@ -42,16 +42,14 @@ export function getDataDiff(oldData: Data, newData: Data): DataDiff | null {
 
     const dataDiff = getDataDiff(oldChildData, newChildData);
 
-    if (dataDiff === null) {
-      // Groups can be arrays, which technically have number keys. However, it also works
-      // to treat array keys like strings in JavaScript, and to delete keys in the middle
-      // of arrays (those items become "empty slots").
-      delete (groupDiff as { [key: string]: unknown })[oldChildName];
-    } else {
-      // Officially, setData only works on normal Data objects. However, we know it will
-      // work to set DataDiff objects here, so we cast them to the Data type.
-      setData(groupDiff as Data, [oldChildName], dataDiff as Data);
-    }
+    // Officially, setData only works on normal Data objects. However, we know it will
+    // work to set DataDiff objects here, so we cast them to the Data type. Setting to
+    // values to undefined is meant to represent deleting them.
+    setData(
+      groupDiff as Data,
+      [oldChildName],
+      (dataDiff === null ? undefined : dataDiff) as Data,
+    );
   });
 
   // Compare each child of new Data to the corresponding child in old Data, and set that

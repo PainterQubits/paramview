@@ -1,11 +1,13 @@
-import { formatDate, getLocalISOString } from "./timestamp";
+import { formatDate, getISOString, getLocalISOString } from "./timestamp";
 
 const date = new Date();
 const timestamp = date.getTime();
 const isoString = date.toISOString();
 const utcString = date.toUTCString();
 
-date.setMilliseconds(0); // Timestamp utils do not handle milliseconds
+// For timestamp utils that do not handle milliseconds
+const dateWithoutMilliseconds = new Date(date);
+dateWithoutMilliseconds.setMilliseconds(0);
 
 describe.each([timestamp, isoString, utcString])(
   "formatted date string from %p",
@@ -37,6 +39,15 @@ describe.each([timestamp, isoString, utcString])(
       expect(formattedString).toContain(String(date.getSeconds())));
 
     it("converts to a valid local ISO string", () =>
-      expect(new Date(getLocalISOString(timestampOrString))).toEqual(date));
+      expect(new Date(getLocalISOString(timestampOrString))).toEqual(
+        dateWithoutMilliseconds,
+      ));
+
+    it("converts to a valid Python-compatible ISO string", () => {
+      const generatedIsoString = getISOString(timestampOrString);
+      expect(new Date(generatedIsoString)).toEqual(new Date(timestampOrString));
+      expect(generatedIsoString).not.toMatch("Z");
+      expect(generatedIsoString).toMatch(/\+00:00$/);
+    });
   },
 );

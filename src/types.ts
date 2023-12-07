@@ -25,8 +25,8 @@ export enum LeafType {
  */
 export type DataDiff = DataChange | GroupDiff;
 
-/** Difference between two Group objects. */
-export type GroupDiff = Group<DataChange>;
+/** Difference between two Group objects. Undefined children should be ignored. */
+export type GroupDiff = Group<DataChange | undefined>;
 
 /**
  * Changed piece of Data, containing the old and new values.
