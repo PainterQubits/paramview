@@ -1,5 +1,7 @@
 """Script to perform actions relating to the backend."""
 
+# pylint: disable=missing-class-docstring
+
 from __future__ import annotations
 from typing import Any
 import os
@@ -48,27 +50,27 @@ def reset(single: bool = False, long: bool = False) -> None:
         num_commits = 3
     clear()
     date = datetime(2023, 1, 1, tzinfo=timezone.utc).astimezone()
-    initial_data = ParamDict(
-        {
-            "commit_id": 1,
-            "int": 123,
-            "float": 1.2345,
-            "bool": True,
-            "str": "test",
-            "None": None,
-            "datetime": date,
-            "Quantity": 1.2345 * u.m,
-            "list": [123, "test"],
-            "dict": {"int": 123, "str": "test"},
-            "paramList": ParamList([123, "test"]),
-            "paramDict": ParamDict(int=123, str="test"),
-            "struct": CustomStruct(
-                int=123, str="test", param=CustomParam(int=123, str="test")
-            ),
-            "param": CustomParam(int=123, str="test"),
-        }
-    )
     with freeze_time(date):
+        initial_data = ParamDict(
+            {
+                "commit_id": 1,
+                "int": 123,
+                "float": 1.2345,
+                "bool": True,
+                "str": "test",
+                "None": None,
+                "datetime": date,
+                "Quantity": 1.2345 * u.m,
+                "list": [123, "test"],
+                "dict": {"int": 123, "str": "test"},
+                "paramList": ParamList([123, "test"]),
+                "paramDict": ParamDict(int=123, str="test"),
+                "struct": CustomStruct(
+                    int=123, str="test", param=CustomParam(int=123, str="test")
+                ),
+                "param": CustomParam(int=123, str="test"),
+            }
+        )
         db.commit("Initial commit", initial_data)
     for commit_id in range(2, num_commits + 1):
         date += timedelta(days=1)

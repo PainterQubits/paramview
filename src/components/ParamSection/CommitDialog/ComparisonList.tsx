@@ -63,7 +63,12 @@ function DataListItem({ name, data, status }: DataListItemProps) {
   const backgroundColor = status === "old" ? "removed.main" : "added.main";
 
   return (
-    <ListItem sx={listItemSx} disableGutters disablePadding>
+    <ListItem
+      data-testid={`comparison-list-item-${status}-${name}`}
+      sx={listItemSx}
+      disableGutters
+      disablePadding
+    >
       {isLeaf(data) ? (
         <LeafItemContent name={name} leaf={data} backgroundColor={backgroundColor} />
       ) : (
