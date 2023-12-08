@@ -4,6 +4,6 @@ authors:
   - family-names: "Hadley"
     given-names: "Alex"
 title: "ParamView"
-version: 0.2.0
-date-released: 2023-05-04
+version: 0.3.0
+date-released: 2023-12-08
 url: "https://github.com/PainterQubits/paramview"
