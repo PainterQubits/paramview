@@ -2,6 +2,7 @@ import {
   Path,
   LeafType,
   Data,
+  DataDiff,
   Leaf,
   Group,
   Datetime,
@@ -107,21 +108,21 @@ describe("group data", () => {
     __type: "Child",
     __last_updated: {
       __type: "datetime.datetime",
-      isoformat: "2023-01-02T00:00:00.000Z",
+      isoformat: "2023-01-02T00:00:00.000+00:00",
     },
   };
   const child2: Param = {
     __type: "Child",
     __last_updated: {
       __type: "datetime.datetime",
-      isoformat: "2023-01-04T00:00:00.000Z",
+      isoformat: "2023-01-04T00:00:00.000+00:00",
     },
   };
   const child3: Param = {
     __type: "Child",
     __last_updated: {
       __type: "datetime.datetime",
-      isoformat: "2023-01-03T00:00:00.000Z",
+      isoformat: "2023-01-03T00:00:00.000+00:00",
     },
   };
   const list: List = [123, "test", child1, child2, child3];
@@ -144,6 +145,8 @@ describe("group data", () => {
     },
     ...dict,
   };
+  const dataDiff1: DataDiff = { __old: child1, __new: child2 };
+  const dataDiff2: DataDiff = { __old: child2, __new: child1 };
 
   const lastUpdated = (param: Param) =>
     new Date(param.__last_updated.isoformat).getTime();
@@ -163,17 +166,19 @@ describe("group data", () => {
   };
 
   describe.each`
-    group          | path          | child          | typeString                 | childrenNames        | timestamp
-    ${child1}      | ${[]}         | ${child1}      | ${"Child (Param)"}         | ${[]}                | ${lastUpdated(child1)}
-    ${child2}      | ${[]}         | ${child2}      | ${"Child (Param)"}         | ${[]}                | ${lastUpdated(child2)}
-    ${child3}      | ${[]}         | ${child3}      | ${"Child (Param)"}         | ${[]}                | ${lastUpdated(child3)}
-    ${list}        | ${["0"]}      | ${123}         | ${"list"}                  | ${listChildrenNames} | ${latestTimestamp}
-    ${dict}        | ${["number"]} | ${123}         | ${"dict"}                  | ${dictChildrenNames} | ${latestTimestamp}
-    ${paramList}   | ${["2"]}      | ${child1}      | ${"ParamList"}             | ${listChildrenNames} | ${latestTimestamp}
-    ${paramDict}   | ${["child1"]} | ${child1}      | ${"ParamDict"}             | ${dictChildrenNames} | ${latestTimestamp}
-    ${struct}      | ${["child1"]} | ${child1}      | ${"CustomStruct (Struct)"} | ${dictChildrenNames} | ${latestTimestamp}
-    ${emptyStruct} | ${[]}         | ${emptyStruct} | ${"EmptyStruct (Struct)"}  | ${[]}                | ${-Infinity}
-    ${param}       | ${["child1"]} | ${child1}      | ${"CustomParam (Param)"}   | ${dictChildrenNames} | ${lastUpdated(param)}
+    group          | path          | child          | typeString                 | childrenNames         | timestamp
+    ${child1}      | ${[]}         | ${child1}      | ${"Child (Param)"}         | ${[]}                 | ${lastUpdated(child1)}
+    ${child2}      | ${[]}         | ${child2}      | ${"Child (Param)"}         | ${[]}                 | ${lastUpdated(child2)}
+    ${child3}      | ${[]}         | ${child3}      | ${"Child (Param)"}         | ${[]}                 | ${lastUpdated(child3)}
+    ${list}        | ${["0"]}      | ${123}         | ${"list"}                  | ${listChildrenNames}  | ${latestTimestamp}
+    ${dict}        | ${["number"]} | ${123}         | ${"dict"}                  | ${dictChildrenNames}  | ${latestTimestamp}
+    ${paramList}   | ${["2"]}      | ${child1}      | ${"ParamList"}             | ${listChildrenNames}  | ${latestTimestamp}
+    ${paramDict}   | ${["child1"]} | ${child1}      | ${"ParamDict"}             | ${dictChildrenNames}  | ${latestTimestamp}
+    ${struct}      | ${["child1"]} | ${child1}      | ${"CustomStruct (Struct)"} | ${dictChildrenNames}  | ${latestTimestamp}
+    ${emptyStruct} | ${[]}         | ${emptyStruct} | ${"EmptyStruct (Struct)"}  | ${[]}                 | ${-Infinity}
+    ${param}       | ${["child1"]} | ${child1}      | ${"CustomParam (Param)"}   | ${dictChildrenNames}  | ${lastUpdated(param)}
+    ${dataDiff1}   | ${["__new"]}  | ${child2}      | ${undefined}               | ${["__old", "__new"]} | ${lastUpdated(child2)}
+    ${dataDiff2}   | ${["__new"]}  | ${child1}      | ${undefined}               | ${["__old", "__new"]} | ${lastUpdated(child1)}
   `(
     "$group",
     ({ group, path, child, typeString, childrenNames, timestamp }: groupTestParams) => {

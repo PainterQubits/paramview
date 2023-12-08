@@ -67,8 +67,13 @@ describe("commit making", () => {
     // Open the commit dialog
     cy.getByTestId("open-commit-dialog-button").click();
 
-    // Commit dialog reflects what has been edited
-    cy.getByTestId("commit-dialog-changed").contains('{"root":{"b":456,"c":"test"}}');
+    // Comparison list reflects what has been edited
+    cy.getByTestId("comparison-list-item-old-commit_id").should("not.exist");
+    cy.getByTestId("comparison-list-item-new-commit_id").should("not.exist");
+    cy.getByTestId("comparison-list-item-old-b").contains("2");
+    cy.getByTestId("comparison-list-item-new-b").contains("456");
+    cy.getByTestId("comparison-list-item-old-c").contains("3");
+    cy.getByTestId("comparison-list-item-new-c").contains("test");
 
     // Type a message and type enter to make the commit
     cy.getByTestId("commit-message-text-field").type("New commit{enter}");

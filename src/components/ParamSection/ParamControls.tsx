@@ -53,7 +53,10 @@ export default function ParamControls() {
       !dataEdited ||
       confirm("You have unsaved changes. Do you want to discard them?")
     ) {
-      startCancelTransition(() => setEditMode(false));
+      startCancelTransition(() => {
+        setCommitDialogOpen(false);
+        setEditMode(false);
+      });
     }
   };
 

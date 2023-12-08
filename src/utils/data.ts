@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
-import { Path, LeafType, Data, Leaf, Group } from "@/types";
+import { Path, LeafType, DataDict, Data, Leaf, Group } from "@/types";
 import {
   isLeaf,
   isDatetime,
@@ -11,7 +11,7 @@ import {
   isParam,
   isStruct,
 } from "@/utils/type";
-import { formatDate, getLocalISOString } from "@/utils/timestamp";
+import { formatDate, getISOString, getLocalISOString } from "@/utils/timestamp";
 
 const precision = 4;
 
@@ -130,9 +130,7 @@ export function parseLeaf(
     const dateInput = new Date(input);
 
     if (!Number.isNaN(dateInput.getTime())) {
-      // Z is replaced for compatibility with Python parsing
-      const isoformat = new Date(input).toISOString().replace("Z", "+00:00");
-      return { __type: "datetime.datetime", isoformat };
+      return { __type: "datetime.datetime", isoformat: getISOString(input) };
     }
   }
 
@@ -200,7 +198,7 @@ export function setData(data: Data, path: Path, value: Data) {
 }
 
 /** Return a string representing the type of the given Group. */
-export function getTypeString(group: Group) {
+export function getTypeString<T>(group: Group<T>) {
   if (isList(group)) return "list";
 
   if (isDict(group)) return "dict";
@@ -213,8 +211,8 @@ export function getTypeString(group: Group) {
 }
 
 /** Get the names of the child data within the given group. */
-export function getChildrenNames(group: Group) {
-  let children: Data[] | { [key: string]: Data };
+export function getChildrenNames<T>(group: Group<T>) {
+  let children: Data<T>[] | DataDict<T>;
 
   if (isList(group) || isDict(group)) {
     children = group;
@@ -233,14 +231,23 @@ export function getChildrenNames(group: Group) {
 }
 
 /**
- * Get the last updated timestamp from the given Group, or -Infinity if there is no
- * timestamp.
+ * Get the last updated timestamp from the given Group or GroupDiff, or -Infinity if
+ * there is no timestamp.
  */
-export function getTimestamp(group: Group): number {
+export function getTimestamp<T>(group: Group<T>): number {
   if (isParam(group)) return new Date(group.__last_updated.isoformat).getTime();
 
   const timestamps = getChildrenNames(group).map((childName) => {
-    const childData = getData(group, [childName]);
+    // Don't bubble up timestamps from old data in a GroupDiff
+    if (childName === "__old") {
+      return -Infinity;
+    }
+
+    // Officially, getData only works on normal Data objects. However, we know it will
+    // work on DataDiff objects in this context, so we cast group to the Data type.
+    // Similarly, the resulting childData is technically of type Data<T>, but we know that
+    // for this particular use case it will get the correc timestamp.
+    const childData = getData(group as Data, [childName]);
     return isLeaf(childData) ? -Infinity : getTimestamp(childData);
   });
 
