@@ -28,6 +28,9 @@ coverage/
 cypress/videos/
 cypress/screenshots/
 
+# Playwright
+test-results/
+
 # Data files
 *.db
 *.db-journal

@@ -1,4 +1,8 @@
-"""Defines global fixtures. Called automatically by Pytest before running tests."""
+"""
+Global fixtures for unit tests.
+
+Called automatically by Pytest before running tests.
+"""
 
 from __future__ import annotations
 from typing import Any
@@ -18,7 +22,7 @@ def fixture_db_name() -> str:
 
 
 @pytest.fixture(name="db_path")
-def fixture_db_path(db_name: str, tmp_path: Path) -> str:
+def fixture_db_path(tmp_path: Path, db_name: str) -> str:
     """
     Path to a ParamDB database. The initial database is created using a different path
     name to ensure that residual file system events do not trigger update events when
