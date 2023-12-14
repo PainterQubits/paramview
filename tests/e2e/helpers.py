@@ -37,6 +37,11 @@ def get_date(commit_id: int) -> datetime:
     return _START_DATE + timedelta(days=commit_id - 1)
 
 
+def datetime_to_input_str(datetime_obj: datetime) -> str:
+    """Format the datetime object in HTML datetime-local input format."""
+    return datetime_obj.astimezone().strftime("%Y-%m-%dT%H:%M")
+
+
 def clear(db: ParamDB[Any]) -> None:
     """Clear the database."""
     with db._Session.begin() as session:  # pylint: disable=no-member,protected-access

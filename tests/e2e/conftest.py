@@ -12,13 +12,14 @@ from playwright.sync_api import Page
 from paramdb import ParamDB
 from tests.e2e.helpers import setup_db_and_start_server, clear, reset
 
+
 HOST = "http://127.0.0.1"
-STARTING_PORT = 7001  # xdist workers will increment up from this port
+STARTING_PORT = 7000  # xdist workers will increment up from this port
 
 
 @pytest.fixture(name="port", scope="session")
 def fixture_port(request: pytest.FixtureRequest) -> int:
-    """Port to run ParamView server on."""
+    """Port to run ParamView server on, unique to the current xdist worker."""
     worker_id = get_xdist_worker_id(request)
     if worker_id == "master":
         port_offset = 0
