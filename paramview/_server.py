@@ -33,7 +33,7 @@ def _available_port(host: str, default_port: int) -> int:
 
 def start_server(
     db_path: str,
-    host: str = "localhost",
+    host: str = "127.0.0.1",
     default_port: int = 5050,
     open_window: bool = True,
 ) -> None:

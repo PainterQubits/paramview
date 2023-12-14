@@ -83,7 +83,9 @@ def reset(db: ParamDB[Any], num_commits: int = 3) -> None:
         commit(db)
 
 
-def setup_db_and_start_server(db_path: str, base_url: str) -> Callable[[], None]:
+def setup_db_and_start_server(
+    db_path: str, port: int, base_url: str
+) -> Callable[[], None]:
     """
     Set up the database, start the server, wait for the server to be up, and return a
     function to stop the server.
@@ -98,7 +100,9 @@ def setup_db_and_start_server(db_path: str, base_url: str) -> Callable[[], None]
     reset(ParamDB(db_path))
 
     # pylint: disable=consider-using-with
-    server_process = subprocess.Popen(["paramview", db_path, "--no-open"])
+    server_process = subprocess.Popen(
+        ["paramview", db_path, "--port", f"{port}", "--no-open"]
+    )
 
     # Wait for server to be up
     for _ in range(_SERVER_POLLING_MAX_RETRIES):
