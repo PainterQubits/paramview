@@ -201,11 +201,7 @@ function CommitSelectContents() {
 /** Controls that affect the entire dashboard. */
 export default function CommitSelect() {
   return (
-    <Suspense
-      fallback={
-        <Skeleton data-testid="commit-select-loading" variant="rounded" height="4rem" />
-      }
-    >
+    <Suspense fallback={<Skeleton variant="rounded" height="4rem" />}>
       <CommitSelectContents />
     </Suspense>
   );

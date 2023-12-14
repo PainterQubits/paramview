@@ -21,15 +21,15 @@ _SERVER_REQUEST_TIMEOUT = 1.0
 _START_DATE = datetime(2023, 1, 1, tzinfo=timezone.utc).astimezone()
 
 
-class _CustomParam(Param):
+class CustomParam(Param):  # pylint: disable=missing-class-docstring
     int: int
     str: str
 
 
-class _CustomStruct(Struct):
+class CustomStruct(Struct):  # pylint: disable=missing-class-docstring
     int: int
     str: str
-    param: _CustomParam
+    param: CustomParam
 
 
 def get_date(commit_id: int) -> datetime:
@@ -40,6 +40,11 @@ def get_date(commit_id: int) -> datetime:
 def datetime_to_input_str(datetime_obj: datetime) -> str:
     """Format the datetime object in HTML datetime-local input format."""
     return datetime_obj.astimezone().strftime("%Y-%m-%dT%H:%M")
+
+
+def datetime_to_display_str(datetime_obj: datetime) -> str:
+    """Format the datetime object in the format displayed in the app."""
+    return datetime_obj.astimezone().strftime("%m/%d/%y, %I:%M:%S %p")
 
 
 def clear(db: ParamDB[Any]) -> None:
@@ -63,26 +68,27 @@ def commit(
 def reset(db: ParamDB[Any], num_commits: int = 3) -> None:
     """Clear the database and make some initial commits."""
     clear(db)
-    initial_data = ParamDict(
-        {
-            "commit_id": 1,
-            "int": 123,
-            "float": 1.2345,
-            "bool": True,
-            "str": "test",
-            "None": None,
-            "datetime": get_date(1),
-            "Quantity": 1.2345 * u.m,
-            "list": [123, "test"],
-            "dict": {"int": 123, "str": "test"},
-            "paramList": ParamList([123, "test"]),
-            "paramDict": ParamDict(int=123, str="test"),
-            "struct": _CustomStruct(
-                int=123, str="test", param=_CustomParam(int=123, str="test")
-            ),
-            "param": _CustomParam(int=123, str="test"),
-        }
-    )
+    with freeze_time(get_date(1)):
+        initial_data = ParamDict(
+            {
+                "commit_id": 1,
+                "int": 123,
+                "float": 1.2345,
+                "bool": True,
+                "str": "test",
+                "None": None,
+                "datetime": get_date(1),
+                "Quantity": 1.2345 * u.m,
+                "list": [123, "test"],
+                "dict": {"int": 123, "str": "test"},
+                "paramList": ParamList([123, "test"]),
+                "paramDict": ParamDict(int=123, str="test"),
+                "struct": CustomStruct(
+                    int=123, str="test", param=CustomParam(int=123, str="test")
+                ),
+                "param": CustomParam(int=123, str="test"),
+            }
+        )
     commit(db, "Initial commit", initial_data)
     for _ in range(2, num_commits + 1):
         commit(db)

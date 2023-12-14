@@ -43,7 +43,7 @@ export default function Header() {
     <AppBar position="static" elevation={0}>
       <ThemeProvider theme={theme("dark")}>
         <Box sx={toolbarSx}>
-          <Suspense fallback={<Box data-testid="database-name-loading" />}>
+          <Suspense fallback={<Box />}>
             <DatabaseName />
           </Suspense>
           <Box sx={commitSelectContainerSx}>
