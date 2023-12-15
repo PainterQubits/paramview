@@ -38,3 +38,21 @@ def test_displays_params(page: Page) -> None:
         ),
     ]:
         expect(page.get_by_test_id(test_id)).to_have_text(expected_text)
+
+
+def test_round_switch(page: Page) -> None:
+    """Rounds numerical parameters only when round switch is checked."""
+    round_switch = page.get_by_test_id("round-switch")
+    float_item = page.get_by_test_id("parameter-list-item-float")
+    quantity_item = page.get_by_test_id("parameter-list-item-Quantity")
+
+    # Rounded (default)
+    expect(round_switch).to_be_checked()
+    expect(float_item).to_have_text("float1.234")
+    expect(quantity_item).to_have_text("Quantity1.234 m")
+
+    # Unrounded
+    round_switch.uncheck()
+    expect(round_switch).not_to_be_checked()
+    expect(float_item).to_have_text("float1.2345")
+    expect(quantity_item).to_have_text("Quantity1.2345 m")

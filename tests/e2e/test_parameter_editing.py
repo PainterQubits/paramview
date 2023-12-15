@@ -5,6 +5,32 @@ import pytest
 from playwright.sync_api import Page, Dialog, expect
 from tests.e2e.helpers import reset_db, get_datetime_input
 
+num_dialogs: int
+last_dialog_message: str | None
+
+
+def capture_dialogs(page: Page, accept: bool = False) -> None:
+    """
+    Capture dialogs for the given page, updating the global variables
+    ``num_confirm_dialogs`` and ``dialog_message`` for each dialog, and accepting or
+    dismissing the dialog according to ``accept``.
+    """
+    # pylint: disable=global-statement
+    global num_dialogs, last_dialog_message
+    num_dialogs = 0
+    last_dialog_message = None
+
+    def handle_dialog(dialog: Dialog) -> None:
+        global num_dialogs, last_dialog_message
+        num_dialogs += 1
+        last_dialog_message = dialog.message
+        if accept:
+            dialog.accept()
+        else:
+            dialog.dismiss()
+
+    page.on("dialog", handle_dialog)
+
 
 @pytest.fixture(autouse=True)
 def setup(page: Page) -> None:
@@ -23,6 +49,7 @@ def test_input_int(page: Page) -> None:
     leaf_input = item.get_by_test_id("leaf-input").get_by_role("textbox")
     leaf_type_input = item.get_by_test_id("leaf-type-input").get_by_role("combobox")
 
+    # Initial input
     expect(leaf_input).to_have_value("123")
     expect(leaf_input).to_have_attribute("aria-invalid", "false")
     expect(item.get_by_test_id("leaf-unit-input")).not_to_be_attached()
@@ -47,6 +74,7 @@ def test_input_float(page: Page) -> None:
     leaf_input = item.get_by_test_id("leaf-input").get_by_role("textbox")
     leaf_type_input = item.get_by_test_id("leaf-type-input").get_by_role("combobox")
 
+    # Initial input
     expect(leaf_input).to_have_value("1.2345")
     expect(leaf_input).to_have_attribute("aria-invalid", "false")
     expect(item.get_by_test_id("leaf-unit-input")).not_to_be_attached()
@@ -70,6 +98,7 @@ def test_input_bool(page: Page) -> None:
     leaf_input = item.get_by_test_id("leaf-input").get_by_role("combobox")
     leaf_type_input = item.get_by_test_id("leaf-type-input").get_by_role("combobox")
 
+    # Initial input
     expect(leaf_input).to_have_text("True")
     expect(item.get_by_test_id("leaf-unit-input")).not_to_be_attached()
     expect(leaf_type_input).to_have_text("bool")
@@ -92,6 +121,7 @@ def test_input_str(page: Page) -> None:
     leaf_input = item.get_by_test_id("leaf-input").get_by_role("textbox")
     leaf_type_input = item.get_by_test_id("leaf-type-input").get_by_role("combobox")
 
+    # Initial input
     expect(leaf_input).to_have_value("test")
     expect(item.get_by_test_id("leaf-unit-input")).not_to_be_attached()
     expect(leaf_type_input).to_have_text("str")
@@ -113,6 +143,7 @@ def test_input_none(page: Page) -> None:
     leaf_input = item.get_by_test_id("leaf-input").get_by_role("textbox")
     leaf_type_input = item.get_by_test_id("leaf-type-input").get_by_role("combobox")
 
+    # Initial input
     expect(leaf_input).to_have_value("None")
     expect(leaf_input).to_be_disabled()
     expect(item.get_by_test_id("leaf-unit-input")).not_to_be_attached()
@@ -135,6 +166,7 @@ def test_input_datetime(page: Page) -> None:
     leaf_input = item.get_by_test_id("leaf-input").locator("input[type=datetime-local]")
     leaf_type_input = item.get_by_test_id("leaf-type-input").get_by_role("combobox")
 
+    # Initial input
     expect(leaf_input).to_have_value(datetime_input_value)
     expect(item.get_by_test_id("leaf-unit-input")).not_to_be_attached()
     expect(leaf_type_input).to_have_text("datetime")
@@ -158,6 +190,7 @@ def test_input_quantity(page: Page) -> None:
     leaf_unit_input = item.get_by_test_id("leaf-unit-input").get_by_role("textbox")
     leaf_type_input = item.get_by_test_id("leaf-type-input").get_by_role("combobox")
 
+    # Initial input
     expect(leaf_input).to_have_value("1.2345")
     expect(leaf_input).to_have_attribute("aria-invalid", "false")
     expect(leaf_unit_input).to_have_value("m")
@@ -254,16 +287,9 @@ def test_exit_edit_mode_no_changes(page: Page) -> None:
     Can exit edit mode or close the page when there are no changes, and there are no
     dialogs.
     """
-    no_dialogs = True
+    capture_dialogs(page)
     edit_button = page.get_by_test_id("edit-button")
     cancel_button = page.get_by_test_id("cancel-edit-button")
-
-    def handle_dialog(dialog: Dialog) -> None:
-        nonlocal no_dialogs
-        no_dialogs = False
-        dialog.dismiss()
-
-    page.on("dialog", handle_dialog)
 
     # Exit edit mode
     expect(edit_button).not_to_be_attached()
@@ -275,7 +301,7 @@ def test_exit_edit_mode_no_changes(page: Page) -> None:
     # Close the page
     page.close(run_before_unload=True)
 
-    assert no_dialogs
+    assert num_dialogs == 0
 
 
 def test_exit_edit_mode_invalid_changes(page: Page) -> None:
@@ -283,7 +309,7 @@ def test_exit_edit_mode_invalid_changes(page: Page) -> None:
     Can exit edit mode or close the page when there are invalid changes only, and there
     are no dialogs.
     """
-    no_dialogs = True
+    capture_dialogs(page)
     edit_button = page.get_by_test_id("edit-button")
     cancel_button = page.get_by_test_id("cancel-edit-button")
     leaf_input = (
@@ -291,13 +317,6 @@ def test_exit_edit_mode_invalid_changes(page: Page) -> None:
         .get_by_test_id("leaf-input")
         .get_by_role("textbox")
     )
-
-    def handle_dialog(dialog: Dialog) -> None:
-        nonlocal no_dialogs
-        no_dialogs = False
-        dialog.dismiss()
-
-    page.on("dialog", handle_dialog)
 
     # Fill with invalid value, then exit and re-enter edit mode
     leaf_input.fill("123a")
@@ -309,7 +328,7 @@ def test_exit_edit_mode_invalid_changes(page: Page) -> None:
     leaf_input.fill("123a")
     page.close(run_before_unload=True)
 
-    assert no_dialogs
+    assert num_dialogs == 0
 
 
 def test_exit_edit_mode_valid_changes_dismiss(page: Page) -> None:
@@ -318,8 +337,7 @@ def test_exit_edit_mode_valid_changes_dismiss(page: Page) -> None:
     is given a confirmation dialog. If they dismiss this dialog, exit mode is not
     exited.
     """
-    num_confirm_dialogs = 0
-    dialog_message = None
+    capture_dialogs(page, accept=False)
     cancel_button = page.get_by_test_id("cancel-edit-button")
     leaf_input = (
         page.get_by_test_id("parameter-list-item-int")
@@ -327,26 +345,20 @@ def test_exit_edit_mode_valid_changes_dismiss(page: Page) -> None:
         .get_by_role("textbox")
     )
 
-    def handle_dialog(dialog: Dialog) -> None:
-        nonlocal num_confirm_dialogs, dialog_message
-        num_confirm_dialogs += 1
-        dialog_message = dialog.message
-        dialog.dismiss()
-
-    page.on("dialog", handle_dialog)
-
     # Fill with valid value and attempt to exit edit mode
     leaf_input.fill("1234")
     cancel_button.click()
     expect(leaf_input).to_have_value("1234")
-    assert num_confirm_dialogs == 1
-    assert dialog_message == "You have unsaved changes. Do you want to discard them?"
+    assert num_dialogs == 1
+    assert (
+        last_dialog_message == "You have unsaved changes. Do you want to discard them?"
+    )
 
     # Change to invalid value and attempt to close the page
     leaf_input.fill("1234")
     page.close(run_before_unload=True)
     expect(leaf_input).to_have_value("1234")
-    assert num_confirm_dialogs == 2
+    assert num_dialogs == 2
 
 
 def test_exit_edit_mode_valid_changes_accept(page: Page) -> None:
@@ -354,8 +366,7 @@ def test_exit_edit_mode_valid_changes_accept(page: Page) -> None:
     When there are valid changes and exit mode is exited, the user is given a
     confirmation dialog. If they accept this dialog, exit mode is exited.
     """
-    num_confirm_dialogs = 0
-    dialog_message = None
+    capture_dialogs(page, accept=True)
     edit_button = page.get_by_test_id("edit-button")
     cancel_button = page.get_by_test_id("cancel-edit-button")
     leaf_input = (
@@ -364,18 +375,12 @@ def test_exit_edit_mode_valid_changes_accept(page: Page) -> None:
         .get_by_role("textbox")
     )
 
-    def handle_dialog(dialog: Dialog) -> None:
-        nonlocal num_confirm_dialogs, dialog_message
-        num_confirm_dialogs += 1
-        dialog_message = dialog.message
-        dialog.accept()
-
-    page.on("dialog", handle_dialog)
-
     # Fill with valid value and exit edit mode
     leaf_input.fill("1234")
     cancel_button.click()
     edit_button.click()
     expect(leaf_input).to_have_value("123")
-    assert num_confirm_dialogs == 1
-    assert dialog_message == "You have unsaved changes. Do you want to discard them?"
+    assert num_dialogs == 1
+    assert (
+        last_dialog_message == "You have unsaved changes. Do you want to discard them?"
+    )
