@@ -26,10 +26,8 @@ flake8 = "^6.1.0"
 pylint = "^3.0.2"
 black = "^23.11.0"
 pytest = "^7.4.3"
-pytest-xdist = "^3.5.0"
 pytest-playwright = "^0.4.3"
 freezegun = "1.2.2"
-requests = "^2.31.0"
 sqlalchemy = "^2.0.23"
 astropy = "^6.0.0"
 
@@ -41,4 +39,5 @@ strict = true
 
 [tool.pytest.ini_options]
 addopts = ["--import-mode=importlib"]
+base_url = "http://127.0.0.1:5051"
 filterwarnings = ["ignore::DeprecationWarning:eventlet.support.greenlets"]

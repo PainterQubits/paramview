@@ -3,12 +3,14 @@
 from __future__ import annotations
 import pytest
 from playwright.sync_api import Page, Dialog, expect
-from tests.e2e.helpers import get_date, datetime_to_input_str
+from tests.e2e.helpers import reset_db, get_datetime_input
 
 
 @pytest.fixture(autouse=True)
-def setup(_reset_single_db: None, _visit_page: None, page: Page) -> None:
+def setup(page: Page) -> None:
     """Automatically run before each test in this module."""
+    reset_db()
+    page.goto("/")
     page.get_by_test_id("edit-button").click()
 
 
@@ -127,8 +129,8 @@ def test_input_datetime(page: Page) -> None:
     Input for datetime parameters has the correct initial values can be edited and
     reset.
     """
-    datetime_input_value = datetime_to_input_str(get_date(1))
-    new_datetime_input_value = datetime_to_input_str(get_date(2))
+    datetime_input_value = get_datetime_input(1)
+    new_datetime_input_value = get_datetime_input(2)
     item = page.get_by_test_id("parameter-list-item-datetime")
     leaf_input = item.get_by_test_id("leaf-input").locator("input[type=datetime-local]")
     leaf_type_input = item.get_by_test_id("leaf-type-input").get_by_role("combobox")

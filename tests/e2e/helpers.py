@@ -2,12 +2,8 @@
 
 from __future__ import annotations
 from typing import Any
-from collections.abc import Callable
-import time
-import signal
-import subprocess
+import os
 from datetime import datetime, timedelta, timezone
-import requests  # type: ignore
 from sqlalchemy import delete
 from freezegun import freeze_time
 import astropy.units as u  # type: ignore
@@ -15,60 +11,68 @@ from paramdb import ParamDB, Param, Struct, ParamList, ParamDict
 from paramdb._database import _Snapshot
 
 
-_SERVER_POLLING_WAIT = 0.1
-_SERVER_POLLING_MAX_RETRIES = int(5 / _SERVER_POLLING_WAIT)
-_SERVER_REQUEST_TIMEOUT = 1.0
-_START_DATE = datetime(2023, 1, 1, tzinfo=timezone.utc).astimezone()
+_START_DATETIME = datetime(2023, 1, 1, tzinfo=timezone.utc).astimezone()
+DB_NAME = "param.db"
+DB_PATH = os.path.join(os.path.dirname(__file__), DB_NAME)
+_DB = ParamDB[Any](DB_PATH)
 
 
-class CustomParam(Param):  # pylint: disable=missing-class-docstring
+class CustomParam(Param):
+    """Custom parameter."""
+
     int: int
     str: str
 
 
-class CustomStruct(Struct):  # pylint: disable=missing-class-docstring
+class CustomStruct(Struct):
+    """Custom parameter structure."""
+
     int: int
     str: str
     param: CustomParam
 
 
-def get_date(commit_id: int) -> datetime:
-    """Get the date corresponding to the given commit ID."""
-    return _START_DATE + timedelta(days=commit_id - 1)
+def get_datetime(commit_id: int) -> datetime:
+    """Get the datetime corresponding to the given commit ID."""
+    return _START_DATETIME + timedelta(days=commit_id - 1)
 
 
-def datetime_to_input_str(datetime_obj: datetime) -> str:
-    """Format the datetime object in HTML datetime-local input format."""
-    return datetime_obj.astimezone().strftime("%Y-%m-%dT%H:%M")
+def get_datetime_input(commit_id: int) -> str:
+    """
+    Get the datetime corresponding to the given commit ID in the format of HTML
+    datetime-local input.
+    """
+    return get_datetime(commit_id).astimezone().strftime("%Y-%m-%dT%H:%M")
 
 
-def datetime_to_display_str(datetime_obj: datetime) -> str:
-    """Format the datetime object in the format displayed in the app."""
-    return datetime_obj.astimezone().strftime("%m/%d/%y, %I:%M:%S %p")
+def get_datetime_display(commit_id: int) -> str:
+    """
+    Get the datetime corresponding to the given commit ID in the format dates are
+    displayed in the app.
+    """
+    return get_datetime(commit_id).astimezone().strftime("%m/%d/%y, %I:%M:%S %p")
 
 
-def clear(db: ParamDB[Any]) -> None:
+def clear_db() -> None:
     """Clear the database."""
-    with db._Session.begin() as session:  # pylint: disable=no-member,protected-access
+    with _DB._Session.begin() as session:  # pylint: disable=no-member,protected-access
         session.execute(delete(_Snapshot))  # Clear all commits
 
 
-def commit(
-    db: ParamDB[Any], message: str | None = None, data: Any | None = None
-) -> None:
+def commit_to_db(message: str | None = None, data: Any | None = None) -> None:
     """Make a commit with the given message."""
-    num_commits = db.num_commits
+    num_commits = _DB.num_commits
     commit_id = num_commits + 1
     message = f"Commit {commit_id}" if message is None else message
     data = ParamDict(commit_id=commit_id, b=2, c=3) if data is None else data
-    with freeze_time(get_date(num_commits + 1)):
-        db.commit(message, data)
+    with freeze_time(get_datetime(num_commits + 1)):
+        _DB.commit(message, data)
 
 
-def reset(db: ParamDB[Any], num_commits: int = 3) -> None:
+def reset_db(num_commits: int = 1) -> None:
     """Clear the database and make some initial commits."""
-    clear(db)
-    with freeze_time(get_date(1)):
+    clear_db()
+    with freeze_time(get_datetime(1)):
         initial_data = ParamDict(
             {
                 "commit_id": 1,
@@ -77,7 +81,7 @@ def reset(db: ParamDB[Any], num_commits: int = 3) -> None:
                 "bool": True,
                 "str": "test",
                 "None": None,
-                "datetime": get_date(1),
+                "datetime": get_datetime(1),
                 "Quantity": 1.2345 * u.m,
                 "list": [123, "test"],
                 "dict": {"int": 123, "str": "test"},
@@ -89,49 +93,18 @@ def reset(db: ParamDB[Any], num_commits: int = 3) -> None:
                 "param": CustomParam(int=123, str="test"),
             }
         )
-    commit(db, "Initial commit", initial_data)
+    commit_to_db("Initial commit", initial_data)
     for _ in range(2, num_commits + 1):
-        commit(db)
+        commit_to_db()
 
 
-def setup_db_and_start_server(
-    db_path: str, port: int, base_url: str
-) -> Callable[[], None]:
-    """
-    Set up the database, start the server, wait for the server to be up, and return a
-    function to stop the server.
-    """
-    # Verify that the base url is available
-    try:
-        requests.get(base_url, timeout=_SERVER_REQUEST_TIMEOUT)
-        raise RuntimeError(f"{base_url} is already in use.")
-    except requests.ConnectionError:
-        time.sleep(_SERVER_POLLING_WAIT)
-
-    reset(ParamDB(db_path))
-
-    # pylint: disable=consider-using-with
-    server_process = subprocess.Popen(
-        ["paramview", db_path, "--port", f"{port}", "--no-open"]
-    )
-
-    # Wait for server to be up
-    for _ in range(_SERVER_POLLING_MAX_RETRIES):
-        try:
-            requests.get(base_url, timeout=_SERVER_REQUEST_TIMEOUT)
-            break
-        except requests.ConnectionError:
-            time.sleep(_SERVER_POLLING_WAIT)
-
-    def stop_server() -> None:
-        server_process.send_signal(signal.SIGINT)
-
-    return stop_server
-
-
-def load_classes_from_db(db: ParamDB[Any]) -> None:
+def load_classes_from_db() -> None:
     """
     Load the last commit as Python classes. This helps to test that objects are
     formatted properly, in particular datetime and Quantity objects.
     """
-    db.load()
+    _DB.load()
+
+
+if __name__ == "__main__":
+    reset_db()
