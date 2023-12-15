@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "lint": "tsc && tsc --project cypress && eslint . && prettier --check .",
+    "lint": "tsc && eslint . && prettier --check .",
     "test": "jest"
   },
   "packageManager": "yarn@4.0.2",
