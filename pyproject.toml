@@ -38,6 +38,6 @@ paramview = "paramview._cli:main"
 strict = true
 
 [tool.pytest.ini_options]
-addopts = ["--import-mode=importlib"]
+addopts = ["--import-mode=importlib", "--tracing=retain-on-failure"]
 base_url = "http://127.0.0.1:5051"
 filterwarnings = ["ignore::DeprecationWarning:eventlet.support.greenlets"]

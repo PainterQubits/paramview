@@ -3,6 +3,7 @@
 from __future__ import annotations
 from typing import Any
 import os
+from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from sqlalchemy import delete
 from freezegun import freeze_time
@@ -53,20 +54,33 @@ def get_datetime_display(commit_id: int) -> str:
     return get_datetime(commit_id).astimezone().strftime("%m/%d/%y, %I:%M:%S %p")
 
 
+def get_commit_message(commit_id: int, message: str | None = None) -> str:
+    """Get the commit message corresponding to the given commit ID."""
+    if message is not None:
+        return message
+    if commit_id == 1:
+        return "Initial commit"
+    return f"Commit {commit_id}"
+
+
+def get_commit_message_display(commit_id: int, message: str | None = None) -> str:
+    """Get the commit message as displayed in the app."""
+    return f"{commit_id}: {get_commit_message(commit_id, message)}"
+
+
 def clear_db() -> None:
     """Clear the database."""
     with _DB._Session.begin() as session:  # pylint: disable=no-member,protected-access
         session.execute(delete(_Snapshot))  # Clear all commits
 
 
-def commit_to_db(message: str | None = None, data: Any | None = None) -> None:
+def commit_to_db(data: Any | None = None, message: str | None = None) -> None:
     """Make a commit with the given message."""
     num_commits = _DB.num_commits
     commit_id = num_commits + 1
-    message = f"Commit {commit_id}" if message is None else message
     data = ParamDict(commit_id=commit_id, b=2, c=3) if data is None else data
     with freeze_time(get_datetime(num_commits + 1)):
-        _DB.commit(message, data)
+        _DB.commit(get_commit_message(commit_id, message), data)
 
 
 def reset_db(num_commits: int = 1) -> None:
@@ -93,7 +107,7 @@ def reset_db(num_commits: int = 1) -> None:
                 "param": CustomParam(int=123, str="test"),
             }
         )
-    commit_to_db("Initial commit", initial_data)
+    commit_to_db(initial_data)
     for _ in range(2, num_commits + 1):
         commit_to_db()
 
@@ -106,5 +120,23 @@ def load_classes_from_db() -> None:
     _DB.load()
 
 
-if __name__ == "__main__":
-    reset_db()
+@dataclass
+class CaptureDialogs:
+    """Settings and captured values exposed by the ``capture_dialogs`` fixture."""
+
+    accept: bool = False
+    """Whether to accept subsequent dialogs (default is ``False``)."""
+    num_dialogs: int = 0
+    """Number of dialogs captured in the current test."""
+    last_dialog_message: str | None = None
+    """Message of the last dialog message captured."""
+
+
+# pylint: disable-next=too-few-public-methods
+class CommitInfo:
+    """Information for a given commit."""
+
+    def __init__(self, commit_id: int) -> None:
+        self.id = commit_id
+        self.date = get_datetime_display(commit_id)
+        self.message = get_commit_message_display(commit_id)

@@ -56,3 +56,67 @@ def test_round_switch(page: Page) -> None:
     expect(round_switch).not_to_be_checked()
     expect(float_item).to_have_text("float1.2345")
     expect(quantity_item).to_have_text("Quantity1.2345 m")
+
+
+def test_nested_items(page: Page) -> None:
+    """Expands and collapses nested items when they are clicked."""
+    nested_item = page.get_by_test_id("parameter-list-item-dict")
+    nested_item_button = nested_item.get_by_role("button")
+    child_item_1 = nested_item.get_by_test_id("parameter-list-item-int")
+    child_item_2 = nested_item.get_by_test_id("parameter-list-item-str")
+
+    # Initially collapsed
+    expect(child_item_1).not_to_be_visible()
+    expect(child_item_2).not_to_be_visible()
+
+    # Expands when clicked
+    nested_item_button.click()
+    expect(child_item_1).to_be_visible()
+    expect(child_item_2).to_be_visible()
+
+    # Collapses when clicked again
+    nested_item_button.click()
+    expect(child_item_1).not_to_be_visible()
+    expect(child_item_2).not_to_be_visible()
+
+
+def test_collapse_all(page: Page) -> None:
+    """Collapses all non-root items when "Collapse all" is clicked."""
+    dict_item = page.get_by_test_id("parameter-list-item-dict")
+    list_item = page.get_by_test_id("parameter-list-item-list")
+    dict_item_child_1 = dict_item.get_by_test_id("parameter-list-item-int")
+    dict_item_child_2 = dict_item.get_by_test_id("parameter-list-item-str")
+    list_item_child_1 = list_item.get_by_test_id("parameter-list-item-0")
+    list_item_child_2 = list_item.get_by_test_id("parameter-list-item-1")
+
+    # Click nested items to expand
+    dict_item.get_by_role("button").click()
+    list_item.get_by_role("button").click()
+    expect(dict_item_child_1).to_be_visible()
+    expect(dict_item_child_2).to_be_visible()
+    expect(list_item_child_1).to_be_visible()
+    expect(list_item_child_2).to_be_visible()
+
+    # Collapse all
+    page.get_by_test_id("collapse-all-button").click()
+    expect(dict_item_child_1).not_to_be_visible()
+    expect(dict_item_child_2).not_to_be_visible()
+    expect(list_item_child_1).not_to_be_visible()
+    expect(list_item_child_2).not_to_be_visible()
+
+
+def test_collapse_all_root(page: Page) -> None:
+    """Expands the root item when "Collapse all" is clicked."""
+    root_item = page.get_by_test_id("parameter-list-item-root")
+    child_item_1 = root_item.get_by_test_id("parameter-list-item-int")
+    child_item_2 = root_item.get_by_test_id("parameter-list-item-str")
+
+    # Click root to collapse
+    root_item.get_by_role("button", name="root").click()
+    expect(child_item_1).not_to_be_visible()
+    expect(child_item_2).not_to_be_visible()
+
+    # Collapse all to reset root
+    page.get_by_test_id("collapse-all-button").click()
+    expect(child_item_1).to_be_visible()
+    expect(child_item_2).to_be_visible()

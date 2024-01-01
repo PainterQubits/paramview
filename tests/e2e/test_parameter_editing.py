@@ -1,35 +1,8 @@
 """Tests for parameter editing."""
 
-from __future__ import annotations
 import pytest
-from playwright.sync_api import Page, Dialog, expect
-from tests.e2e.helpers import reset_db, get_datetime_input
-
-num_dialogs: int
-last_dialog_message: str | None
-
-
-def capture_dialogs(page: Page, accept: bool = False) -> None:
-    """
-    Capture dialogs for the given page, updating the global variables
-    ``num_confirm_dialogs`` and ``dialog_message`` for each dialog, and accepting or
-    dismissing the dialog according to ``accept``.
-    """
-    # pylint: disable=global-statement
-    global num_dialogs, last_dialog_message
-    num_dialogs = 0
-    last_dialog_message = None
-
-    def handle_dialog(dialog: Dialog) -> None:
-        global num_dialogs, last_dialog_message
-        num_dialogs += 1
-        last_dialog_message = dialog.message
-        if accept:
-            dialog.accept()
-        else:
-            dialog.dismiss()
-
-    page.on("dialog", handle_dialog)
+from playwright.sync_api import Page, expect
+from tests.e2e.helpers import CaptureDialogs, reset_db, get_datetime_input
 
 
 @pytest.fixture(autouse=True)
@@ -282,12 +255,11 @@ def test_change_input_type(page: Page) -> None:
     expect(leaf_type_input).to_have_text("int/float")
 
 
-def test_exit_edit_mode_no_changes(page: Page) -> None:
+def test_exit_edit_mode_no_changes(page: Page, capture_dialogs: CaptureDialogs) -> None:
     """
     Can exit edit mode or close the page when there are no changes, and there are no
     dialogs.
     """
-    capture_dialogs(page)
     edit_button = page.get_by_test_id("edit-button")
     cancel_button = page.get_by_test_id("cancel-edit-button")
 
@@ -301,15 +273,16 @@ def test_exit_edit_mode_no_changes(page: Page) -> None:
     # Close the page
     page.close(run_before_unload=True)
 
-    assert num_dialogs == 0
+    assert capture_dialogs.num_dialogs == 0
 
 
-def test_exit_edit_mode_invalid_changes(page: Page) -> None:
+def test_exit_edit_mode_invalid_changes(
+    page: Page, capture_dialogs: CaptureDialogs
+) -> None:
     """
     Can exit edit mode or close the page when there are invalid changes only, and there
     are no dialogs.
     """
-    capture_dialogs(page)
     edit_button = page.get_by_test_id("edit-button")
     cancel_button = page.get_by_test_id("cancel-edit-button")
     leaf_input = (
@@ -328,16 +301,18 @@ def test_exit_edit_mode_invalid_changes(page: Page) -> None:
     leaf_input.fill("123a")
     page.close(run_before_unload=True)
 
-    assert num_dialogs == 0
+    assert capture_dialogs.num_dialogs == 0
 
 
-def test_exit_edit_mode_valid_changes_dismiss(page: Page) -> None:
+def test_exit_edit_mode_valid_changes_dismiss(
+    page: Page, capture_dialogs: CaptureDialogs
+) -> None:
     """
     When there are valid changes and exit mode is exited or the page is closed, the user
     is given a confirmation dialog. If they dismiss this dialog, exit mode is not
     exited.
     """
-    capture_dialogs(page, accept=False)
+    capture_dialogs.accept = False
     cancel_button = page.get_by_test_id("cancel-edit-button")
     leaf_input = (
         page.get_by_test_id("parameter-list-item-int")
@@ -349,24 +324,27 @@ def test_exit_edit_mode_valid_changes_dismiss(page: Page) -> None:
     leaf_input.fill("1234")
     cancel_button.click()
     expect(leaf_input).to_have_value("1234")
-    assert num_dialogs == 1
+    assert capture_dialogs.num_dialogs == 1
     assert (
-        last_dialog_message == "You have unsaved changes. Do you want to discard them?"
+        capture_dialogs.last_dialog_message
+        == "You have unsaved changes. Do you want to discard them?"
     )
 
     # Change to invalid value and attempt to close the page
     leaf_input.fill("1234")
     page.close(run_before_unload=True)
     expect(leaf_input).to_have_value("1234")
-    assert num_dialogs == 2
+    assert capture_dialogs.num_dialogs == 2
 
 
-def test_exit_edit_mode_valid_changes_accept(page: Page) -> None:
+def test_exit_edit_mode_valid_changes_accept(
+    page: Page, capture_dialogs: CaptureDialogs
+) -> None:
     """
     When there are valid changes and exit mode is exited, the user is given a
     confirmation dialog. If they accept this dialog, exit mode is exited.
     """
-    capture_dialogs(page, accept=True)
+    capture_dialogs.accept = True
     edit_button = page.get_by_test_id("edit-button")
     cancel_button = page.get_by_test_id("cancel-edit-button")
     leaf_input = (
@@ -380,7 +358,8 @@ def test_exit_edit_mode_valid_changes_accept(page: Page) -> None:
     cancel_button.click()
     edit_button.click()
     expect(leaf_input).to_have_value("123")
-    assert num_dialogs == 1
+    assert capture_dialogs.num_dialogs == 1
     assert (
-        last_dialog_message == "You have unsaved changes. Do you want to discard them?"
+        capture_dialogs.last_dialog_message
+        == "You have unsaved changes. Do you want to discard them?"
     )
