@@ -19,7 +19,7 @@
     "@emotion/styled": "^11.11.0",
     "@fontsource/roboto": "^5.0.8",
     "@mui/icons-material": "^5.14.19",
-    "@mui/lab": "^5.0.0-alpha.155",
+    "@mui/lab": "^5.0.0-alpha.158",
     "@mui/material": "^5.14.20",
     "deep-object-diff": "^1.1.9",
     "fast-deep-equal": "^3.1.3",
