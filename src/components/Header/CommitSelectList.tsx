@@ -53,16 +53,16 @@ const OuterElementContext = createContext({});
 const CommitSelectOuterElement = forwardRef<HTMLDivElement>(
   function CommitSelectOuterElement(props, ref) {
     const outerProps = useContext(OuterElementContext);
-    return <Box ref={ref} {...props} {...outerProps} />;
+    return (
+      <Box data-testid="commit-select-listbox" ref={ref} {...props} {...outerProps} />
+    );
   },
 );
 
 /** Custom innerElementType passed to React window. */
 const CommitSelectInnerElement = forwardRef<HTMLUListElement>(
   function CommitSelectInnerElement(props, ref) {
-    return (
-      <List data-testid="commit-select-listbox" disablePadding ref={ref} {...props} />
-    );
+    return <List disablePadding ref={ref} {...props} />;
   },
 );
 
