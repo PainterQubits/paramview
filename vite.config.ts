@@ -5,6 +5,7 @@ import react from "@vitejs/plugin-react-swc";
 export default defineConfig({
   build: {
     outDir: "paramview/static",
+    chunkSizeWarningLimit: 1000,
   },
   resolve: {
     alias: {
