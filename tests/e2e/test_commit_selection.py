@@ -67,7 +67,7 @@ def test_latest_checkbox(page: Page) -> None:
     expect(latest_checkbox).not_to_be_checked()
 
     # Check the latest checkbox
-    latest_checkbox.check()
+    latest_checkbox.click()
     expect(latest_checkbox).to_be_checked()
     expect(commit_select_combobox).to_contain_text(LATEST_COMMIT.date)
     expect(commit_select_combobox_input).to_have_value(LATEST_COMMIT.message)
@@ -121,7 +121,7 @@ def test_latest_unchecked_does_not_update(page: Page) -> None:
     commit_select_combobox_input = commit_select_combobox.get_by_role("combobox")
     commit_id_item = page.get_by_test_id("parameter-list-item-commit_id")
 
-    page.get_by_test_id("latest-checkbox").uncheck()
+    page.get_by_test_id("latest-checkbox").click()
     commit_to_db()
 
     # Commit select contains original latest commit
@@ -210,7 +210,7 @@ def test_edit_mode_latest_unchecked(page: Page) -> None:
     commit_id_input = commit_id_item.get_by_test_id("leaf-input").get_by_role("textbox")
 
     # In edit mode, latest checkbox is unchecked
-    latest_checkbox.uncheck()
+    latest_checkbox.click()
     page.get_by_test_id("edit-button").click()
     expect(latest_checkbox).not_to_be_checked()
 
