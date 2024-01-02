@@ -37,7 +37,7 @@ def start() -> None:
     from paramview import start_server  # pylint: disable=import-outside-toplevel
 
     reset()
-    start_server(DB_PATH, auto_open=False)
+    start_server(DB_PATH, open_window=True)
 
 
 def reset(single: bool = False, long: bool = False) -> None:

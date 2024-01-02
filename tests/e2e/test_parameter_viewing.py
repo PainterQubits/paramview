@@ -1,4 +1,4 @@
-"""Tests for parameter navigation."""
+"""Tests for parameter viewing."""
 
 import pytest
 from playwright.sync_api import Page, expect

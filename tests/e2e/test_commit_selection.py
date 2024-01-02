@@ -2,7 +2,7 @@
 
 import pytest
 from playwright.sync_api import Page, expect
-from tests.e2e.helpers import reset_db, commit_to_db, CommitInfo
+from tests.e2e.helpers import CommitInfo, reset_db, commit_to_db
 
 NUM_COMMITS = 3
 FIRST_COMMIT = CommitInfo(1)

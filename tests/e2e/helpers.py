@@ -87,6 +87,13 @@ def reset_db(num_commits: int = 1) -> None:
     """Clear the database and make some initial commits."""
     clear_db()
     with freeze_time(get_datetime(1)):
+        param = CustomParam(int=123, str="test")
+        # Convert last updated from freezegun.api.FakeDatetime to a true datetime
+        setattr(
+            param,
+            "_Param__last_updated",
+            datetime.fromtimestamp(param.last_updated.timestamp()),
+        )
         initial_data = ParamDict(
             {
                 "commit_id": 1,
@@ -101,10 +108,8 @@ def reset_db(num_commits: int = 1) -> None:
                 "dict": {"int": 123, "str": "test"},
                 "paramList": ParamList([123, "test"]),
                 "paramDict": ParamDict(int=123, str="test"),
-                "struct": CustomStruct(
-                    int=123, str="test", param=CustomParam(int=123, str="test")
-                ),
-                "param": CustomParam(int=123, str="test"),
+                "struct": CustomStruct(int=123, str="test", param=param),
+                "param": param,
             }
         )
     commit_to_db(initial_data)
@@ -136,7 +141,7 @@ class CaptureDialogs:
 class CommitInfo:
     """Information for a given commit."""
 
-    def __init__(self, commit_id: int) -> None:
+    def __init__(self, commit_id: int, message: str | None = None) -> None:
         self.id = commit_id
         self.date = get_datetime_display(commit_id)
-        self.message = get_commit_message_display(commit_id)
+        self.message = get_commit_message_display(commit_id, message)
