@@ -125,9 +125,9 @@ jobs:
       - name: E2E tests
         run: poetry run pytest tests/e2e
 
-      - name: Upload failure screenshots
+      - name: Upload failure traces
         uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: e2e-failed-traces
+          name: e2e-failure-traces
           path: test-results
