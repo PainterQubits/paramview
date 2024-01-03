@@ -16,19 +16,19 @@ include = ["paramview/static/**/*"]
 python = "^3.9"
 flask = "^3.0.0"
 flask-socketio = "^5.3.6"
-eventlet = "^0.33.3"
+eventlet = "^0.34.2"
 watchdog = "^3.0.0"
 paramdb = "^0.10.2"
 
 [tool.poetry.group.dev.dependencies]
-mypy = "^1.7.1"
+mypy = "^1.8.0"
 flake8 = "^6.1.0"
-pylint = "^3.0.2"
+pylint = "^3.0.3"
 black = "^23.12.1"
-pytest = "^7.4.3"
+pytest = "^7.4.4"
 pytest-playwright = "^0.4.3"
-freezegun = "1.2.2"
-sqlalchemy = "^2.0.23"
+freezegun = "^1.4.0"
+sqlalchemy = "^2.0.25"
 astropy = "^6.0.0"
 
 [tool.poetry.scripts]
@@ -40,4 +40,3 @@ strict = true
 [tool.pytest.ini_options]
 addopts = ["--import-mode=importlib", "--tracing=retain-on-failure"]
 base_url = "http://127.0.0.1:5051"
-filterwarnings = ["ignore::DeprecationWarning:eventlet.support.greenlets"]
