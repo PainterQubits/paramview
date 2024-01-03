@@ -86,14 +86,10 @@ def commit_to_db(data: Any | None = None, message: str | None = None) -> None:
 def reset_db(num_commits: int = 1) -> None:
     """Clear the database and make some initial commits."""
     clear_db()
-    with freeze_time(get_datetime(1)):
+    with freeze_time(_START_DATETIME):
         param = CustomParam(int=123, str="test")
-        # Convert last updated from freezegun.api.FakeDatetime to a true datetime
-        setattr(
-            param,
-            "_Param__last_updated",
-            datetime.fromtimestamp(param.last_updated.timestamp()),
-        )
+        # Use real datetime for last updated (rather than freezegun.api.FakeDatetime)
+        setattr(param, "_Param__last_updated", _START_DATETIME)
         initial_data = ParamDict(
             {
                 "commit_id": 1,
