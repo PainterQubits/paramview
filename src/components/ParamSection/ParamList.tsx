@@ -86,8 +86,8 @@ function ParamListItem({ path }: ParamListItemProps) {
 /** List of parameter data. */
 export default function ParamList() {
   return (
-    <Suspense fallback={<Box data-testid="parameter-list-loading" />}>
-      <List data-testid="parameter-list" disablePadding sx={rootListSx}>
+    <Suspense fallback={<Box />}>
+      <List disablePadding sx={rootListSx}>
         <ParamListItem path={[]} />
       </List>
     </Suspense>

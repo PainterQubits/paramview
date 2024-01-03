@@ -9,7 +9,7 @@ from paramview._cli import _parse_args
 PROGRAM_NAME = "paramview"
 DB_PATH = "test.db"
 VERSION_MSG = f"{PROGRAM_NAME} {distribution(PROGRAM_NAME).version}"
-USAGE_MSG = f"usage: {PROGRAM_NAME} [-h] [-V] [-p PORT] <database path>"
+USAGE_MSG = f"usage: {PROGRAM_NAME} [-h] [-V] [-p PORT] [--no-open] <database path>"
 POSITIONAL_ARGS_MSG = """
 positional arguments:
   <database path>       path to the ParamDB database file
@@ -18,6 +18,7 @@ OPTIONAL_ARGS_MSG = """
   -h, --help            show this help message and exit
   -V, --version         show program's version number and exit
   -p PORT, --port PORT  port to use (default is 5050)
+  --no-open             don't open a new browser window (default is to open one)
 """
 ERROR_MSG = f"{PROGRAM_NAME}: error:"
 REQUIRED_MSG = "the following arguments are required: <database path>"
@@ -34,20 +35,20 @@ def _sw(*strings: str) -> str:
 
 def test_db_path() -> None:
     """Parses the database path."""
-    args = _parse_args(DB_PATH)
+    args = _parse_args([DB_PATH])
     assert args.db_path == DB_PATH
 
 
 def test_port_default() -> None:
     """Default port is 5050."""
-    args = _parse_args(DB_PATH)
+    args = _parse_args([DB_PATH])
     assert args.port == 5050
 
 
 @pytest.mark.parametrize("port_arg", ["--port", "-p"])
 def test_port(port_arg: str) -> None:
     """Parses the port."""
-    args = _parse_args(DB_PATH, port_arg, "1234")
+    args = _parse_args([DB_PATH, port_arg, "1234"])
     assert args.port == 1234
 
 
@@ -55,7 +56,7 @@ def test_port(port_arg: str) -> None:
 def test_version(version_arg: str, capsys: CaptureFixture[str]) -> None:
     """Prints version message to stdout and exists with code 0."""
     with pytest.raises(SystemExit) as exc_info:
-        _parse_args(version_arg)
+        _parse_args([version_arg])
     assert exc_info.value.code == 0
     assert _sw(capsys.readouterr().out) == _sw(VERSION_MSG)
 
@@ -64,7 +65,7 @@ def test_version(version_arg: str, capsys: CaptureFixture[str]) -> None:
 def test_help(help_arg: str, capsys: CaptureFixture[str]) -> None:
     """Prints help message to stdout and exists with code 0."""
     with pytest.raises(SystemExit) as exc_info:
-        _parse_args(help_arg)
+        _parse_args([help_arg])
     assert exc_info.value.code == 0
     help_message = _sw(capsys.readouterr().out)
     assert _sw(USAGE_MSG, POSITIONAL_ARGS_MSG) in help_message
@@ -74,7 +75,7 @@ def test_help(help_arg: str, capsys: CaptureFixture[str]) -> None:
 def test_no_args(capsys: CaptureFixture[str]) -> None:
     """Prints required argument message to stderr and exits with code 2."""
     with pytest.raises(SystemExit) as exc_info:
-        _parse_args()
+        _parse_args([])
     assert exc_info.value.code == 2
     assert _sw(capsys.readouterr().err) == _sw(USAGE_MSG, ERROR_MSG, REQUIRED_MSG)
 
@@ -85,7 +86,7 @@ def test_parse_args_unrecognized(
 ) -> None:
     """Prints message to stderr and exits with code 2."""
     with pytest.raises(SystemExit) as excinfo:
-        _parse_args(DB_PATH, unrecognized_arg)
+        _parse_args([DB_PATH, unrecognized_arg])
     assert excinfo.value.code == 2
     assert _sw(capsys.readouterr().err) == _sw(
         USAGE_MSG, ERROR_MSG, UNRECOGNIZED_MSG, unrecognized_arg

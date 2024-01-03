@@ -24,9 +24,8 @@ node_modules/
 # Jest
 coverage/
 
-# Cypress
-cypress/videos/
-cypress/screenshots/
+# Playwright
+test-results/
 
 # Data files
 *.db

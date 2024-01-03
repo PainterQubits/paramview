@@ -172,10 +172,10 @@ function LeafItemEditModeContent({ editedLeaf, path }: LeafItemEditModeContentPr
         color={changedInput ? "success" : undefined}
         onChange={({ target: { value } }) => setInput(value)}
       >
-        <MenuItem data-testid="boolean-input-option-True" value="True">
+        <MenuItem data-testid="bool-input-option-True" value="True">
           True
         </MenuItem>
-        <MenuItem data-testid="boolean-input-option-False" value="False">
+        <MenuItem data-testid="bool-input-option-False" value="False">
           False
         </MenuItem>
       </TextField>

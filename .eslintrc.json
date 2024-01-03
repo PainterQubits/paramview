@@ -9,6 +9,7 @@
     "plugin:react/jsx-runtime",
     "plugin:react-hooks/recommended",
     "plugin:jsx-a11y/recommended",
+    "plugin:jest/recommended",
     "prettier"
   ],
   "rules": {
@@ -21,17 +22,5 @@
       "version": "detect"
     }
   },
-  "overrides": [
-    {
-      "files": "src/**/*.test.{ts,tsx}",
-      "extends": ["plugin:jest/recommended"],
-      "plugins": ["jest"]
-    },
-    {
-      "files": "cypress/**/*.ts",
-      "extends": ["plugin:cypress/recommended"],
-      "plugins": ["cypress"]
-    }
-  ],
   "ignorePatterns": ["paramview/static/"]
 }

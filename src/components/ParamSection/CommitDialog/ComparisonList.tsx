@@ -192,15 +192,15 @@ export default function ComparisonList({ shouldUpdate }: ComparisonListProps) {
 
   return (
     <Box sx={comparisonListContainerSx}>
-      {dataDiff === null ? (
-        <Typography>{`No changes from ${latestCommitDescription}`}</Typography>
-      ) : (
-        <>
-          <Typography>{`Changes from ${latestCommitDescription}`}</Typography>
-          <List disablePadding sx={rootListSx}>
-            <DataDiffListItem dataDiff={dataDiff} />
-          </List>
-        </>
+      <Typography data-testid="commit-changes-message">
+        {dataDiff === null
+          ? `No changes from ${latestCommitDescription}`
+          : `Changes from ${latestCommitDescription}`}
+      </Typography>
+      {dataDiff !== null && (
+        <List disablePadding sx={rootListSx}>
+          <DataDiffListItem dataDiff={dataDiff} />
+        </List>
       )}
     </Box>
   );
