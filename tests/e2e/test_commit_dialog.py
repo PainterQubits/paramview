@@ -55,15 +55,15 @@ def test_reopen_resets_commit_message(page: Page) -> None:
 
 
 def test_make_commit(page: Page) -> None:
-    """Can edit data and make a commit."""
+    """
+    Can edit data and make a commit, which also updates Param last updated timestamps.
+    """
     commit_select_combobox = page.get_by_test_id("commit-select-combobox")
     commit_select_combobox_input = commit_select_combobox.get_by_role("combobox")
     commit_message = page.get_by_test_id("commit-message-text-field")
     commit_message_input = commit_message.get_by_role("textbox")
-
     float_item = page.get_by_test_id("parameter-list-item-float")
     float_item_input = float_item.get_by_test_id("leaf-input").get_by_role("textbox")
-
     param_item = page.get_by_test_id("parameter-list-item-param")
     param_str_item = param_item.get_by_test_id("parameter-list-item-str")
     param_str_item_input = param_str_item.get_by_test_id("leaf-input").get_by_role(
@@ -80,7 +80,7 @@ def test_make_commit(page: Page) -> None:
     float_item_input.fill("5.6789")
     param_str_item_input.fill("hello")
 
-    # Opem commit dialog
+    # Open commit dialog
     page.get_by_test_id("open-commit-dialog-button").click()
 
     # Commit list reflects what was changed
@@ -119,7 +119,6 @@ def test_commit_backend_format(page: Page) -> None:
     """
     commit_message = page.get_by_test_id("commit-message-text-field")
     commit_message_input = commit_message.get_by_role("textbox")
-
     datetime_item = page.get_by_test_id("parameter-list-item-datetime")
     datetime_item_input = datetime_item.get_by_test_id("leaf-input").locator(
         "input[type=datetime-local]"
@@ -144,3 +143,53 @@ def test_commit_backend_format(page: Page) -> None:
 
     # Load classes in the backend (test fails if this fails)
     load_classes_from_db()
+
+
+def test_comparison_list_collapse(page: Page) -> None:
+    """Can collapse and expand items within the commit comparison list."""
+    float_item = page.get_by_test_id("parameter-list-item-float")
+    float_item_input = float_item.get_by_test_id("leaf-input").get_by_role("textbox")
+    list_item = page.get_by_test_id("parameter-list-item-list")
+    list_second_item = list_item.get_by_test_id("parameter-list-item-1")
+    list_second_item_input = list_second_item.get_by_test_id("leaf-input").get_by_role(
+        "textbox"
+    )
+    comparison_root_item = page.get_by_test_id("comparison-list-item-root")
+    comparison_root_item_button = comparison_root_item.get_by_role("button").first
+    comparison_list_item = page.get_by_test_id("comparison-list-item-list")
+    comparison_list_item_button = comparison_list_item.get_by_role("button").first
+    comparison_float_item = page.get_by_test_id("comparison-list-item-new-float")
+    comparison_list_second_item = comparison_list_item.get_by_test_id(
+        "comparison-list-item-new-1"
+    )
+
+    # Edit parameter values and open commit dialog
+    float_item_input.fill("5.6789")
+    list_item.get_by_role("button").click()
+    list_second_item_input.fill("hello")
+    page.get_by_test_id("open-commit-dialog-button").click()
+
+    # Comparison list group items are initially expanded
+    expect(comparison_float_item).to_be_attached()
+    expect(comparison_list_item).to_be_attached()
+    expect(comparison_list_second_item).to_be_attached()
+
+    # Can collapse the root item
+    comparison_root_item_button.click()
+    expect(comparison_float_item).not_to_be_attached()
+    expect(comparison_list_item).not_to_be_attached()
+    expect(comparison_list_second_item).not_to_be_attached()
+
+    # Can expand the root item
+    comparison_root_item_button.click()
+    expect(comparison_float_item).to_be_attached()
+    expect(comparison_list_item).to_be_attached()
+    expect(comparison_list_second_item).to_be_attached()
+
+    # Can collapse the list item
+    comparison_list_item_button.click()
+    expect(comparison_list_second_item).not_to_be_attached()
+
+    # Can expand the list item
+    comparison_list_item_button.click()
+    expect(comparison_list_second_item).to_be_attached()
