@@ -4,13 +4,16 @@ updates:
     directory: "/"
     schedule:
       interval: "monthly"
+    groups:
 
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
       interval: "monthly"
+    groups:
 
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "monthly"
+    groups:
