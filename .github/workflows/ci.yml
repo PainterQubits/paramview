@@ -111,7 +111,7 @@ jobs:
         run: yarn
 
       - name: Install Playwright browsers
-        run: poetry run playwright install --with-deps chromium
+        run: poetry run playwright install chromium
 
       - name: Build frontend
         run: yarn build
