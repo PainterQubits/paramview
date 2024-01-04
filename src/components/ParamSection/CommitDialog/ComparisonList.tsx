@@ -129,7 +129,12 @@ function DataDiffListItem({ name: nameOrUndefined, dataDiff }: DataDiffListItemP
           )}
         </>
       ) : (
-        <ListItem sx={listItemSx} disableGutters disablePadding>
+        <ListItem
+          data-testid={`comparison-list-item-${name}`}
+          sx={listItemSx}
+          disableGutters
+          disablePadding
+        >
           <CollapseItem
             defaultOpen={true}
             itemContent={
