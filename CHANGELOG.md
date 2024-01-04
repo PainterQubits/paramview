@@ -7,6 +7,12 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0).
 
 ## [Unreleased]
 
+## [0.4.0] (Jan 4 2024)
+
+### Added
+
+- Command line option to not open a new browser window (used in internal testing)
+
 ## [0.3.0] (Dec 8 2023)
 
 ### Added
@@ -45,7 +51,8 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0).
 - CLI command `paramview` for launching the GUI.
 - `start_server` Python function to launch the GUI.
 
-[unreleased]: https://github.com/PainterQubits/paramview/compare/v0.3.0...main
+[unreleased]: https://github.com/PainterQubits/paramview/compare/v0.4.0...main
+[0.4.0]: https://github.com/PainterQubits/paramview/releases/tag/v0.4.0
 [0.3.0]: https://github.com/PainterQubits/paramview/releases/tag/v0.3.0
 [0.2.0]: https://github.com/PainterQubits/paramview/releases/tag/v0.2.0
 [0.1.1]: https://github.com/PainterQubits/paramview/releases/tag/v0.1.1
