@@ -388,19 +388,18 @@ wmi = ["wmi (>=1.5.1,<2.0.0)"]
 
 [[package]]
 name = "eventlet"
-version = "0.34.2"
+version = "0.34.3"
 description = "Highly concurrent networking library"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "eventlet-0.34.2-py3-none-any.whl", hash = "sha256:eca0114398d3133f94d16590d205bbb010668a3bc7453fddadb51d63e8c1bac2"},
-    {file = "eventlet-0.34.2.tar.gz", hash = "sha256:2115c7c6742e6893bf1347f82915572f8895c911cb5abaad4d3596a7daa847cc"},
+    {file = "eventlet-0.34.3-py3-none-any.whl", hash = "sha256:3093f2822ce2f40792bf9aa7eb8920fe3b90db785d3bea7640c50412969dcfd7"},
+    {file = "eventlet-0.34.3.tar.gz", hash = "sha256:ed2d28a64414a001894b3baf5b650f2c9596b00d57f57d4d7a38f9d3d0c252e8"},
 ]
 
 [package.dependencies]
 dnspython = ">=1.15.0"
 greenlet = ">=1.0"
-six = ">=1.10.0"
 
 [package.extras]
 dev = ["black", "build", "commitizen", "isort", "pip-tools", "pre-commit", "twine"]
@@ -1563,4 +1562,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "41986b360f6c814a8c834fc66daf414d89723c3818725fe922e6899881264469"
+content-hash = "938bb9487485f58084ca63ccfc4f7cdaaa65e1e772d03b2d6668be86f062580d"
