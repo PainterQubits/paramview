@@ -14,7 +14,7 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
-    "paths": { "@/*": ["./src/*"], "test-utils": ["./test-utils"] }
+    "paths": { "@/*": ["./src/*"], "test-utils": ["./test-utils"] },
   },
-  "include": ["src/**/*", "vite.config.ts", "jest.config.ts"]
+  "include": ["src/**/*", "vite.config.ts", "jest.config.ts"],
 }
