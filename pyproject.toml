@@ -14,9 +14,9 @@ include = ["paramview/static/**/*"]
 
 [tool.poetry.dependencies]
 python = "^3.9"
-flask = "^3.0.0"
+flask = "^3.0.1"
 flask-socketio = "^5.3.6"
-eventlet = "^0.34.2"
+eventlet = "^0.35.0"
 watchdog = "^3.0.0"
 paramdb = "^0.10.2"
 
