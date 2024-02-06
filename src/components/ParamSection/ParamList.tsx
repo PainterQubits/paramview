@@ -10,9 +10,13 @@ import LeafItemContent from "./LeafItemContent";
 import GroupItemContent from "./GroupItemContent";
 import CollapseItem from "./CollapseItem";
 
-const rootDataAtom = atom((get) =>
-  get(editModeAtom) ? get(editedDataAtom) : get(originalDataAtom),
-);
+const rootDataAtom = atom((get) => {
+  // Reading the data atoms outside of the conditional ensures that Jotai will register
+  // both as dependencies, regardless of the result of the conditional.
+  const editedData = get(editedDataAtom);
+  const originalData = get(originalDataAtom);
+  return get(editModeAtom) ? editedData : originalData;
+});
 
 const rootListSx = {
   borderBottom: 1,

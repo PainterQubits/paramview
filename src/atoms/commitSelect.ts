@@ -32,7 +32,6 @@ const selectedCommitIndexStateAtom = atom<number | Promise<number>>(0);
 export const selectedCommitIndexAtom = atom(
   (get) =>
     get(syncLatestAtom) ? get(latestCommitIndexAtom) : get(selectedCommitIndexStateAtom),
-
   (get, set, action: selectCommitIndexAction) => {
     if (action.type === "sync") {
       if (get(syncLatestAtom)) {
