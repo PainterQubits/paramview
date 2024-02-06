@@ -62,7 +62,7 @@ def _params(commit_id: int) -> Response:
 def _commit() -> Response:
     """
     Create a commit with the given message and data. This request gets its data from the
-    JSON body of a POST request.
+    JSON body of a POST request and returns the new commit's ID.
     """
     request_data = request.json
     if not isinstance(request_data, dict):
@@ -78,4 +78,4 @@ def _commit() -> Response:
         ) from exc
     if not isinstance(message, str):
         raise TypeError(f"message must be a string, not '{type(message).__name__}'")
-    return jsonify(_current_db.commit(message, data))
+    return jsonify(_current_db.commit(message, data).id)
