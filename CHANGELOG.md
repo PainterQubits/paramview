@@ -7,11 +7,20 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0).
 
 ## [Unreleased]
 
+## Added
+
+- Support for ParamDB v0.11.0.
+
+## Fixed
+
+- Parameter list did not update upon exiting edit mode if latest was checked and a new
+  commit had been made.
+
 ## [0.4.0] (Jan 4 2024)
 
 ### Added
 
-- Command line option to not open a new browser window (used in internal testing)
+- Command line option to not open a new browser window (used in internal testing).
 
 ## [0.3.0] (Dec 8 2023)
 
