@@ -7,7 +7,12 @@ const syncLatestStateAtom = atom(true);
 
 /** Whether to sync the current commit index with the latest commit. */
 export const syncLatestAtom = atom(
-  (get) => !get(editModeAtom) && get(syncLatestStateAtom),
+  (get) => {
+    // Defined outside boolean statement so Jotai registers both as dependencies
+    const editMode = get(editModeAtom);
+    const syncLatest = get(syncLatestStateAtom);
+    return !editMode && syncLatest;
+  },
   (_, set, newSyncLatest: boolean) => set(syncLatestStateAtom, newSyncLatest),
 );
 
@@ -30,8 +35,12 @@ const selectedCommitIndexStateAtom = atom<number | Promise<number>>(0);
  * specific value.
  */
 export const selectedCommitIndexAtom = atom(
-  (get) =>
-    get(syncLatestAtom) ? get(latestCommitIndexAtom) : get(selectedCommitIndexStateAtom),
+  async (get) => {
+    // Defined outside conditional so Jotai registers both as dependencies
+    const latestCommitIndex = get(latestCommitIndexAtom);
+    const selectedCommitIndexState = get(selectedCommitIndexStateAtom);
+    return get(syncLatestAtom) ? latestCommitIndex : selectedCommitIndexState;
+  },
   (get, set, action: selectCommitIndexAction) => {
     if (action.type === "sync") {
       if (get(syncLatestAtom)) {
