@@ -39,7 +39,7 @@ class _DBEventHandler(FileSystemEventHandler):
         # SQLite "-journal" suffix. On macOS, it appears that only the journal file
         # triggers Watchdog on a database write.
         if event.src_path == f"{self._db_path}-journal":
-            super().dispatch(event)  # type: ignore
+            super().dispatch(event)
 
     def on_deleted(self, event: FileSystemEvent) -> None:
         # Triggers an update if the database file was deleted, or if the database
