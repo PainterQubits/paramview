@@ -16,20 +16,20 @@ include = ["paramview/static/**/*"]
 python = "^3.9"
 flask = "^3.0.2"
 flask-socketio = "^5.3.6"
-eventlet = "^0.35.1"
+eventlet = "^0.35.2"
 watchdog = "^4.0.0"
 paramdb = "^0.11.0"
 
 [tool.poetry.group.dev.dependencies]
 mypy = "^1.8.0"
 flake8 = "^7.0.0"
-pylint = "^3.0.3"
-black = "^24.1.1"
-pytest = "^8.0.0"
+pylint = "^3.1.0"
+black = "^24.2.0"
+pytest = "^8.0.2"
 playwright = "^1.41.2"
 pytest-playwright = "^0.4.4"
 freezegun = "^1.4.0"
-sqlalchemy = "^2.0.26"
+sqlalchemy = "^2.0.27"
 astropy = "^6.0.0"
 
 [tool.poetry.scripts]
