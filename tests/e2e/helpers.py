@@ -99,7 +99,7 @@ def reset_db(num_commits: int = 1) -> None:
                 "str": "test",
                 "None": None,
                 "datetime": get_datetime(1),
-                "Quantity": 1.2345 * u.m,
+                "Quantity": 1.2345 * u.cm,
                 "list": [123, "test"],
                 "dict": {"int": 123, "str": "test"},
                 "paramList": ParamList([123, "test"]),
