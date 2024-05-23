@@ -3075,13 +3075,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"deep-object-diff@npm:^1.1.9":
-  version: 1.1.9
-  resolution: "deep-object-diff@npm:1.1.9"
-  checksum: 10c0/12cfd1b000d16c9192fc649923c972f8aac2ddca4f71a292f8f2c1e2d5cf3c9c16c85e73ab3e7d8a89a5ec6918d6460677d0b05bd160f7bd50bb4816d496dc24
-  languageName: node
-  linkType: hard
-
 "deepmerge@npm:^4.2.2":
   version: 4.3.1
   resolution: "deepmerge@npm:4.3.1"
@@ -6136,7 +6129,6 @@ __metadata:
     "@typescript-eslint/eslint-plugin": "npm:^6.21.0"
     "@typescript-eslint/parser": "npm:^6.21.0"
     "@vitejs/plugin-react-swc": "npm:^3.6.0"
-    deep-object-diff: "npm:^1.1.9"
     eslint: "npm:^8.56.0"
     eslint-config-prettier: "npm:^9.1.0"
     eslint-import-resolver-typescript: "npm:^3.6.1"

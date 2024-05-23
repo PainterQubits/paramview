@@ -1,12 +1,10 @@
-import { resolve } from "path";
+import path, { resolve } from "path";
+import license from "rollup-plugin-license";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 
 export default defineConfig({
-  build: {
-    outDir: "paramview/static",
-    chunkSizeWarningLimit: 1000,
-  },
+  plugins: [react()],
   resolve: {
     alias: {
       "@": resolve(__dirname, "./src"),
@@ -23,5 +21,28 @@ export default defineConfig({
       },
     },
   },
-  plugins: [react()],
+  build: {
+    outDir: "paramview/static",
+    chunkSizeWarningLimit: 1000,
+    rollupOptions: {
+      plugins: [
+        license({
+          thirdParty: {
+            allow: {
+              test: "(MIT OR BSD-3-Clause)",
+              failOnUnlicensed: true,
+              failOnViolation: true,
+            },
+            output: {
+              file: path.resolve(__dirname, "./paramview/static/assets/licenses.txt"),
+            },
+          },
+        }),
+      ],
+    },
+  },
+  esbuild: {
+    banner: "/* licenses: /assets/licenses.txt */",
+    legalComments: "none",
+  },
 });
