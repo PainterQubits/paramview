@@ -1166,7 +1166,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jridgewell/sourcemap-codec@npm:^1.4.10, @jridgewell/sourcemap-codec@npm:^1.4.14":
+"@jridgewell/sourcemap-codec@npm:^1.4.10, @jridgewell/sourcemap-codec@npm:^1.4.14, @jridgewell/sourcemap-codec@npm:^1.4.15":
   version: 1.4.15
   resolution: "@jridgewell/sourcemap-codec@npm:1.4.15"
   checksum: 10c0/0c6b5ae663087558039052a626d2d7ed5208da36cfd707dcc5cea4a07cfc918248403dcb5989a8f7afaf245ce0573b7cc6fd94c4a30453bd10e44d9363940ba5
@@ -2414,6 +2414,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"array-find-index@npm:^1.0.2":
+  version: 1.0.2
+  resolution: "array-find-index@npm:1.0.2"
+  checksum: 10c0/86b9485c74ddd324feab807e10a6de3f9c1683856267236fac4bb4d4667ada6463e106db3f6c540ae6b720e0442b590ec701d13676df4c6af30ebf4da09b4f57
+  languageName: node
+  linkType: hard
+
 "array-includes@npm:^3.1.6, array-includes@npm:^3.1.7":
   version: 3.1.7
   resolution: "array-includes@npm:3.1.7"
@@ -2908,6 +2915,13 @@ __metadata:
   dependencies:
     delayed-stream: "npm:~1.0.0"
   checksum: 10c0/0dbb829577e1b1e839fa82b40c07ffaf7de8a09b935cadd355a73652ae70a88b4320db322f6634a4ad93424292fa80973ac6480986247f1734a1137debf271d5
+  languageName: node
+  linkType: hard
+
+"commenting@npm:~1.1.0":
+  version: 1.1.0
+  resolution: "commenting@npm:1.1.0"
+  checksum: 10c0/23f9ecb680b561bdd3dba6c9aada0636e42e8804073b623175e6e58bea77d12fcacc6979b009ac5c5a7c8b82590c64d87296827641bf5ac31dd900617b1b84e7
   languageName: node
   linkType: hard
 
@@ -4186,7 +4200,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"glob@npm:^7.1.3, glob@npm:^7.1.4":
+"glob@npm:^7.1.3, glob@npm:^7.1.4, glob@npm:~7.2.0":
   version: 7.2.3
   resolution: "glob@npm:7.2.3"
   dependencies:
@@ -5572,7 +5586,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lodash@npm:^4.17.21":
+"lodash@npm:^4.17.21, lodash@npm:~4.17.21":
   version: 4.17.21
   resolution: "lodash@npm:4.17.21"
   checksum: 10c0/d8cbea072bb08655bb4c989da418994b073a608dffa608b09ac04b43a791b12aeae7cd7ad919aa4c925f33b48490b5cfe6c1f71d827956071dae2e7bb3a6b74c
@@ -5612,6 +5626,15 @@ __metadata:
   dependencies:
     yallist: "npm:^4.0.0"
   checksum: 10c0/cb53e582785c48187d7a188d3379c181b5ca2a9c78d2bce3e7dee36f32761d1c42983da3fe12b55cb74e1779fa94cdc2e5367c028a9b35317184ede0c07a30a9
+  languageName: node
+  linkType: hard
+
+"magic-string@npm:~0.30.0":
+  version: 0.30.10
+  resolution: "magic-string@npm:0.30.10"
+  dependencies:
+    "@jridgewell/sourcemap-codec": "npm:^1.4.15"
+  checksum: 10c0/aa9ca17eae571a19bce92c8221193b6f93ee8511abb10f085e55ffd398db8e4c089a208d9eac559deee96a08b7b24d636ea4ab92f09c6cf42a7d1af51f7fd62b
   languageName: node
   linkType: hard
 
@@ -5828,6 +5851,22 @@ __metadata:
   bin:
     mkdirp: bin/cmd.js
   checksum: 10c0/46ea0f3ffa8bc6a5bc0c7081ffc3907777f0ed6516888d40a518c5111f8366d97d2678911ad1a6882bf592fa9de6c784fea32e1687bb94e1f4944170af48a5cf
+  languageName: node
+  linkType: hard
+
+"mkdirp@npm:~3.0.0":
+  version: 3.0.1
+  resolution: "mkdirp@npm:3.0.1"
+  bin:
+    mkdirp: dist/cjs/src/bin.js
+  checksum: 10c0/9f2b975e9246351f5e3a40dcfac99fcd0baa31fbfab615fe059fb11e51f10e4803c63de1f384c54d656e4db31d000e4767e9ef076a22e12a641357602e31d57d
+  languageName: node
+  linkType: hard
+
+"moment@npm:~2.30.1":
+  version: 2.30.1
+  resolution: "moment@npm:2.30.1"
+  checksum: 10c0/865e4279418c6de666fca7786607705fd0189d8a7b7624e2e56be99290ac846f90878a6f602e34b4e0455c549b85385b1baf9966845962b313699e7cb847543a
   languageName: node
   linkType: hard
 
@@ -6109,6 +6148,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"package-name-regex@npm:~2.0.6":
+  version: 2.0.6
+  resolution: "package-name-regex@npm:2.0.6"
+  checksum: 10c0/f0d2446983d9e4fcd21e983a38b30d5d4728f7e3613392c455ba00e3b6ddfbde12b91955c8f4e15a7f72851bd619af4832313eae4b52aedb88cf84024a5224a3
+  languageName: node
+  linkType: hard
+
 "paramview@workspace:.":
   version: 0.0.0-use.local
   resolution: "paramview@workspace:."
@@ -6146,6 +6192,7 @@ __metadata:
     react-dom: "npm:^18.2.0"
     react-error-boundary: "npm:^4.0.12"
     react-window: "npm:^1.8.10"
+    rollup-plugin-license: "npm:^3.4.0"
     socket.io-client: "npm:^4.7.4"
     ts-node: "npm:^10.9.2"
     typescript: "npm:^5.3.3"
@@ -6613,6 +6660,25 @@ __metadata:
   languageName: node
   linkType: hard
 
+"rollup-plugin-license@npm:^3.4.0":
+  version: 3.4.0
+  resolution: "rollup-plugin-license@npm:3.4.0"
+  dependencies:
+    commenting: "npm:~1.1.0"
+    glob: "npm:~7.2.0"
+    lodash: "npm:~4.17.21"
+    magic-string: "npm:~0.30.0"
+    mkdirp: "npm:~3.0.0"
+    moment: "npm:~2.30.1"
+    package-name-regex: "npm:~2.0.6"
+    spdx-expression-validate: "npm:~2.0.0"
+    spdx-satisfies: "npm:~5.0.1"
+  peerDependencies:
+    rollup: ^1.0.0 || ^2.0.0 || ^3.0.0 || ^4.0.0
+  checksum: 10c0/c363fc7cdce7125462c75e309cf7b82bbf6f9f8b2ab8f2d46b042e1483d49eba99d781bde4be75ddd197c83d3653bd31ba5ba4b7927b4904cde61518cca25543
+  languageName: node
+  linkType: hard
+
 "rollup@npm:^4.2.0":
   version: 4.9.6
   resolution: "rollup@npm:4.9.6"
@@ -6912,6 +6978,68 @@ __metadata:
   version: 0.6.1
   resolution: "source-map@npm:0.6.1"
   checksum: 10c0/ab55398007c5e5532957cb0beee2368529618ac0ab372d789806f5718123cc4367d57de3904b4e6a4170eb5a0b0f41373066d02ca0735a0c4d75c7d328d3e011
+  languageName: node
+  linkType: hard
+
+"spdx-compare@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "spdx-compare@npm:1.0.0"
+  dependencies:
+    array-find-index: "npm:^1.0.2"
+    spdx-expression-parse: "npm:^3.0.0"
+    spdx-ranges: "npm:^2.0.0"
+  checksum: 10c0/39d584129b00eaf0bb314984e5d662e511980c1fc6c4eb1d80677044a7b2b9cc3f84f6838695cf988807bf81ea0fce7438e33b0ee54fa87d302635bd143b7fc7
+  languageName: node
+  linkType: hard
+
+"spdx-exceptions@npm:^2.1.0":
+  version: 2.5.0
+  resolution: "spdx-exceptions@npm:2.5.0"
+  checksum: 10c0/37217b7762ee0ea0d8b7d0c29fd48b7e4dfb94096b109d6255b589c561f57da93bf4e328c0290046115961b9209a8051ad9f525e48d433082fc79f496a4ea940
+  languageName: node
+  linkType: hard
+
+"spdx-expression-parse@npm:^3.0.0":
+  version: 3.0.1
+  resolution: "spdx-expression-parse@npm:3.0.1"
+  dependencies:
+    spdx-exceptions: "npm:^2.1.0"
+    spdx-license-ids: "npm:^3.0.0"
+  checksum: 10c0/6f8a41c87759fa184a58713b86c6a8b028250f158159f1d03ed9d1b6ee4d9eefdc74181c8ddc581a341aa971c3e7b79e30b59c23b05d2436d5de1c30bdef7171
+  languageName: node
+  linkType: hard
+
+"spdx-expression-validate@npm:~2.0.0":
+  version: 2.0.0
+  resolution: "spdx-expression-validate@npm:2.0.0"
+  dependencies:
+    spdx-expression-parse: "npm:^3.0.0"
+  checksum: 10c0/fd1e8555e034be72c3a52bd306d04e6035e5d257bea6d39a77d391d236700d32a4647bd1391fc1eaa50c22a67aba6d1004a7569af02e499c8a3afda0bcdb6144
+  languageName: node
+  linkType: hard
+
+"spdx-license-ids@npm:^3.0.0":
+  version: 3.0.18
+  resolution: "spdx-license-ids@npm:3.0.18"
+  checksum: 10c0/c64ba03d4727191c8fdbd001f137d6ab51386c350d5516be8a4576c2e74044cb27bc8a758f6a04809da986cc0b14213f069b04de72caccecbc9f733753ccde32
+  languageName: node
+  linkType: hard
+
+"spdx-ranges@npm:^2.0.0":
+  version: 2.1.1
+  resolution: "spdx-ranges@npm:2.1.1"
+  checksum: 10c0/2d6bf9ec8e0f509c1a119361ff784f0bfa8ebbd8cfbc8e10f79579def54af060bb5058b36372f19770e659051082c451145c1284d2980419a720675accdb4a3d
+  languageName: node
+  linkType: hard
+
+"spdx-satisfies@npm:~5.0.1":
+  version: 5.0.1
+  resolution: "spdx-satisfies@npm:5.0.1"
+  dependencies:
+    spdx-compare: "npm:^1.0.0"
+    spdx-expression-parse: "npm:^3.0.0"
+    spdx-ranges: "npm:^2.0.0"
+  checksum: 10c0/47bf163108e64fe4c179a5e2f8dc5fd4ece1665739fc61eae3157a9d4b9b2eb389df7f645223192557659155dda9071ceaa3dfd06ecab65cc3862032c20f2e61
   languageName: node
   linkType: hard
 
