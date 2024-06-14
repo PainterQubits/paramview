@@ -54,7 +54,6 @@ def _commit_history() -> list[CommitEntry]:
 @api.get("/data/<int:commit_id>")
 def _params(commit_id: int) -> Response:
     """Return data from the commit with the given ID."""
-    # ParamDB custom classes and Astropy are not required since load_classes is False
     return jsonify(_current_db.load(commit_id, load_classes=False))
 
 
