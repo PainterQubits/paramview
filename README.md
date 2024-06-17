@@ -1,5 +1,8 @@
 # ParamView
 
+[![PyPI Latest Release](https://img.shields.io/pypi/v/paramview)](https://pypi.org/project/paramview/)
+[![PyPI Python Versions](https://img.shields.io/pypi/pyversions/paramview)](https://pypi.org/project/paramview/)
+[![License](https://img.shields.io/github/license/PainterQubits/paramview)](https://github.com/PainterQubits/paramview/blob/main/LICENSE)
 [![CI](https://github.com/PainterQubits/paramview/actions/workflows/ci.yml/badge.svg)](https://github.com/PainterQubits/paramview/actions/workflows/ci.yml)
 
 GUI for viewing the contents of a ParamDB database.
