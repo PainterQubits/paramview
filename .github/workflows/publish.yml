@@ -7,7 +7,7 @@ on:
     inputs:
       ref_override:
         description: "Build from the specified git ref"
-        required: false
+        required: true
         type: string
 
 env:
@@ -20,6 +20,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref_override }}
 
       - name: Install Poetry
         run: pipx install poetry==${{ env.POETRY_VERSION }}
