@@ -26,6 +26,20 @@ jobs:
       - name: Install Poetry
         run: pipx install poetry==${{ env.POETRY_VERSION }}
 
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Enable Yarn
+        run: corepack enable
+
+      - name: Install Node.js dependencies
+        run: yarn
+
+      - name: Build frontend
+        run: yarn build
+
       - name: Build package
         run: poetry build
 
