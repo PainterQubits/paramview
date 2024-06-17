@@ -12,7 +12,7 @@ GUI for viewing the contents of a ParamDB database.
 Install the latest version of ParamView using pip:
 
 ```
-pip install -U paramview --extra-index-url https://painterqubits.github.io/paramview/releases
+pip install -U paramview
 ```
 
 ## Usage
