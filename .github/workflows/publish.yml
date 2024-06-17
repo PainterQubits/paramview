@@ -4,6 +4,11 @@ on:
   release:
     types: [published]
   workflow_dispatch:
+    inputs:
+      ref_override:
+        description: "Build from the specified git ref"
+        required: false
+        type: string
 
 env:
   POETRY_VERSION: "1.8.3"
