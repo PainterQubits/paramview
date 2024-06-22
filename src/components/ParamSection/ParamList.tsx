@@ -2,8 +2,7 @@ import { Suspense } from "react";
 import { atom, useAtom } from "jotai";
 import { Box, List, ListItem } from "@mui/material";
 import { Path } from "@/types";
-import { isLeaf } from "@/utils/type";
-import { getTypeString, getTimestamp, getData, getChildrenNames } from "@/utils/data";
+import { isLeaf, unwrapParamData, getData } from "@/utils/data";
 import { originalDataAtom } from "@/atoms/api";
 import { editModeAtom, editedDataAtom } from "@/atoms/paramList";
 import LeafItemContent from "./LeafItemContent";
@@ -49,8 +48,7 @@ type ParamListItemProps = {
 function ParamListItem({ path }: ParamListItemProps) {
   const [rootData] = useAtom(rootDataAtom);
 
-  const data = getData(rootData, path);
-
+  const { className, lastUpdated, innerData } = unwrapParamData(getData(rootData, path));
   const name = path.length > 0 ? path[path.length - 1] : "root";
 
   return (
@@ -60,22 +58,18 @@ function ParamListItem({ path }: ParamListItemProps) {
       disableGutters
       disablePadding
     >
-      {isLeaf(data) ? (
-        <LeafItemContent name={name} leaf={data} path={path} />
+      {isLeaf(innerData) ? (
+        <LeafItemContent name={name} leaf={innerData} path={path} />
       ) : (
         <CollapseItem
           defaultOpen={path.length === 0}
           itemContent={
-            <GroupItemContent
-              name={name}
-              type={getTypeString(data)}
-              timestamp={getTimestamp(data)}
-            />
+            <GroupItemContent name={name} className={className} timestamp={lastUpdated} />
           }
         >
           {
             <List disablePadding sx={sublistSx}>
-              {getChildrenNames(data).map((childName) => (
+              {Object.keys(innerData.data).map((childName) => (
                 <ParamListItem key={childName} path={[...path, childName]} />
               ))}
             </List>

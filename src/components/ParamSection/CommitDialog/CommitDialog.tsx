@@ -66,7 +66,10 @@ export default function CommitDialog() {
   const commit = () => {
     startCommitTransition(() => {
       setCommitId(
-        requestData<number>("api/commit", { message: commitMessage, data: editedData }),
+        requestData<number>("api/commit", {
+          message: commitMessage,
+          data: JSON.stringify(editedData),
+        }),
       );
       setCommitDialogOpen(false);
       setEditMode(false);

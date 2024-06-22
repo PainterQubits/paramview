@@ -19,81 +19,71 @@ export enum LeafType {
 }
 
 /**
- * Difference between two Data objects.
- *
- * Either a DataChange object, a Group containing further DataDiff objects.
+ * Type strings corresponding to different object types in the JSON representation of a
+ * ParamDB commit, as specified by [paramdb.ParamDBType](https://paramdb.readthedocs.io/en/stable/api-reference.html#paramdb.ParamDBType).
  */
-export type DataDiff = DataChange | GroupDiff;
-
-/** Difference between two Group objects. Undefined children should be ignored. */
-export type GroupDiff = Group<DataChange | undefined>;
+export enum DataType {
+  Datetime = "datetime",
+  Quantity = "Quantity",
+  List = "list",
+  Dict = "dict",
+  ParamData = "ParamData",
+  Diff = "Diff",
+}
 
 /**
- * Changed piece of Data, containing the old and new values.
- *
- * If __old is undefined, the data is new. If __new is undefined, the data was deleted. If
- * neither is undefined, the data has been updated.
+ * JSON data loaded from a ParamDB commit, as specified by
+ * [paramdb.ParamDB.load()](https://paramdb.readthedocs.io/en/stable/api-reference.html#paramdb.ParamDB.load).
  */
-export type DataChange = { __old: Data | undefined; __new: Data | undefined };
+export type Data<LeafType extends AllowedLeafType = Leaf> =
+  | LeafType
+  | Group<LeafType>
+  | ParamData<LeafType>;
 
-/** Dictionary of Data, which is used in several Group types. */
-export type DataDict<T> = { [key: string]: Data<T> };
+export type AllowedLeafType = Leaf | Diff;
 
-/** Data from the ParamDB database. */
-export type Data<T = Leaf> = T | Group<T>;
-
-/** Data that does not contain other Data. */
+/** `Data` value that does not contain other values. */
 export type Leaf = number | boolean | string | null | Datetime | Quantity;
 
-/** Data that can contain other Data. */
-export type Group<T = Leaf> =
-  | List<T>
-  | Dict<T>
-  | ParamList<T>
-  | ParamDict<T>
-  | Struct<T>
-  | Param<T>;
+/** `Data` value that contains other values. */
+export type Group<LeafType extends AllowedLeafType = Leaf> =
+  | List<LeafType>
+  | Dict<LeafType>;
 
-/** Datetime object. */
-export type Datetime = {
-  __type: "datetime.datetime";
-  isoformat: string;
+/** Datetime object representation. */
+export type Datetime = { type: DataType.Datetime; timestamp: number };
+
+/** Astropy Quantity object representation. */
+export type Quantity = { type: DataType.Quantity; value: number; unit: string };
+
+/** List object representation. */
+export type List<LeafType extends AllowedLeafType = Leaf> = {
+  type: DataType.List;
+  data: Data<LeafType>[];
 };
 
-/** Astropy Quantity object. */
-export type Quantity = {
-  __type: "astropy.units.quantity.Quantity";
-  value: number;
-  unit: string;
+/** Dictionary object representation. */
+export type Dict<LeafType extends AllowedLeafType = Leaf> = {
+  type: DataType.Dict;
+  data: { [key: string]: Data<LeafType> };
 };
 
-/** Ordinary list. */
-export type List<T = Leaf> = Data<T>[];
-
-/** Ordinary dictionary. */
-export type Dict<T = Leaf> = {
-  __dict: never; // Fake key so TypeScript can distinguish from ParamDict and Struct
-} & DataDict<T>;
-
-/** ParamDB ParamList object. */
-export type ParamList<T = Leaf> = {
-  __type: "ParamList";
-  __items: List<T>;
+/** Parameter data object representation. */
+export type ParamData<LeafType extends AllowedLeafType = Leaf> = {
+  type: DataType.ParamData;
+  className?: string;
+  lastUpdated: number;
+  data: Data<LeafType>;
 };
 
-/** ParamDB ParamDict object. */
-export type ParamDict<T = Leaf> = {
-  __type: "ParamDict";
-} & DataDict<T>;
-
-/** Object that is a ParamDB Struct. */
-export type Struct<T = Leaf> = {
-  __struct: never; // Fake key so TypeScript can distinguish from Dict and ParamDict
-  __type: string;
-} & DataDict<T>;
-
-/** Object that is a ParamDB Param. */
-export type Param<T = Leaf> = {
-  __type: string;
-  __last_updated: Datetime;
-} & DataDict<T>;
+/**
+ * Changed piece of `Data`, containing the old and new values.
+ *
+ * If `old` is undefined, the data is new. If `new` is undefined, the data was deleted. If
+ * neither is undefined, the data has been updated.
+ */
+export type Diff = {
+  type: DataType.Diff;
+  old?: Data;
+  new?: Data;
+};

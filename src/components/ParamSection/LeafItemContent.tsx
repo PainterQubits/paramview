@@ -8,12 +8,12 @@ import {
   getLeafType,
   leafToInput,
   parseLeaf,
+  isLeaf,
+  unwrapParamData,
   getData,
   setData,
-  getChildrenNames,
+  updateLastUpdated,
 } from "@/utils/data";
-import { isLeaf, isParam } from "@/utils/type";
-import { getISOString } from "@/utils/timestamp";
 import { originalDataAtom } from "@/atoms/api";
 import { roundAtom, editModeAtom, editedDataAtom } from "@/atoms/paramList";
 
@@ -52,24 +52,8 @@ function LeafItemEditModeContent({ editedLeaf, path }: LeafItemEditModeContentPr
   const [originalRootData] = useAtom(originalDataAtom);
   const [editedRootData, setEditedRootData] = useAtom(editedDataAtom);
 
-  /** Original parent if that parent is a Param; otherwise, null. */
-  const originalParentParam = useMemo(() => {
-    if (path.length === 0) return null;
-
-    const originalParentData = getData(originalRootData, path.slice(0, -1));
-    return isParam(originalParentData) ? originalParentData : null;
-  }, [originalRootData, path]);
-
-  /** Edited parent if that parent is a Param; otherwise, null. */
-  const editedParentParam = useMemo(() => {
-    if (path.length === 0) return null;
-
-    const editedParentData = getData(editedRootData, path.slice(0, -1));
-    return isParam(editedParentData) ? editedParentData : null;
-  }, [editedRootData, path]);
-
   const originalLeaf = useMemo(() => {
-    const originalData = getData(originalRootData, path);
+    const { innerData: originalData } = unwrapParamData(getData(originalRootData, path));
 
     if (!isLeaf(originalData)) {
       throw new TypeError("original data for leaf input is not a leaf");
@@ -115,26 +99,16 @@ function LeafItemEditModeContent({ editedLeaf, path }: LeafItemEditModeContentPr
       if (path.length === 0) {
         setEditedRootData(leaf);
       } else {
-        setData(editedRootData, path, leaf);
+        setData(editedRootData, path, {
+          type: "set",
+          value: leaf,
+          withinParamData: true,
+        });
       }
 
-      // Update the last updated time of the leaf's parent if it is a Param and any of
-      // its children have changed. Otherwise, reset the Param's last updated timestamp,
-      // since none of its values have changed.
-      if (editedParentParam !== null) {
-        const childrenChanged =
-          originalParentParam === null ||
-          getChildrenNames(editedParentParam).some(
-            (childName) =>
-              editedParentParam[childName] !== originalParentParam[childName],
-          );
-
-        editedParentParam.__last_updated.isoformat = childrenChanged
-          ? getISOString(Date.now())
-          : originalParentParam.__last_updated.isoformat;
-      }
+      updateLastUpdated(editedRootData, path);
     },
-    [editedRootData, originalParentParam, editedParentParam, path, setEditedRootData],
+    [editedRootData, path, setEditedRootData],
   );
 
   useEffect(() => {
