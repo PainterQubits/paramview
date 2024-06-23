@@ -5,7 +5,7 @@ import ParamList from "./ParamList";
 const paramSectionSx = {
   display: "flex",
   flexDirection: "column",
-  flexBasis: "40rem",
+  flexBasis: "45rem",
   overflow: "hidden",
   borderLeft: 1,
   borderRight: 1,

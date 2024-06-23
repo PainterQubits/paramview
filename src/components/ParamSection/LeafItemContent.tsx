@@ -16,17 +16,7 @@ import {
 } from "@/utils/data";
 import { originalDataAtom } from "@/atoms/api";
 import { roundAtom, editModeAtom, editedDataAtom } from "@/atoms/paramList";
-
-const leafItemContentSx = {
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "space-between",
-  flex: 1,
-  pl: "24px",
-  pr: 2,
-  minHeight: "28px",
-  background: "white",
-};
+import ItemContent from "./ItemContent";
 
 type LeafItemReadModeContentProps = {
   /** Leaf value to display. */
@@ -226,9 +216,18 @@ function LeafItemEditModeContent({ editedLeaf, path }: LeafItemEditModeContentPr
   );
 }
 
+const leafItemContentSx = {
+  pl: "24px",
+  background: "white",
+};
+
 type LeafItemContentProps = {
   /** Name to display. */
   name: string;
+  /** Class name to display, if any. */
+  className: string | null;
+  /** Timestamp to display, if any. */
+  timestamp: string | null;
   /** Leaf value to display, or the edited leaf value in edit mode. */
   leaf: Leaf;
   /** Path to the data this item represents. */
@@ -236,17 +235,27 @@ type LeafItemContentProps = {
 };
 
 /** Item content for a Leaf. */
-export default function LeafItemContent({ name, leaf, path }: LeafItemContentProps) {
+export default function LeafItemContent({
+  name,
+  className,
+  timestamp,
+  leaf,
+  path,
+}: LeafItemContentProps) {
   const [editMode] = useAtom(editModeAtom);
 
   return (
-    <Box sx={leafItemContentSx}>
-      <Typography>{name}</Typography>
+    <ItemContent
+      name={name}
+      className={className}
+      timestamp={timestamp}
+      extraSx={leafItemContentSx}
+    >
       {editMode ? (
         <LeafItemEditModeContent editedLeaf={leaf} path={path} />
       ) : (
         <LeafItemReadModeContent leaf={leaf} />
       )}
-    </Box>
+    </ItemContent>
   );
 }

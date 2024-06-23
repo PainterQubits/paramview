@@ -6,7 +6,7 @@ import { isLeaf, unwrapParamData, getData } from "@/utils/data";
 import { getDataDiff } from "@/utils/dataDiff";
 import { commitHistoryAtom, latestDataAtom } from "@/atoms/api";
 import { editedDataAtom } from "@/atoms/paramList";
-import GroupItemContent from "../GroupItemContent";
+import ItemContent from "../ItemContent";
 import CollapseItem from "../CollapseItem";
 import LeafItemContent from "./LeafItemContent";
 
@@ -70,13 +70,19 @@ function DataListItem({ name, data, status }: DataListItemProps) {
       disablePadding
     >
       {isLeaf(innerData) ? (
-        <LeafItemContent name={name} leaf={innerData} backgroundColor={backgroundColor} />
+        <LeafItemContent
+          name={name}
+          className={className}
+          timestamp={lastUpdated}
+          leaf={innerData}
+          backgroundColor={backgroundColor}
+        />
       ) : (
         <CollapseItem
           backgroundColor={backgroundColor}
           defaultOpen={true}
           itemContent={
-            <GroupItemContent name={name} className={className} timestamp={lastUpdated} />
+            <ItemContent name={name} className={className} timestamp={lastUpdated} />
           }
         >
           <List disablePadding sx={sublistSx}>
@@ -135,11 +141,7 @@ function DataDiffListItem({ name: nameOrUndefined, dataDiff }: DataDiffListItemP
           <CollapseItem
             defaultOpen={true}
             itemContent={
-              <GroupItemContent
-                name={name}
-                className={className}
-                timestamp={lastUpdated}
-              />
+              <ItemContent name={name} className={className} timestamp={lastUpdated} />
             }
           >
             <List disablePadding sx={sublistSx}>

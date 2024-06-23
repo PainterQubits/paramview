@@ -5,8 +5,8 @@ import { Path } from "@/types";
 import { isLeaf, unwrapParamData, getData } from "@/utils/data";
 import { originalDataAtom } from "@/atoms/api";
 import { editModeAtom, editedDataAtom } from "@/atoms/paramList";
+import ItemContent from "./ItemContent";
 import LeafItemContent from "./LeafItemContent";
-import GroupItemContent from "./GroupItemContent";
 import CollapseItem from "./CollapseItem";
 
 const rootDataAtom = atom((get) => {
@@ -59,12 +59,18 @@ function ParamListItem({ path }: ParamListItemProps) {
       disablePadding
     >
       {isLeaf(innerData) ? (
-        <LeafItemContent name={name} leaf={innerData} path={path} />
+        <LeafItemContent
+          name={name}
+          className={className}
+          timestamp={lastUpdated}
+          leaf={innerData}
+          path={path}
+        />
       ) : (
         <CollapseItem
           defaultOpen={path.length === 0}
           itemContent={
-            <GroupItemContent name={name} className={className} timestamp={lastUpdated} />
+            <ItemContent name={name} className={className} timestamp={lastUpdated} />
           }
         >
           {

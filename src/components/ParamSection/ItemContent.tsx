@@ -1,4 +1,4 @@
-import { Box, Typography } from "@mui/material";
+import { SxProps, Box, Typography } from "@mui/material";
 
 const itemContentSx = {
   display: "flex",
@@ -6,12 +6,12 @@ const itemContentSx = {
   justifyContent: "space-between",
   flex: 1,
   pr: 2,
-  py: 0.25,
+  minHeight: "28px",
 };
 
 const nameContainerSx = {
   display: "flex",
-  alignItems: "baseline",
+  alignItems: "center",
   columnGap: 1.25,
 };
 
@@ -22,16 +22,22 @@ type ParamItemContentProps = {
   className: string | null;
   /** Timestamp to display, if any. */
   timestamp: string | null;
+  /** Extra styles. */
+  extraSx?: SxProps;
+  /** Children to include on the right of this item. */
+  children?: React.ReactNode;
 };
 
-/** Item content for a Group. */
-export default function GroupItemContent({
+/** Conent of an item in a parameter list. */
+export default function ItemContent({
   name,
   className,
   timestamp,
+  extraSx,
+  children,
 }: ParamItemContentProps) {
   return (
-    <Box sx={itemContentSx}>
+    <Box sx={{ ...itemContentSx, ...extraSx }}>
       <Box sx={nameContainerSx}>
         <Typography>{name}</Typography>
         {(className !== null || timestamp !== null) && (
@@ -41,6 +47,7 @@ export default function GroupItemContent({
           </Typography>
         )}
       </Box>
+      {children}
     </Box>
   );
 }

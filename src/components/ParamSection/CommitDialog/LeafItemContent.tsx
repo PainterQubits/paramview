@@ -1,20 +1,19 @@
-import { Box, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
 import { Leaf } from "@/types";
 import { leafToString } from "@/utils/data";
+import ItemContent from "../ItemContent";
 
 const leafItemContentSx = {
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "space-between",
-  flex: 1,
   pl: "24px",
-  pr: 2,
-  minHeight: "28px",
 };
 
 type LeafItemContentProps = {
   /** Name to display. */
   name: string;
+  /** Class name to display, if any. */
+  className: string | null;
+  /** Timestamp to display, if any. */
+  timestamp: string | null;
   /** Leaf value to display. */
   leaf: Leaf;
   /** Background color (any valid color CSS). */
@@ -24,13 +23,19 @@ type LeafItemContentProps = {
 /** Item content for a leaf in the ComparisonList component. */
 export default function LeafItemContent({
   name,
+  className,
+  timestamp,
   leaf,
   backgroundColor,
 }: LeafItemContentProps) {
   return (
-    <Box sx={{ ...leafItemContentSx, backgroundColor }}>
-      <Typography>{name}</Typography>
+    <ItemContent
+      name={name}
+      className={className}
+      timestamp={timestamp}
+      extraSx={{ ...leafItemContentSx, backgroundColor }}
+    >
       <Typography align="right">{leafToString(leaf, false)}</Typography>
-    </Box>
+    </ItemContent>
   );
 }
