@@ -39,17 +39,16 @@ export function leafToString(leaf: Leaf, round: boolean) {
       return leaf;
   }
 
-  if (leaf instanceof Array) {
-    switch (leaf[0]) {
-      case DataType.Datetime:
-        return formatDate(leaf[1]);
-      case DataType.Quantity:
-        return `${numberToString(leaf[1], round)} ${leaf[2]}`;
-    }
+  if (leaf === null) {
+    return "None";
   }
 
-  // leaf is null
-  return "None";
+  if (leaf.type === DataType.Datetime) {
+    return formatDate(leaf.timestamp);
+  }
+
+  // leaf is Quantity
+  return `${numberToString(leaf.value, round)} ${leaf.unit}`;
 }
 
 /** Get the type (as a `LeafType` enum value) of the given leaf. */
@@ -63,27 +62,26 @@ export function getLeafType(leaf: Leaf) {
       return LeafType.String;
   }
 
-  if (leaf instanceof Array) {
-    switch (leaf[0]) {
-      case DataType.Datetime:
-        return LeafType.Datetime;
-      case DataType.Quantity:
-        return LeafType.Quantity;
-    }
+  if (leaf === null) {
+    return LeafType.Null;
   }
 
-  // leaf is null
-  return LeafType.Null;
+  if (leaf.type === DataType.Datetime) {
+    return LeafType.Datetime;
+  }
+
+  // leaf is Quantity
+  return LeafType.Quantity;
 }
 
 /** Convert the given leaf to an input string and a unit input string. */
 export function leafToInput(leaf: Leaf) {
-  if (leaf instanceof Array) {
-    switch (leaf[0]) {
+  if (typeof leaf === "object" && leaf !== null) {
+    switch (leaf.type) {
       case DataType.Datetime:
-        return { input: getLocalISOString(leaf[1]), unitInput: "" };
+        return { input: getLocalISOString(leaf.timestamp), unitInput: "" };
       case DataType.Quantity:
-        return { input: String(leaf[1]), unitInput: leaf[2] };
+        return { input: String(leaf.value), unitInput: leaf.unit };
     }
   }
 
