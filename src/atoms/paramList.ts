@@ -1,7 +1,8 @@
 import { atom } from "jotai";
 import { loadable } from "jotai/utils";
 import { Data } from "@/types";
-import { originalDataAtom } from "@/atoms/api";
+import { getDataDiff } from "@/utils/dataDiff";
+import { originalDataAtom, latestDataAtom } from "@/atoms/api";
 
 /** Primitive atom to store the current value of collapseAtom. */
 const collapseStateAtom = atom(Symbol());
@@ -68,9 +69,14 @@ export const commitDialogOpenStateAtom = atom(false);
 /** Whether the commit dialog is open. */
 export const commitDialogOpenAtom = atom(
   (get) => get(commitDialogOpenStateAtom),
-  (_, set, newCommitDialogOpen: boolean) => {
+  (get, set, newCommitDialogOpen: boolean) => {
     if (newCommitDialogOpen) {
       set(commitMessageAtom, "");
+
+      // Set commitDataAtom to a fresh copy of editedDataAtom
+      const editedDataCopy = (async () =>
+        JSON.parse(JSON.stringify(await get(editedDataAtom))))();
+      set(commitDataAtom, editedDataCopy);
     }
 
     set(commitDialogOpenStateAtom, newCommitDialogOpen);
@@ -79,3 +85,15 @@ export const commitDialogOpenAtom = atom(
 
 /** User-entered message to use for the next commit. */
 export const commitMessageAtom = atom("");
+
+const commitDataStateAtom = atom<Data | Promise<Data> | null>(null);
+
+export const commitDataAtom = atom(
+  (get) => get(commitDataStateAtom),
+  (_, set, newCommitData: Data | Promise<Data>) =>
+    set(commitDataStateAtom, newCommitData),
+);
+
+export const dataDiffAtom = atom(async (get) =>
+  getDataDiff(await get(latestDataAtom), await get(commitDataAtom)),
+);

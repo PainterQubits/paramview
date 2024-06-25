@@ -1,11 +1,9 @@
 import { atom, useAtom } from "jotai";
-import { useState, useCallback, useEffect } from "react";
 import { Box, Typography, List, ListItem } from "@mui/material";
 import { DataType, Data, Diff } from "@/types";
 import { isLeaf, unwrapParamData, getData } from "@/utils/data";
-import { getDataDiff } from "@/utils/dataDiff";
-import { commitHistoryAtom, latestDataAtom } from "@/atoms/api";
-import { editedDataAtom } from "@/atoms/paramList";
+import { commitHistoryAtom } from "@/atoms/api";
+import { dataDiffAtom } from "@/atoms/paramList";
 import ItemContent from "../ItemContent";
 import CollapseItem from "../CollapseItem";
 import LeafItemContent from "./LeafItemContent";
@@ -166,33 +164,10 @@ function DataDiffListItem({ name: nameOrUndefined, dataDiff }: DataDiffListItemP
   );
 }
 
-type ComparisonListProps = {
-  /**
-   * Whether this component should update in response to database changes. Intended to be
-   * true in general, but false when the commit is already in progress.
-   */
-  shouldUpdate: boolean;
-};
-
 /** List displaying the difference between the current edited data and the latest data. */
-export default function ComparisonList({ shouldUpdate }: ComparisonListProps) {
-  const [latestData] = useAtom(latestDataAtom);
-  const [editedData] = useAtom(editedDataAtom);
+export default function ComparisonList() {
+  const [dataDiff] = useAtom(dataDiffAtom);
   const [latestCommitDescription] = useAtom(latestCommitDescriptionAtom);
-
-  const calcDataDiff = useCallback(
-    () => getDataDiff(latestData, editedData),
-    [latestData, editedData],
-  );
-
-  const [dataDiff, setDataDiff] = useState(calcDataDiff);
-
-  useEffect(() => {
-    if (shouldUpdate) {
-      const newDataDiff = calcDataDiff();
-      setDataDiff(newDataDiff);
-    }
-  }, [shouldUpdate, calcDataDiff]);
 
   return (
     <Box sx={comparisonListContainerSx}>

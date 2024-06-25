@@ -43,6 +43,6 @@ export function getLocalISOString(timestampOrString: number | string) {
 }
 
 /** Return the current Unix timestamp (in seconds). */
-export default function nowTimestamp() {
+export function nowTimestamp() {
   return Date.now() / 1000;
 }

@@ -191,20 +191,18 @@ export function getData<LeafType extends AllowedLeafType>(
   data: Data<LeafType>,
   path: Path,
 ) {
-  if (path.length === 0) return data;
+  return path.reduce((previousData, childName) => {
+    const { innerData } = unwrapParamData(previousData);
 
-  const { innerData } = unwrapParamData(data);
+    if (isLeaf(innerData) || innerData.type === DataType.Diff) {
+      throw new TypeError(
+        `data '${JSON.stringify(data)}' has no children` +
+          ` (trying to get child "${childName}")`,
+      );
+    }
 
-  if (isLeaf(innerData) || innerData.type === DataType.Diff) {
-    throw new TypeError(
-      `data '${JSON.stringify(data)}' has no children` +
-        ` (trying to get path ${JSON.stringify(path)})`,
-    );
-  }
-
-  const [key, ...remainingPath] = path;
-
-  return getData(getChildren(innerData)[key], remainingPath);
+    return getChildren(innerData)[childName];
+  }, data);
 }
 
 /**
@@ -258,24 +256,17 @@ export function setData<LeafType extends AllowedLeafType>(
 }
 
 /**
- * Update the last updated time for the given path within the given root `Data` object.
+ * If the `Data` specified by the given `Data` and `Path` is `ParamData`, then update its
+ * last updated time to the given timestamp.
  */
-export function updateLastUpdated(rootData: Data, path: Path) {
-  console.log(`Updating timestamp for ${JSON.stringify(path)}`);
+export function updateLastUpdated(data: Data, path: Path, timestamp: number) {
+  const updatedData = getData(data, path);
 
-  // // Update the last updated time of the leaf's parent if it is a Param and any of
-  // // its children have changed. Otherwise, reset the Param's last updated timestamp,
-  // // since none of its values have changed.
-  // if (editedParentParam !== null) {
-  //   const childrenChanged =
-  //     originalParentParam === null ||
-  //     getChildrenNames(editedParentParam).some(
-  //       (childName) =>
-  //         editedParentParam[childName] !== originalParentParam[childName],
-  //     );
-
-  //   editedParentParam.__last_updated.isoformat = childrenChanged
-  //     ? getISOString(Date.now())
-  //     : originalParentParam.__last_updated.isoformat;
-  // }
+  if (
+    typeof updatedData === "object" &&
+    updatedData !== null &&
+    updatedData.type === DataType.ParamData
+  ) {
+    updatedData.lastUpdated = timestamp;
+  }
 }

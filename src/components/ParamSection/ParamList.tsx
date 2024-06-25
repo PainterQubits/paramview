@@ -1,5 +1,5 @@
-import { Suspense } from "react";
-import { atom, useAtom } from "jotai";
+import { useMemo, Suspense } from "react";
+import { useAtom } from "jotai";
 import { Box, List, ListItem } from "@mui/material";
 import { Path } from "@/types";
 import { isLeaf, unwrapParamData, getData } from "@/utils/data";
@@ -8,13 +8,6 @@ import { editModeAtom, editedDataAtom } from "@/atoms/paramList";
 import ItemContent from "./ItemContent";
 import LeafItemContent from "./LeafItemContent";
 import CollapseItem from "./CollapseItem";
-
-const rootDataAtom = atom((get) => {
-  // Defined outside conditional so Jotai registers both as dependencies
-  const editedData = get(editedDataAtom);
-  const originalData = get(originalDataAtom);
-  return get(editModeAtom) ? editedData : originalData;
-});
 
 const rootListSx = {
   borderBottom: 1,
@@ -46,9 +39,21 @@ type ParamListItemProps = {
  * group, then the item will contain a sublist.
  */
 function ParamListItem({ path }: ParamListItemProps) {
-  const [rootData] = useAtom(rootDataAtom);
+  const [editMode] = useAtom(editModeAtom);
+  const [originalData] = useAtom(originalDataAtom);
+  const [editedData] = useAtom(editedDataAtom);
 
-  const { className, lastUpdated, innerData } = unwrapParamData(getData(rootData, path));
+  const { className, lastUpdated, innerData } = useMemo(() => {
+    const unwrappedOriginalData = unwrapParamData(getData(originalData, path));
+    const { lastUpdated } = unwrappedOriginalData;
+
+    const { className, innerData } = editMode
+      ? unwrapParamData(getData(editedData, path))
+      : unwrappedOriginalData;
+
+    return { className, lastUpdated, innerData };
+  }, [originalData, path, editMode, editedData]);
+
   const name = path.length > 0 ? path[path.length - 1] : "root";
 
   return (

@@ -11,13 +11,15 @@ import { isLeaf, unwrapParamData, getData, setData } from "@/utils/data";
  *
  * Otherwise, it will return a `Diff` object if the old and new `Data` objects are
  * different, or `null` if they are equal.
+ *
+ * This function also modifies the last updated timestamps of `ParamData` items in the new
+ * `Data` to be the latest last updated time of their children.
  */
 export function getDataDiff(oldData: Data, newData: Data): Data<Diff> | null {
   const { className: oldClassName, innerData: oldInnerData } = unwrapParamData(oldData);
   const { className: newClassName, innerData: newInnerData } = unwrapParamData(newData);
 
-  // If the Data objects are equal (other than timestamp), return null.
-  if (oldClassName === newClassName && deepEquals(oldInnerData, newInnerData)) {
+  if (deepEquals(oldData, newData)) {
     return null;
   }
 
@@ -60,6 +62,28 @@ export function getDataDiff(oldData: Data, newData: Data): Data<Diff> | null {
       dataDiff === null ? { type: "delete" } : { type: "set", value: childDataDiff },
     );
   });
+
+  // Update timestamps for the new `Data` and for the `Data<Diff>`
+  if (
+    typeof newData === "object" &&
+    newData !== null &&
+    newData.type === DataType.ParamData
+  ) {
+    const latestLastUpdated = Math.max(
+      ...Object.values(newInnerData.data).map((newChildData) =>
+        typeof newChildData === "object" &&
+        newChildData !== null &&
+        newChildData.type === DataType.ParamData
+          ? newChildData.lastUpdated
+          : -Infinity,
+      ),
+    );
+
+    if (isFinite(latestLastUpdated)) {
+      newData.lastUpdated = latestLastUpdated;
+      (dataDiff as ParamData).lastUpdated = latestLastUpdated;
+    }
+  }
 
   return dataDiff;
 }
