@@ -19,6 +19,23 @@ import { originalDataAtom } from "@/atoms/api";
 import { roundAtom, editModeAtom, editedDataAtom } from "@/atoms/paramList";
 import ItemContent from "./ItemContent";
 
+const leafItemContentSx = {
+  pl: "24px",
+  background: "white",
+};
+
+const leafItemReadModeContentSx = {
+  ml: 2,
+  display: "flex",
+  overflow: "hidden",
+  direction: "rtl", // Hack to overflow to the left instead of the right
+};
+
+const leafItemReadModeTextSx = {
+  whiteSpace: "nowrap",
+  direction: "ltr", // Switch direction back so text is not messed up
+};
+
 type LeafItemReadModeContentProps = {
   /** Leaf value to display. */
   leaf: Leaf;
@@ -28,7 +45,13 @@ type LeafItemReadModeContentProps = {
 function LeafItemReadModeContent({ leaf }: LeafItemReadModeContentProps) {
   const [round] = useAtom(roundAtom);
 
-  return <Typography align="right">{leafToString(leaf, round)}</Typography>;
+  return (
+    <Box sx={leafItemReadModeContentSx}>
+      <Typography sx={leafItemReadModeTextSx} title={leafToString(leaf, false)}>
+        {leafToString(leaf, round)}
+      </Typography>
+    </Box>
+  );
 }
 
 type LeafItemEditModeContentProps = {
@@ -234,11 +257,6 @@ function LeafItemEditModeContent({ editedLeaf, path }: LeafItemEditModeContentPr
     </Box>
   );
 }
-
-const leafItemContentSx = {
-  pl: "24px",
-  background: "white",
-};
 
 type LeafItemContentProps = {
   /** Name to display. */

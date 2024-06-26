@@ -13,6 +13,7 @@ const nameContainerSx = {
   display: "flex",
   alignItems: "center",
   columnGap: 1.25,
+  whiteSpace: "nowrap",
 };
 
 type ParamItemContentProps = {
