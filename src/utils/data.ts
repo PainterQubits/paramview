@@ -1,19 +1,7 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+import { Path, LeafType, DataType, Data, AllowedLeafType, Leaf, Group } from "@/types";
+import { formatDate, getLocalISOString } from "@/utils/timestamp";
 
-import { Path, LeafType, DataDict, Data, Leaf, Group } from "@/types";
-import {
-  isLeaf,
-  isDatetime,
-  isQuantity,
-  isList,
-  isDict,
-  isParamList,
-  isParam,
-  isStruct,
-} from "@/utils/type";
-import { formatDate, getISOString, getLocalISOString } from "@/utils/timestamp";
-
-const precision = 4;
+const PRECISION = 4;
 
 /** Convert the given number to a string, rounding it if round is true. */
 function numberToString(num: number, round: boolean) {
@@ -23,14 +11,14 @@ function numberToString(num: number, round: boolean) {
     const exponential = num.toExponential();
     const exponent = Number(exponential.split("e")[1]);
 
-    if (Math.abs(exponent) >= precision) {
-      const exponentialToPrecision = num.toExponential(precision - 1);
+    if (Math.abs(exponent) >= PRECISION) {
+      const exponentialToPrecision = num.toExponential(PRECISION - 1);
       return exponentialToPrecision.length < exponential.length
         ? exponentialToPrecision
         : exponential;
     }
 
-    const numToPrecision = num.toPrecision(precision);
+    const numToPrecision = num.toPrecision(PRECISION);
     return numToPrecision.length < numString.length ? numToPrecision : numString;
   }
 
@@ -38,23 +26,32 @@ function numberToString(num: number, round: boolean) {
 }
 
 /**
- * Convert the given Leaf to a string, rounding it if it is a number and round is true.
+ * Convert the given leaf value to a string, rounding it if it is a number and `round`
+ * is true.
  */
 export function leafToString(leaf: Leaf, round: boolean) {
-  if (isDatetime(leaf)) return formatDate(leaf.isoformat);
+  switch (typeof leaf) {
+    case "number":
+      return numberToString(leaf, round);
+    case "boolean":
+      return leaf ? "True" : "False";
+    case "string":
+      return leaf;
+  }
 
-  if (isQuantity(leaf)) return `${numberToString(leaf.value, round)} ${leaf.unit}`;
+  if (leaf === null) {
+    return "None";
+  }
 
-  if (typeof leaf === "boolean") return leaf ? "True" : "False";
+  if (leaf.type === DataType.Datetime) {
+    return formatDate(leaf.timestamp);
+  }
 
-  if (leaf === null) return "None";
-
-  if (typeof leaf === "number") return numberToString(leaf, round);
-
-  return leaf;
+  // leaf is Quantity
+  return `${numberToString(leaf.value, round)} ${leaf.unit}`;
 }
 
-/** Get the type (as a LeafType enum value) of the given leaf. */
+/** Get the type (as a `LeafType` enum value) of the given leaf. */
 export function getLeafType(leaf: Leaf) {
   switch (typeof leaf) {
     case "number":
@@ -65,21 +62,27 @@ export function getLeafType(leaf: Leaf) {
       return LeafType.String;
   }
 
-  if (leaf === null) return LeafType.Null;
+  if (leaf === null) {
+    return LeafType.Null;
+  }
 
-  if (isDatetime(leaf)) return LeafType.Datetime;
+  if (leaf.type === DataType.Datetime) {
+    return LeafType.Datetime;
+  }
 
+  // leaf is Quantity
   return LeafType.Quantity;
 }
 
 /** Convert the given leaf to an input string and a unit input string. */
 export function leafToInput(leaf: Leaf) {
-  if (isDatetime(leaf)) {
-    return { input: getLocalISOString(leaf.isoformat), unitInput: "" };
-  }
-
-  if (isQuantity(leaf)) {
-    return { input: String(leaf.value), unitInput: leaf.unit };
+  if (typeof leaf === "object" && leaf !== null) {
+    switch (leaf.type) {
+      case DataType.Datetime:
+        return { input: getLocalISOString(leaf.timestamp), unitInput: "" };
+      case DataType.Quantity:
+        return { input: String(leaf.value), unitInput: leaf.unit };
+    }
   }
 
   return { input: leafToString(leaf, false), unitInput: "" };
@@ -118,19 +121,16 @@ export function parseLeaf(
     const number = parseNumber(input);
 
     if (number !== undefined && unitInput !== "") {
-      return {
-        __type: "astropy.units.quantity.Quantity",
-        value: number,
-        unit: unitInput,
-      };
+      return { type: DataType.Quantity, value: number, unit: unitInput };
     }
   }
 
   if (leafType === LeafType.Datetime) {
     const dateInput = new Date(input);
+    const timestamp = dateInput.getTime();
 
-    if (!Number.isNaN(dateInput.getTime())) {
-      return { __type: "datetime.datetime", isoformat: getISOString(input) };
+    if (!Number.isNaN(timestamp)) {
+      return { type: DataType.Datetime, timestamp: timestamp / 1000 };
     }
   }
 
@@ -146,110 +146,127 @@ export function parseLeaf(
   }
 }
 
-/** Return data at the given path within the given data. */
-export function getData(data: Data, path: Path): Data {
-  if (path.length === 0) return data;
+/** Check whether the given `Data` is a `Leaf`. */
+export function isLeaf(data: Data<AllowedLeafType>): data is Leaf {
+  return (
+    typeof data !== "object" ||
+    data === null ||
+    data.type === DataType.Datetime ||
+    data.type === DataType.Quantity
+  );
+}
 
-  if (isLeaf(data)) {
-    throw new TypeError(
-      `data '${leafToString(data, false)}' has no children` +
-        ` (trying to get path ${JSON.stringify(path)})`,
-    );
+/**
+ * If the given `Data` is `ParamData`, then return the class name (or `null`), and the
+ * last updated timestamp as a string, and the underlying `Data` value. Otherwise, just
+ * return the original `Data`.
+ */
+export function unwrapParamData<LeafType extends AllowedLeafType>(data: Data<LeafType>) {
+  let className: string | undefined;
+  let lastUpdated: number | null = null;
+  let innerData = data;
+
+  while (
+    typeof innerData === "object" &&
+    innerData !== null &&
+    innerData.type === DataType.ParamData
+  ) {
+    ({ className, lastUpdated, data: innerData } = innerData);
   }
 
-  const [key, ...remainingPath] = path;
+  return {
+    className: className ?? null,
+    lastUpdated: lastUpdated !== null ? formatDate(lastUpdated) : null,
+    // We cast because innerData can no longer be ParamData due to the while loop
+    innerData: innerData as LeafType | Group<LeafType>,
+  };
+}
 
-  if (isParamList(data)) return getData(data.__items[Number(key)], remainingPath);
+export function getChildren<LeafType extends AllowedLeafType>(group: Group<LeafType>) {
+  return group.data as { [key: string]: Data<LeafType> };
+}
 
-  if (isList(data)) return getData(data[Number(key)], remainingPath);
+/** Return the data at the given path within the given data. */
+export function getData<LeafType extends AllowedLeafType>(
+  data: Data<LeafType>,
+  path: Path,
+) {
+  return path.reduce((previousData, childName) => {
+    const { innerData } = unwrapParamData(previousData);
 
-  // Dict, ParamDict, Struct, or Param
-  return getData(data[key], remainingPath);
+    if (isLeaf(innerData) || innerData.type === DataType.Diff) {
+      throw new TypeError(
+        `data '${JSON.stringify(data)}' has no children` +
+          ` (trying to get child "${childName}")`,
+      );
+    }
+
+    return getChildren(innerData)[childName];
+  }, data);
 }
 
 /**
  * Set the data at the given path to the given value. Note that this mutates the data
  * object that is passed in. The path must not be empty (the root data must be reassigned
  * separately).
+ *
+ * If the value is `undefined`, the data will be deleted instead.
  */
-export function setData(data: Data, path: Path, value: Data) {
+export function setData<LeafType extends AllowedLeafType>(
+  data: Data<LeafType>,
+  path: Path,
+  action:
+    | { type: "set"; value: Data<LeafType>; withinParamData?: boolean }
+    | { type: "delete" },
+) {
   if (path.length === 0) {
-    throw new RangeError("path is empty (setData cannot set the root data)");
+    throw new RangeError(`path is empty (setData cannot ${action.type} the root data)`);
   }
 
   const parentData = getData(data, path.slice(0, -1));
+  const { innerData: parentInnerData } = unwrapParamData(parentData);
   const key = path[path.length - 1];
 
-  if (isLeaf(parentData)) {
+  if (isLeaf(parentInnerData) || parentInnerData.type === DataType.Diff) {
     throw new TypeError(
-      `data '${leafToString(parentData, false)}' has no children` +
+      `data '${JSON.stringify(parentData)}' has no children` +
         ` (trying to set child "${key}")`,
     );
   }
 
-  if (isParamList(parentData)) {
-    parentData.__items[Number(key)] = value;
-  } else if (isList(parentData)) {
-    parentData[Number(key)] = value;
+  const parentChildren = getChildren(parentInnerData);
+
+  if (action.type === "delete") {
+    delete parentChildren[key];
   } else {
-    // Dict, ParamDict, Struct, or Param
-    parentData[key] = value;
+    const { value, withinParamData = false } = action;
+    const childData = parentChildren[key];
+
+    if (
+      withinParamData &&
+      typeof childData === "object" &&
+      childData !== null &&
+      childData.type === DataType.ParamData
+    ) {
+      childData.data = value;
+    } else {
+      parentChildren[key] = value;
+    }
   }
-}
-
-/** Return a string representing the type of the given Group. */
-export function getTypeString<T>(group: Group<T>) {
-  if (isList(group)) return "list";
-
-  if (isDict(group)) return "dict";
-
-  if (isParam(group)) return `${group.__type} (Param)`;
-
-  if (isStruct(group)) return `${group.__type} (Struct)`;
-
-  return group.__type;
-}
-
-/** Get the names of the child data within the given group. */
-export function getChildrenNames<T>(group: Group<T>) {
-  let children: Data<T>[] | DataDict<T>;
-
-  if (isList(group) || isDict(group)) {
-    children = group;
-  } else if (isParamList(group)) {
-    children = group.__items;
-  } else if (isParam(group)) {
-    const { __type, __last_updated, ...rest } = group;
-    children = rest;
-  } else {
-    // ParamDict or Struct
-    const { __type, ...rest } = group;
-    children = rest;
-  }
-
-  return Object.keys(children);
 }
 
 /**
- * Get the last updated timestamp from the given Group or GroupDiff, or -Infinity if
- * there is no timestamp.
+ * If the `Data` specified by the given `Data` and `Path` is `ParamData`, then update its
+ * last updated time to the given timestamp.
  */
-export function getTimestamp<T>(group: Group<T>): number {
-  if (isParam(group)) return new Date(group.__last_updated.isoformat).getTime();
+export function updateLastUpdated(data: Data, path: Path, timestamp: number) {
+  const updatedData = getData(data, path);
 
-  const timestamps = getChildrenNames(group).map((childName) => {
-    // Don't bubble up timestamps from old data in a GroupDiff
-    if (childName === "__old") {
-      return -Infinity;
-    }
-
-    // Officially, getData only works on normal Data objects. However, we know it will
-    // work on DataDiff objects in this context, so we cast group to the Data type.
-    // Similarly, the resulting childData is technically of type Data<T>, but we know that
-    // for this particular use case it will get the correc timestamp.
-    const childData = getData(group as Data, [childName]);
-    return isLeaf(childData) ? -Infinity : getTimestamp(childData);
-  });
-
-  return Math.max(...timestamps);
+  if (
+    typeof updatedData === "object" &&
+    updatedData !== null &&
+    updatedData.type === DataType.ParamData
+  ) {
+    updatedData.lastUpdated = timestamp;
+  }
 }

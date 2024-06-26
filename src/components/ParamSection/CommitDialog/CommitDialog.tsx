@@ -13,9 +13,9 @@ import { LoadingButton } from "@mui/lab";
 import { requestData } from "@/utils/api";
 import {
   editModeAtom,
-  editedDataAtom,
   commitDialogOpenAtom,
   commitMessageAtom,
+  commitDataAtom,
 } from "@/atoms/paramList";
 import ComparisonList from "./ComparisonList";
 
@@ -52,12 +52,12 @@ const commitButtonSx = {
 export default function CommitDialog() {
   const [commitLoading, startCommitTransition] = useTransition();
 
-  const [editedData] = useAtom(editedDataAtom);
   const [commitDialogOpen, setCommitDialogOpen] = useAtom(commitDialogOpenAtom);
   const [commitMessage, setCommitMessage] = useAtom(commitMessageAtom);
+  const [commitData] = useAtom(commitDataAtom);
 
-  // We load this using useAtom, not useSetAtom, so this component updates setCommitId is
-  // called.
+  // We load this using useAtom, not useSetAtom, so this component updates when
+  // setCommitId is called.
   const [, setCommitId] = useAtom(commitIdAtom);
 
   const setEditMode = useSetAtom(editModeAtom);
@@ -66,7 +66,10 @@ export default function CommitDialog() {
   const commit = () => {
     startCommitTransition(() => {
       setCommitId(
-        requestData<number>("api/commit", { message: commitMessage, data: editedData }),
+        requestData<number>("api/commit", {
+          message: commitMessage,
+          data: JSON.stringify(commitData),
+        }),
       );
       setCommitDialogOpen(false);
       setEditMode(false);
@@ -87,7 +90,7 @@ export default function CommitDialog() {
       >
         <DialogTitle>Commit</DialogTitle>
         <DialogContent sx={dialogContentSx}>
-          <ComparisonList shouldUpdate={!disabled} />
+          <ComparisonList />
           <TextField
             data-testid="commit-message-text-field"
             fullWidth

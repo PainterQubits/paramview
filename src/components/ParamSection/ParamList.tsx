@@ -1,21 +1,13 @@
-import { Suspense } from "react";
-import { atom, useAtom } from "jotai";
+import { useMemo, Suspense } from "react";
+import { useAtom } from "jotai";
 import { Box, List, ListItem } from "@mui/material";
 import { Path } from "@/types";
-import { isLeaf } from "@/utils/type";
-import { getTypeString, getTimestamp, getData, getChildrenNames } from "@/utils/data";
+import { isLeaf, unwrapParamData, getData } from "@/utils/data";
 import { originalDataAtom } from "@/atoms/api";
 import { editModeAtom, editedDataAtom } from "@/atoms/paramList";
+import ItemContent from "./ItemContent";
 import LeafItemContent from "./LeafItemContent";
-import GroupItemContent from "./GroupItemContent";
 import CollapseItem from "./CollapseItem";
-
-const rootDataAtom = atom((get) => {
-  // Defined outside conditional so Jotai registers both as dependencies
-  const editedData = get(editedDataAtom);
-  const originalData = get(originalDataAtom);
-  return get(editModeAtom) ? editedData : originalData;
-});
 
 const rootListSx = {
   borderBottom: 1,
@@ -47,9 +39,20 @@ type ParamListItemProps = {
  * group, then the item will contain a sublist.
  */
 function ParamListItem({ path }: ParamListItemProps) {
-  const [rootData] = useAtom(rootDataAtom);
+  const [editMode] = useAtom(editModeAtom);
+  const [originalData] = useAtom(originalDataAtom);
+  const [editedData] = useAtom(editedDataAtom);
 
-  const data = getData(rootData, path);
+  const { className, lastUpdated, innerData } = useMemo(() => {
+    const unwrappedOriginalData = unwrapParamData(getData(originalData, path));
+    const { lastUpdated } = unwrappedOriginalData;
+
+    const { className, innerData } = editMode
+      ? unwrapParamData(getData(editedData, path))
+      : unwrappedOriginalData;
+
+    return { className, lastUpdated, innerData };
+  }, [originalData, path, editMode, editedData]);
 
   const name = path.length > 0 ? path[path.length - 1] : "root";
 
@@ -60,22 +63,24 @@ function ParamListItem({ path }: ParamListItemProps) {
       disableGutters
       disablePadding
     >
-      {isLeaf(data) ? (
-        <LeafItemContent name={name} leaf={data} path={path} />
+      {isLeaf(innerData) ? (
+        <LeafItemContent
+          name={name}
+          className={className}
+          timestamp={lastUpdated}
+          leaf={innerData}
+          path={path}
+        />
       ) : (
         <CollapseItem
           defaultOpen={path.length === 0}
           itemContent={
-            <GroupItemContent
-              name={name}
-              type={getTypeString(data)}
-              timestamp={getTimestamp(data)}
-            />
+            <ItemContent name={name} className={className} timestamp={lastUpdated} />
           }
         >
           {
             <List disablePadding sx={sublistSx}>
-              {getChildrenNames(data).map((childName) => (
+              {Object.keys(innerData.data).map((childName) => (
                 <ParamListItem key={childName} path={[...path, childName]} />
               ))}
             </List>

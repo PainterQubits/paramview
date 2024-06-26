@@ -1,13 +1,10 @@
 import { atom, useAtom } from "jotai";
-import { useState, useCallback, useEffect } from "react";
 import { Box, Typography, List, ListItem } from "@mui/material";
-import { DataDiff, Data } from "@/types";
-import { isLeaf, isDataChange } from "@/utils/type";
-import { getTypeString, getTimestamp, getData, getChildrenNames } from "@/utils/data";
-import { getDataDiff } from "@/utils/dataDiff";
-import { commitHistoryAtom, latestDataAtom } from "@/atoms/api";
-import { editedDataAtom } from "@/atoms/paramList";
-import GroupItemContent from "../GroupItemContent";
+import { DataType, Data, Diff } from "@/types";
+import { isLeaf, unwrapParamData, getData } from "@/utils/data";
+import { commitHistoryAtom } from "@/atoms/api";
+import { dataDiffAtom } from "@/atoms/paramList";
+import ItemContent from "../ItemContent";
 import CollapseItem from "../CollapseItem";
 import LeafItemContent from "./LeafItemContent";
 
@@ -61,6 +58,7 @@ type DataListItemProps = {
  */
 function DataListItem({ name, data, status }: DataListItemProps) {
   const backgroundColor = status === "old" ? "removed.main" : "added.main";
+  const { className, lastUpdated, innerData } = unwrapParamData(data);
 
   return (
     <ListItem
@@ -69,26 +67,28 @@ function DataListItem({ name, data, status }: DataListItemProps) {
       disableGutters
       disablePadding
     >
-      {isLeaf(data) ? (
-        <LeafItemContent name={name} leaf={data} backgroundColor={backgroundColor} />
+      {isLeaf(innerData) ? (
+        <LeafItemContent
+          name={name}
+          className={className}
+          timestamp={lastUpdated}
+          leaf={innerData}
+          backgroundColor={backgroundColor}
+        />
       ) : (
         <CollapseItem
           backgroundColor={backgroundColor}
           defaultOpen={true}
           itemContent={
-            <GroupItemContent
-              name={name}
-              type={getTypeString(data)}
-              timestamp={getTimestamp(data)}
-            />
+            <ItemContent name={name} className={className} timestamp={lastUpdated} />
           }
         >
           <List disablePadding sx={sublistSx}>
-            {getChildrenNames(data).map((childName) => (
+            {Object.entries(innerData.data).map(([childName, childData]) => (
               <DataListItem
                 key={childName}
                 name={childName}
-                data={getData(data, [childName])}
+                data={childData}
                 status={status}
               />
             ))}
@@ -103,7 +103,7 @@ type DataDiffListItemProps = {
   /** Name of the data the DataDiff represents, or undefined if this is the root. */
   name?: string;
   /** The data diff object to represent. */
-  dataDiff: DataDiff;
+  dataDiff: Data<Diff>;
 };
 
 /**
@@ -116,16 +116,17 @@ type DataDiffListItemProps = {
 function DataDiffListItem({ name: nameOrUndefined, dataDiff }: DataDiffListItemProps) {
   const root = nameOrUndefined === undefined;
   const name = root ? "root" : nameOrUndefined;
+  const { className, lastUpdated, innerData } = unwrapParamData(dataDiff);
 
   return (
     <>
-      {isDataChange(dataDiff) ? (
+      {innerData.type === DataType.Diff ? (
         <>
-          {dataDiff.__old !== undefined && (
-            <DataListItem name={name} data={dataDiff.__old} status="old" />
+          {innerData.old !== undefined && (
+            <DataListItem name={name} data={innerData.old} status="old" />
           )}
-          {dataDiff.__new !== undefined && (
-            <DataListItem name={name} data={dataDiff.__new} status="new" />
+          {innerData.new !== undefined && (
+            <DataListItem name={name} data={innerData.new} status="new" />
           )}
         </>
       ) : (
@@ -138,25 +139,21 @@ function DataDiffListItem({ name: nameOrUndefined, dataDiff }: DataDiffListItemP
           <CollapseItem
             defaultOpen={true}
             itemContent={
-              <GroupItemContent
-                name={name}
-                type={getTypeString(dataDiff)}
-                timestamp={getTimestamp(dataDiff)}
-              />
+              <ItemContent name={name} className={className} timestamp={lastUpdated} />
             }
           >
             <List disablePadding sx={sublistSx}>
-              {getChildrenNames(dataDiff).map((childName) => {
-                const childDataDiff = getData(dataDiff as Data, [childName]) as
-                  | DataDiff
-                  | undefined;
+              {Object.keys(innerData.data).map((childName) => {
+                const childDataDiff = getData(dataDiff, [childName]);
 
-                return childDataDiff === undefined ? null : (
-                  <DataDiffListItem
-                    key={childName}
-                    name={childName}
-                    dataDiff={childDataDiff}
-                  />
+                return (
+                  childDataDiff && (
+                    <DataDiffListItem
+                      key={childName}
+                      name={childName}
+                      dataDiff={childDataDiff}
+                    />
+                  )
                 );
               })}
             </List>
@@ -167,33 +164,10 @@ function DataDiffListItem({ name: nameOrUndefined, dataDiff }: DataDiffListItemP
   );
 }
 
-type ComparisonListProps = {
-  /**
-   * Whether this component should update in response to database changes. Intended to be
-   * true in general, but false when the commit is already in progress.
-   */
-  shouldUpdate: boolean;
-};
-
 /** List displaying the difference between the current edited data and the latest data. */
-export default function ComparisonList({ shouldUpdate }: ComparisonListProps) {
-  const [latestData] = useAtom(latestDataAtom);
-  const [editedData] = useAtom(editedDataAtom);
+export default function ComparisonList() {
+  const [dataDiff] = useAtom(dataDiffAtom);
   const [latestCommitDescription] = useAtom(latestCommitDescriptionAtom);
-
-  const calcDataDiff = useCallback(
-    () => getDataDiff(latestData, editedData),
-    [latestData, editedData],
-  );
-
-  const [dataDiff, setDataDiff] = useState(calcDataDiff);
-
-  useEffect(() => {
-    if (shouldUpdate) {
-      const newDataDiff = calcDataDiff();
-      setDataDiff(newDataDiff);
-    }
-  }, [shouldUpdate, calcDataDiff]);
 
   return (
     <Box sx={comparisonListContainerSx}>

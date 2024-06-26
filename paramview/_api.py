@@ -54,7 +54,10 @@ def _commit_history() -> list[CommitEntry]:
 @api.get("/data/<int:commit_id>")
 def _params(commit_id: int) -> Response:
     """Return data from the commit with the given ID."""
-    return jsonify(_current_db.load(commit_id, load_classes=False))
+    return current_app.response_class(
+        _current_db.load(commit_id, raw_json=True),
+        mimetype="application/json",
+    )
 
 
 @api.post("/commit")
@@ -77,4 +80,6 @@ def _commit() -> Response:
         ) from exc
     if not isinstance(message, str):
         raise TypeError(f"message must be a string, not '{type(message).__name__}'")
-    return jsonify(_current_db.commit(message, data).id)
+    if not isinstance(data, str):
+        raise TypeError(f"data must be a string, not '{type(data).__name__}'")
+    return jsonify(_current_db.commit(message, data, raw_json=True).id)

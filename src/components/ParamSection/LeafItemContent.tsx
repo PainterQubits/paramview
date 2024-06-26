@@ -2,30 +2,38 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { useAtom } from "jotai";
 import { Replay } from "@mui/icons-material";
 import { Box, Typography, TextField, MenuItem, IconButton } from "@mui/material";
-import { Path, LeafType, Leaf } from "@/types";
+import { Path, LeafType, DataType, Leaf } from "@/types";
 import {
   leafToString,
   getLeafType,
   leafToInput,
   parseLeaf,
+  isLeaf,
+  unwrapParamData,
   getData,
   setData,
-  getChildrenNames,
+  updateLastUpdated,
 } from "@/utils/data";
-import { isLeaf, isParam } from "@/utils/type";
-import { getISOString } from "@/utils/timestamp";
+import { nowTimestamp } from "@/utils/timestamp";
 import { originalDataAtom } from "@/atoms/api";
 import { roundAtom, editModeAtom, editedDataAtom } from "@/atoms/paramList";
+import ItemContent from "./ItemContent";
 
 const leafItemContentSx = {
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "space-between",
-  flex: 1,
   pl: "24px",
-  pr: 2,
-  minHeight: "28px",
   background: "white",
+};
+
+const leafItemReadModeContentSx = {
+  ml: 2,
+  display: "flex",
+  overflow: "hidden",
+  direction: "rtl", // Hack to overflow to the left instead of the right
+};
+
+const leafItemReadModeTextSx = {
+  whiteSpace: "nowrap",
+  direction: "ltr", // Switch direction back so text is not messed up
 };
 
 type LeafItemReadModeContentProps = {
@@ -37,7 +45,13 @@ type LeafItemReadModeContentProps = {
 function LeafItemReadModeContent({ leaf }: LeafItemReadModeContentProps) {
   const [round] = useAtom(roundAtom);
 
-  return <Typography align="right">{leafToString(leaf, round)}</Typography>;
+  return (
+    <Box sx={leafItemReadModeContentSx}>
+      <Typography sx={leafItemReadModeTextSx} title={leafToString(leaf, false)}>
+        {leafToString(leaf, round)}
+      </Typography>
+    </Box>
+  );
 }
 
 type LeafItemEditModeContentProps = {
@@ -52,30 +66,22 @@ function LeafItemEditModeContent({ editedLeaf, path }: LeafItemEditModeContentPr
   const [originalRootData] = useAtom(originalDataAtom);
   const [editedRootData, setEditedRootData] = useAtom(editedDataAtom);
 
-  /** Original parent if that parent is a Param; otherwise, null. */
-  const originalParentParam = useMemo(() => {
-    if (path.length === 0) return null;
-
-    const originalParentData = getData(originalRootData, path.slice(0, -1));
-    return isParam(originalParentData) ? originalParentData : null;
-  }, [originalRootData, path]);
-
-  /** Edited parent if that parent is a Param; otherwise, null. */
-  const editedParentParam = useMemo(() => {
-    if (path.length === 0) return null;
-
-    const editedParentData = getData(editedRootData, path.slice(0, -1));
-    return isParam(editedParentData) ? editedParentData : null;
-  }, [editedRootData, path]);
-
-  const originalLeaf = useMemo(() => {
+  const { originalLastUpdated, originalLeaf } = useMemo(() => {
     const originalData = getData(originalRootData, path);
+    const { innerData: originalInnerData } = unwrapParamData(originalData);
 
-    if (!isLeaf(originalData)) {
+    if (!isLeaf(originalInnerData)) {
       throw new TypeError("original data for leaf input is not a leaf");
     }
 
-    return originalData;
+    const lastUpdated =
+      typeof originalData === "object" &&
+      originalData !== null &&
+      originalData.type === DataType.ParamData
+        ? originalData.lastUpdated
+        : null;
+
+    return { originalLastUpdated: lastUpdated, originalLeaf: originalInnerData };
   }, [originalRootData, path]);
 
   const {
@@ -110,45 +116,45 @@ function LeafItemEditModeContent({ editedLeaf, path }: LeafItemEditModeContentPr
   const changed = changedInput || changedUnitInput || changedLeafType;
 
   const setEditedData = useCallback(
-    (leaf: Leaf) => {
+    ({ leaf, lastUpdated }: { leaf: Leaf; lastUpdated: number | null }) => {
       // Update the corresponding leaf in the edited data object.
       if (path.length === 0) {
         setEditedRootData(leaf);
       } else {
-        setData(editedRootData, path, leaf);
+        setData(editedRootData, path, {
+          type: "set",
+          value: leaf,
+          withinParamData: true,
+        });
       }
 
-      // Update the last updated time of the leaf's parent if it is a Param and any of
-      // its children have changed. Otherwise, reset the Param's last updated timestamp,
-      // since none of its values have changed.
-      if (editedParentParam !== null) {
-        const childrenChanged =
-          originalParentParam === null ||
-          getChildrenNames(editedParentParam).some(
-            (childName) =>
-              editedParentParam[childName] !== originalParentParam[childName],
-          );
-
-        editedParentParam.__last_updated.isoformat = childrenChanged
-          ? getISOString(Date.now())
-          : originalParentParam.__last_updated.isoformat;
+      if (lastUpdated !== null) {
+        updateLastUpdated(editedRootData, path, lastUpdated);
       }
     },
-    [editedRootData, originalParentParam, editedParentParam, path, setEditedRootData],
+    [editedRootData, path, setEditedRootData],
   );
 
   useEffect(() => {
     const parsedLeaf = parseLeaf(leafType, input, unitInput);
 
     // Edited data is only updated if it is valid and has actually been changed. The
-    // changed check is needed to avoid asking the user to confirm they want to discard
-    // changes when they haven't input anything.
-    //
-    // For example, parseLeaf can use a different timezone for the ISO string than the
-    // backend. If this check wasn't there, edited and original data would register as
-    // being not deeply equal even though they refer to the same underlying values.
-    setEditedData(parsedLeaf !== undefined && changed ? parsedLeaf : originalLeaf);
-  }, [leafType, input, unitInput, originalLeaf, changed, setEditedData]);
+    // changed check is needed to only update the last updated timestamp if a change has
+    // been made.
+    setEditedData(
+      parsedLeaf !== undefined && changed
+        ? { leaf: parsedLeaf, lastUpdated: nowTimestamp() }
+        : { leaf: originalLeaf, lastUpdated: originalLastUpdated },
+    );
+  }, [
+    leafType,
+    input,
+    unitInput,
+    changed,
+    originalLeaf,
+    originalLastUpdated,
+    setEditedData,
+  ]);
 
   return (
     <Box sx={{ display: "flex", columnGap: 1 }}>
@@ -255,6 +261,10 @@ function LeafItemEditModeContent({ editedLeaf, path }: LeafItemEditModeContentPr
 type LeafItemContentProps = {
   /** Name to display. */
   name: string;
+  /** Class name to display, if any. */
+  className: string | null;
+  /** Timestamp to display, if any. */
+  timestamp: string | null;
   /** Leaf value to display, or the edited leaf value in edit mode. */
   leaf: Leaf;
   /** Path to the data this item represents. */
@@ -262,17 +272,27 @@ type LeafItemContentProps = {
 };
 
 /** Item content for a Leaf. */
-export default function LeafItemContent({ name, leaf, path }: LeafItemContentProps) {
+export default function LeafItemContent({
+  name,
+  className,
+  timestamp,
+  leaf,
+  path,
+}: LeafItemContentProps) {
   const [editMode] = useAtom(editModeAtom);
 
   return (
-    <Box sx={leafItemContentSx}>
-      <Typography>{name}</Typography>
+    <ItemContent
+      name={name}
+      className={className}
+      timestamp={timestamp}
+      extraSx={leafItemContentSx}
+    >
       {editMode ? (
         <LeafItemEditModeContent editedLeaf={leaf} path={path} />
       ) : (
         <LeafItemReadModeContent leaf={leaf} />
       )}
-    </Box>
+    </ItemContent>
   );
 }

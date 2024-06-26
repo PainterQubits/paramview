@@ -1,71 +1,89 @@
 import deepEquals from "fast-deep-equal";
-import { DataDiff, GroupDiff, Data } from "@/types";
-import { isLeaf } from "@/utils/type";
-import { getData, setData, getTypeString, getChildrenNames } from "@/utils/data";
+import { DataType, Data, Group, ParamData, Diff } from "@/types";
+import { isLeaf, unwrapParamData, getData, setData } from "@/utils/data";
 
 /**
  * Return the difference between the two given `Data` objects.
  *
- * If the two`Data` objects are `Group`s of the same type, then this function will return
- * a `Group` containing differences for each child that has changed. Otherwise, it will
- * return a `DataChange` object if the old and new `Data` are different, or `null` if they
- * are the equal.
+ * If the two `Data` objects have children and the same `DataType`, then this function
+ * will return a `Group` object with the same `DataType` containing differences for each
+ * child that has changed.
+ *
+ * Otherwise, it will return a `Diff` object if the old and new `Data` objects are
+ * different, or `null` if they are equal.
+ *
+ * This function also modifies the last updated timestamps of `ParamData` items in the new
+ * `Data` to be the latest last updated time of their children.
  */
-export function getDataDiff(oldData: Data, newData: Data): DataDiff | null {
-  // If the Data objects are equal, return null.
+export function getDataDiff(oldData: Data, newData: Data): Data<Diff> | null {
+  const { className: oldClassName, innerData: oldInnerData } = unwrapParamData(oldData);
+  const { className: newClassName, innerData: newInnerData } = unwrapParamData(newData);
+
   if (deepEquals(oldData, newData)) {
     return null;
   }
 
-  // If either Data object is a leaf or if they are Groups of different types, just return
-  // a DataChange comparison.
-  if (
-    isLeaf(oldData) ||
-    isLeaf(newData) ||
-    getTypeString(oldData) !== getTypeString(newData)
-  ) {
-    return { __old: oldData, __new: newData };
+  // If either Data object has no children or has a different DataType, then return a Diff
+  // comparison object.
+  if (isLeaf(oldInnerData) || isLeaf(newInnerData) || oldClassName !== newClassName) {
+    return { type: DataType.Diff, old: oldData, new: newData };
   }
 
-  // Otherwise, return a Group object containing DataDiffs for its children. Children that
-  // have not been changed are not included.
+  // Otherwise, return a Group object containing Diffs for its children. Children that
+  // have not been changed are set to undefined.
 
-  // Start with copy of new Data. It is important to use the new Data so that non-child
-  // properties, such as the last updated time for Params, are shown.
-  const groupDiff: GroupDiff = JSON.parse(JSON.stringify(newData));
+  // Start with deep copy of the new Data. It is important to use the new Data so that the
+  // latest non-child properties are shown, such as the last updated time for Params.
+  const dataDiff: Group<Diff> | ParamData<Diff> = JSON.parse(JSON.stringify(newData));
 
-  // Compare each child of old Data to the corresponding child in new Data. If they are
-  // the same, delete from groupDiff. Otherwise, set that child to the difference.
-  getChildrenNames(oldData).forEach((oldChildName) => {
-    const oldChildData = getData(oldData, [oldChildName]);
+  // Compare each child of the old Data to the corresponding child in the new Data. If
+  // they are the same, delete from groupDiff. Otherwise, set that child to the
+  // difference.
+  Object.entries(oldInnerData.data).forEach(([oldChildName, oldChildData]) => {
     const newChildData = getData(newData, [oldChildName]);
+    const childDataDiff = getDataDiff(oldChildData, newChildData);
 
-    const dataDiff = getDataDiff(oldChildData, newChildData);
-
-    // Officially, setData only works on normal Data objects. However, we know it will
-    // work to set DataDiff objects here, so we cast them to the Data type. Setting to
-    // values to undefined is meant to represent deleting them.
     setData(
-      groupDiff as Data,
+      dataDiff,
       [oldChildName],
-      (dataDiff === null ? undefined : dataDiff) as Data,
+      childDataDiff === null ? { type: "delete" } : { type: "set", value: childDataDiff },
     );
   });
 
-  // Compare each child of new Data to the corresponding child in old Data, and set that
-  // child in groupDiff to the difference. (All unchanged children have already been
-  // deleted above.)
-  getChildrenNames(newData).forEach((newChildName) => {
+  // Perform the same operation in reverse (for children that have been added in the
+  // new data).
+  Object.entries(newInnerData.data).forEach(([newChildName, newChildData]) => {
     const oldChildData = getData(oldData, [newChildName]);
-    const newChildData = getData(newData, [newChildName]);
+    const childDataDiff = getDataDiff(oldChildData, newChildData);
 
-    const dataDiff = getDataDiff(oldChildData, newChildData);
-
-    if (dataDiff !== null) {
-      // Officially, setData only works on normal Data objects. However, we know it will
-      // work to set DataDiff objects here, so we cast them to the Data type.
-      setData(groupDiff as Data, [newChildName], dataDiff as Data);
-    }
+    setData(
+      dataDiff,
+      [newChildName],
+      dataDiff === null ? { type: "delete" } : { type: "set", value: childDataDiff },
+    );
   });
-  return groupDiff;
+
+  // Update timestamps for the new `Data` and for the `Data<Diff>`
+  if (
+    typeof newData === "object" &&
+    newData !== null &&
+    newData.type === DataType.ParamData
+  ) {
+    const latestLastUpdated = Math.max(
+      ...Object.values(newInnerData.data).map((newChildData) =>
+        typeof newChildData === "object" &&
+        newChildData !== null &&
+        newChildData.type === DataType.ParamData
+          ? newChildData.lastUpdated
+          : -Infinity,
+      ),
+    );
+
+    if (isFinite(latestLastUpdated)) {
+      newData.lastUpdated = latestLastUpdated;
+      (dataDiff as ParamData).lastUpdated = latestLastUpdated;
+    }
+  }
+
+  return dataDiff;
 }

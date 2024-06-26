@@ -7,13 +7,21 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0).
 
 ## [Unreleased]
 
+### Added
+
+- Support for ParamDB v0.15.0.
+
+### Changed
+
+- Timestamp update functionality was modified to match ParamDB v0.15.0.
+
 ## [0.4.1] (Feb 7 2024)
 
-## Added
+### Added
 
 - Support for ParamDB v0.11.0.
 
-## Fixed
+### Fixed
 
 - Parameter list did not update upon exiting edit mode if latest was checked and a new
   commit had been made.
