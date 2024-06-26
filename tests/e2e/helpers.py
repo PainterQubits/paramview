@@ -8,7 +8,7 @@ from datetime import datetime, timedelta, timezone
 from sqlalchemy import delete
 from freezegun import freeze_time
 import astropy.units as u  # type: ignore
-from paramdb import ParamDB, Param, Struct, ParamList, ParamDict
+from paramdb import ParamDB, ParamDataclass, ParamList, ParamDict
 from paramdb._database import _Snapshot
 
 
@@ -18,14 +18,14 @@ DB_PATH = os.path.join(os.path.dirname(__file__), DB_NAME)
 _DB = ParamDB[Any](DB_PATH)
 
 
-class CustomParam(Param):
+class CustomParam(ParamDataclass):
     """Custom parameter."""
 
     int: int
     str: str
 
 
-class CustomStruct(Struct):
+class CustomStruct(ParamDataclass):
     """Custom parameter structure."""
 
     int: int
